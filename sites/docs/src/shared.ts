@@ -95,6 +95,7 @@ export const layout = ({ page, title, description, path, body }: LayoutOptions):
   <meta name="theme-color" content="#ffffff">
   <link rel="icon" href="data:image/svg+xml,${encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect width="32" height="32" rx="9" fill="#111318"/><path d="M16 6c.8 5.6 4.4 9.2 10 10-5.6.8-9.2 4.4-10 10-.8-5.6-4.4-9.2-10-10 5.6-.8 9.2-4.4 10-10Z" fill="#ffcf4a"/></svg>')}">
   <script>document.documentElement.classList.add('js')</script>
+  <script src="https://cdn.usefathom.com/script.js" data-site="YGMATMZF" defer></script>
   <style>__KIRARI_CSS__</style>
 </head>
 <body>

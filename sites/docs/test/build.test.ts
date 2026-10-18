@@ -20,7 +20,8 @@ for (const { path, html } of pages) {
     expect(html).toContain('.kirari-')
     // rel="canonical" is metadata, not a loaded asset.
     const assets = [...html.matchAll(/<(?:script|link)\b(?![^>]*rel="canonical")[^>]*(?:src|href)="([^"]*)"/gi)].map(match => match[1]!)
-    expect(assets.every(asset => asset.startsWith('data:'))).toBe(true)
+    expect(assets.filter(asset => !asset.startsWith('data:'))).toEqual(['https://cdn.usefathom.com/script.js'])
+    expect(html).toContain('<script src="https://cdn.usefathom.com/script.js" data-site="YGMATMZF" defer></script>')
     const modules = [...html.matchAll(/<script type="module">([\s\S]*?)<\/script>/gi)]
     expect(modules).toHaveLength(1)
     expect(modules[0]![1]!.length).toBeGreaterThan(100)
