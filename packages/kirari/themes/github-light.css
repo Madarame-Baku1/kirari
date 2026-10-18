@@ -1,0 +1,26 @@
+/* GitHub Light (light) — based on GitHub’s Primer VS Code theme (MIT) */
+.kirari {
+  color: var(--kirari-text, #1f2328);
+  background: var(--kirari-background, #ffffff);
+}
+
+.kirari-text { color: var(--kirari-text, #1f2328); }
+.kirari-keyword { color: var(--kirari-keyword, #cf222e); }
+.kirari-variable { color: var(--kirari-variable, #1f2328); }
+.kirari-property { color: var(--kirari-property, #0550ae); }
+.kirari-function { color: var(--kirari-function, #8250df); }
+.kirari-string { color: var(--kirari-string, #0a3069); }
+.kirari-number { color: var(--kirari-number, #0550ae); }
+.kirari-boolean { color: var(--kirari-boolean, #0550ae); }
+.kirari-null { color: var(--kirari-null, #0550ae); }
+.kirari-comment { color: var(--kirari-comment, #6e7781); }
+.kirari-operator { color: var(--kirari-operator, #cf222e); }
+.kirari-punctuation { color: var(--kirari-punctuation, #1f2328); }
+.kirari-type { color: var(--kirari-type, #953800); }
+.kirari-regex { color: var(--kirari-regex, #116329); }
+.kirari-inserted { color: var(--kirari-inserted, #116329); }
+.kirari-deleted { color: var(--kirari-deleted, #82071e); }
+.kirari-heading { color: var(--kirari-heading, #0550ae); }
+.kirari-tag { color: var(--kirari-tag, #116329); }
+.kirari-attribute { color: var(--kirari-attribute, #0550ae); }
+.kirari-entity { color: var(--kirari-entity, #953800); }

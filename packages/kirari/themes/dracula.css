@@ -1,0 +1,26 @@
+/* Dracula (dark) — based on Dracula by Zeno Rocha (MIT) */
+.kirari {
+  color: var(--kirari-text, #f8f8f2);
+  background: var(--kirari-background, #282a36);
+}
+
+.kirari-text { color: var(--kirari-text, #f8f8f2); }
+.kirari-keyword { color: var(--kirari-keyword, #ff79c6); }
+.kirari-variable { color: var(--kirari-variable, #f8f8f2); }
+.kirari-property { color: var(--kirari-property, #8be9fd); }
+.kirari-function { color: var(--kirari-function, #50fa7b); }
+.kirari-string { color: var(--kirari-string, #f1fa8c); }
+.kirari-number { color: var(--kirari-number, #bd93f9); }
+.kirari-boolean { color: var(--kirari-boolean, #bd93f9); }
+.kirari-null { color: var(--kirari-null, #bd93f9); }
+.kirari-comment { color: var(--kirari-comment, #6272a4); }
+.kirari-operator { color: var(--kirari-operator, #ff79c6); }
+.kirari-punctuation { color: var(--kirari-punctuation, #f8f8f2); }
+.kirari-type { color: var(--kirari-type, #8be9fd); }
+.kirari-regex { color: var(--kirari-regex, #ff5555); }
+.kirari-inserted { color: var(--kirari-inserted, #50fa7b); }
+.kirari-deleted { color: var(--kirari-deleted, #ff5555); }
+.kirari-heading { color: var(--kirari-heading, #bd93f9); }
+.kirari-tag { color: var(--kirari-tag, #ff79c6); }
+.kirari-attribute { color: var(--kirari-attribute, #50fa7b); }
+.kirari-entity { color: var(--kirari-entity, #bd93f9); }
