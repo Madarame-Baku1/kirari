@@ -83,6 +83,10 @@ update boundaries, including adverse inputs. It records total response work and
 timing in separate `streaming-latest` reports. Performance depends on the source,
 language, and how callers apply token patches.
 
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md). Report security issues privately as described in [SECURITY.md](SECURITY.md).
+
 ## License
 
 [MIT](LICENSE) © 2026 [Ugi](https://ugi.dev)

@@ -1,0 +1,76 @@
+# Contributing
+
+Thanks for helping with Kirari. This guide covers reporting issues, setting up the workspace, and opening pull requests.
+
+## Reporting issues
+
+- Search [existing issues](https://github.com/vortexkit/kirari/issues) first.
+- Use the bug report form and include a minimal reproduction: the package and version, the language, the theme, the input snippet, and the expected and actual output.
+- For new languages, themes, or APIs, use the feature request form and describe the problem before the solution.
+- Never report security vulnerabilities in a public issue. See [SECURITY.md](SECURITY.md).
+
+## Setup
+
+Kirari is a [Bun](https://bun.sh) workspace. Use the version in the root `package.json` (`packageManager`).
+
+```sh
+bun install
+bun run dev
+```
+
+See the [README](README.md) for the full list of scripts.
+
+| Path | Contents |
+| --- | --- |
+| `packages/kirari` | Core library, language definitions, and themes |
+| `packages/rehype` | Rehype and MDX integration |
+| `packages/react` | React component and streaming hook |
+| `sites/docs` | Documentation site |
+| `packages/benchmarks` | Speed and bundle-size benchmarks (private) |
+
+The core package has no runtime dependencies. Keep it that way: integration dependencies belong in `packages/rehype` or `packages/react`.
+
+## Making changes
+
+1. Branch from `main`.
+2. Add or update tests next to the code you change. Language fixes should come with a fixture in the correctness corpus (`bun run test:corpus`).
+3. Run the full check before pushing. It is the same gate the release uses:
+
+   ```sh
+   bun run check
+   ```
+
+4. Add a changeset for any change users will notice:
+
+   ```sh
+   bunx changeset
+   ```
+
+   The three published packages are versioned together, so pick the bump for the change as a whole. Docs-only, test-only, and internal changes do not need one.
+
+## Commits
+
+Use [Conventional Commits](https://www.conventionalcommits.org) with a scope where it helps:
+
+```
+feat(react): add line number support
+fix(rehype): keep unknown fence languages unchanged
+test(release): cover registry lag
+docs: expand installation guide
+```
+
+Keep each commit focused on one change.
+
+## Pull requests
+
+- Describe what changed and why, and link the issue it addresses.
+- Keep pull requests small. Split unrelated changes.
+- Make sure `bun run check` passes and a changeset is included when needed.
+
+## Releases
+
+Releases are made by maintainers. See [RELEASING.md](RELEASING.md).
+
+## License
+
+By contributing, you agree that your contributions are licensed under the [MIT License](LICENSE).
