@@ -26,6 +26,11 @@ bun run release
 
 A failed release can be resumed by running `bun run release` again: versions already committed are not bumped twice, and versions already on npm are skipped.
 
+If a publish command fails, registry verification must confirm that the exact
+version exists before the release can continue. An overwrite rejection alone is
+not treated as success. A previously published and then unpublished version
+cannot be reused; it needs a new Changeset version.
+
 Run `bun run test:release` to test publishing order, delayed registry visibility, partial-release recovery, and failures without publishing or pushing. These tests also run in `bun run test` and `bun run check`.
 
 To inspect the tarballs without publishing, run `bun run pack:preview`; archives land in `.packs/`.

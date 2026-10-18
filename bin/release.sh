@@ -150,7 +150,10 @@ for dir in "${PACKAGE_DIRS[@]}"; do
         print_status "Publishing ${PACKAGE_NAME}@${PACKAGE_VERSION}"
         pushd "$dir" > /dev/null
         verify_packed_manifest
-        bun publish --access public
+        if ! bun publish --access public; then
+            # An earlier lookup can miss a version that npm refuses to overwrite.
+            print_status "Publish command failed; checking whether ${PACKAGE_NAME}@${PACKAGE_VERSION} already exists"
+        fi
         popd > /dev/null
 
         # 'bun publish' can exit 0 after a failed browser authentication, leaving
@@ -159,7 +162,7 @@ for dir in "${PACKAGE_DIRS[@]}"; do
         print_status "Verifying ${PACKAGE_NAME}@${PACKAGE_VERSION} reached the registry"
         if ! verify_published_package "${PACKAGE_NAME}@${PACKAGE_VERSION}"; then
             print_error "Could not confirm ${PACKAGE_NAME}@${PACKAGE_VERSION} on the registry after 6 attempts."
-            print_error "Re-run this script to retry the publish step."
+            print_error "Check the npm errors above before retrying; a previously used version cannot be republished."
             exit 1
         fi
         print_success "${PACKAGE_NAME}@${PACKAGE_VERSION} is live on npm"

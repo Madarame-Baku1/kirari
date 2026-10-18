@@ -13,6 +13,7 @@ const runRelease = async (options: {
   invisible?: string
   publishFailure?: string
   registryError?: string
+  hiddenExisting?: string[]
 } = {}) => {
   const directory = await mkdtemp(join(tmpdir(), 'kirari-release-'))
   try {
@@ -27,6 +28,7 @@ const runRelease = async (options: {
     await writeFile(join(directory, 'bun.lock'), JSON.stringify({ workspaces }, null, 2))
     await writeFile(join(directory, 'events'), '')
     for (const id of options.existing ?? []) await writeFile(join(directory, `${id}.visible`), '')
+    for (const id of options.hiddenExisting ?? []) await writeFile(join(directory, `${id}.published`), '')
     const result = Bun.spawnSync(['bash', '-c', `
       git() {
         echo "git $*" >> "$RELEASE_FIXTURE/events"
@@ -40,6 +42,10 @@ const runRelease = async (options: {
             local id
             id=$(basename "$PWD")
             echo "publish $id" >> "$RELEASE_FIXTURE/events"
+            if [ -f "$RELEASE_FIXTURE/$id.published" ]; then
+              echo '403 Forbidden: You cannot publish over the previously published versions: 0.1.0.' >&2
+              return 1
+            fi
             if [ "$id" = "$PUBLISH_FAILURE" ]; then
               echo 'npm error E403 publish denied' >&2
               return 1
@@ -129,6 +135,22 @@ test('release accepts visibility on the final verification attempt', async () =>
   const result = await runRelease({ existing: ['kirari', 'rehype'], delay: 5 })
   expect(result.exitCode).toBe(0)
   expect(result.events.filter(event => event.startsWith('publish '))).toEqual(['publish react'])
+})
+
+test('release recovers when an existing version is missing from the initial registry lookup', async () => {
+  const result = await runRelease({ existing: ['kirari'], hiddenExisting: ['rehype'], delay: 2 })
+  expect(result.exitCode).toBe(0)
+  expect(result.output).toContain('You cannot publish over the previously published versions')
+  expect(result.events.filter(event => event.startsWith('publish '))).toEqual(['publish rehype', 'publish react'])
+  expect(result.events).toContain('git tag @vortexlabs/kirari-react@0.1.0')
+})
+
+test('a previously used but unavailable version is not tagged or treated as published', async () => {
+  const result = await runRelease({ existing: ['kirari'], hiddenExisting: ['rehype'], invisible: 'rehype' })
+  expect(result.exitCode).not.toBe(0)
+  expect(result.output).toContain('You cannot publish over the previously published versions')
+  expect(result.events.filter(event => event.startsWith('publish '))).toEqual(['publish rehype'])
+  expect(result.events).not.toContain('git tag @vortexlabs/kirari-rehype@0.1.0')
 })
 
 test('immediately visible releases do not wait', async () => {
