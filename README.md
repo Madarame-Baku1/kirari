@@ -47,6 +47,9 @@ Open `packages/kirari/.checks/browser.html` after `check:browser` to run the bro
 checks. See the [library README](packages/kirari/README.md) for its API and examples.
 See the [installation guide](docs/installation.md) and [release process](RELEASING.md).
 
+Packages are versioned independently. Run `bun run changeset` and select the
+affected packages, then use their package-specific release commands.
+
 The docs build writes three static pages to `sites/docs/dist/`: a landing page,
 `/docs/`, and `/playground/`. GSAP powers the site's motion and stays out of the
 library package. Reduced-motion preferences disable the animations.

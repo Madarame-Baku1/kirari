@@ -1,10 +1,12 @@
 import { expect, test } from 'bun:test'
-import { mkdtemp, mkdir, rm, writeFile } from 'node:fs/promises'
+import { mkdtemp, mkdir, readdir, rm, symlink, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const release = fileURLToPath(new URL('../bin/release.sh', import.meta.url))
+const root = fileURLToPath(new URL('..', import.meta.url))
+const packages = [['kirari', '@vortexlabs/kirari'], ['rehype', '@vortexlabs/kirari-rehype'], ['react', '@vortexlabs/kirari-react']] as const
 
 // Run the real release script and tarball checks; replace remote writes and waiting.
 const runRelease = async (options: {
@@ -15,25 +17,44 @@ const runRelease = async (options: {
   registryError?: string
   args?: string[]
   hiddenExisting?: string[]
+  changes?: Record<string, 'patch' | 'minor' | 'major'>
 } = {}) => {
   const directory = await mkdtemp(join(tmpdir(), 'kirari-release-'))
   try {
     await mkdir(join(directory, '.changeset'))
+    await writeFile(join(directory, '.changeset/config.json'), await Bun.file(join(root, '.changeset/config.json')).text())
+    await writeFile(join(directory, 'package.json'), JSON.stringify({ name: 'release-fixture', private: true, workspaces: ['packages/*'] }))
+    await symlink(join(root, 'node_modules'), join(directory, 'node_modules'))
+    for (const [name, bump] of Object.entries(options.changes ?? {})) {
+      await writeFile(join(directory, '.changeset', `${name}.md`), `---\n"@vortexlabs/${name}": ${bump}\n---\n\nUpdate ${name}.\n`)
+    }
     const workspaces: Record<string, { name: string, version: string }> = {}
-    for (const [id, name] of [['kirari', '@vortexlabs/kirari'], ['rehype', '@vortexlabs/kirari-rehype'], ['react', '@vortexlabs/kirari-react']] as const) {
+    for (const [id, name] of packages) {
       await mkdir(join(directory, 'packages', id), { recursive: true })
-      const manifest = { name, version: '0.1.0' }
+      const manifest = { name, version: '0.1.0', ...(id === 'kirari' ? {} : { peerDependencies: { '@vortexlabs/kirari': '^0.1.0' } }) }
       workspaces[`packages/${id}`] = manifest
       await writeFile(join(directory, 'packages', id, 'package.json'), JSON.stringify(manifest))
     }
-    await writeFile(join(directory, 'bun.lock'), JSON.stringify({ workspaces }, null, 2))
+    await writeFile(join(directory, 'bun.lock'), JSON.stringify({ lockfileVersion: 1, configVersion: 1, workspaces: { '': { name: 'release-fixture' }, ...workspaces }, packages: {} }, null, 2))
     await writeFile(join(directory, 'events'), '')
+    if (options.changes) {
+      for (const args of [['init', '-b', 'main'], ['add', '.'], ['-c', 'user.name=Release Test', '-c', 'user.email=release@example.invalid', '-c', 'commit.gpgsign=false', '-c', 'core.hooksPath=/dev/null', 'commit', '-m', 'Initial fixture']]) {
+        const result = Bun.spawnSync(['git', ...args], { cwd: directory })
+        expect(result.exitCode, result.stderr.toString()).toBe(0)
+      }
+    }
     for (const id of options.existing ?? []) await writeFile(join(directory, `${id}.visible`), '')
     for (const id of options.hiddenExisting ?? []) await writeFile(join(directory, `${id}.published`), '')
     const result = Bun.spawnSync(['bash', '-c', `
       git() {
         echo "git $*" >> "$RELEASE_FIXTURE/events"
         if [ "$1" = rev-parse ]; then return 1; fi
+      }
+      bunx() {
+        if [ "$1" != changeset ]; then echo "Unexpected bunx command: $*" >&2; return 1; fi
+        shift
+        echo "changeset $*" >> "$RELEASE_FIXTURE/events"
+        node "$RELEASE_CHANGESETS" "$@"
       }
       bun() {
         case "$1" in
@@ -61,20 +82,20 @@ const runRelease = async (options: {
         if [ "$1" != view ]; then echo "Unexpected npm command: $*" >&2; return 1; fi
         local id count=0
         case "$2" in
-          @vortexlabs/kirari@0.1.0) id=kirari ;;
-          @vortexlabs/kirari-rehype@0.1.0) id=rehype ;;
-          @vortexlabs/kirari-react@0.1.0) id=react ;;
+          @vortexlabs/kirari@*) id=kirari ;;
+          @vortexlabs/kirari-rehype@*) id=rehype ;;
+          @vortexlabs/kirari-react@*) id=react ;;
           *) echo "Unexpected package: $2" >&2; return 1 ;;
         esac
         echo "view $id $*" >> "$RELEASE_FIXTURE/events"
-        if [ -f "$RELEASE_FIXTURE/$id.visible" ]; then echo 0.1.0; return 0; fi
+        if [ -f "$RELEASE_FIXTURE/$id.visible" ]; then echo "\${2##*@}"; return 0; fi
         if [ -f "$RELEASE_FIXTURE/$id.published" ]; then
           if [ -f "$RELEASE_FIXTURE/$id.count" ]; then read -r count < "$RELEASE_FIXTURE/$id.count"; fi
           count=$((count + 1))
           echo "$count" > "$RELEASE_FIXTURE/$id.count"
           if [ "$id" != "$INVISIBLE" ] && [ "$count" -gt "$VISIBILITY_DELAY" ]; then
             touch "$RELEASE_FIXTURE/$id.visible"
-            echo 0.1.0
+            echo "\${2##*@}"
             return 0
           fi
         fi
@@ -92,6 +113,7 @@ const runRelease = async (options: {
         ...process.env,
         RELEASE_FIXTURE: directory,
         RELEASE_BUN: process.execPath,
+        RELEASE_CHANGESETS: join(root, 'node_modules/.bin/changeset'),
         VISIBILITY_DELAY: String(options.delay ?? 0),
         INVISIBLE: options.invisible ?? '',
         PUBLISH_FAILURE: options.publishFailure ?? '',
@@ -103,11 +125,52 @@ const runRelease = async (options: {
       exitCode: result.exitCode,
       output: result.stdout.toString() + result.stderr.toString(),
       events: (await Bun.file(join(directory, 'events')).text()).trim().split('\n').filter(Boolean),
+      versions: Object.fromEntries(await Promise.all(packages.map(async ([id]) => [id, (await Bun.file(join(directory, 'packages', id, 'package.json')).json()).version]))),
+      changelogs: Object.fromEntries(await Promise.all(packages.map(async ([id]) => [id, await Bun.file(join(directory, 'packages', id, 'CHANGELOG.md')).exists()]))),
+      remainingChangesets: (await readdir(join(directory, '.changeset'))).filter(name => name.endsWith('.md')),
     }
   } finally {
     await rm(directory, { recursive: true, force: true })
   }
 }
+
+test.each([
+  ['react', 'kirari-react', { kirari: '0.1.0', rehype: '0.1.0', react: '0.1.1' }],
+  ['rehype', 'kirari-rehype', { kirari: '0.1.0', rehype: '0.1.1', react: '0.1.0' }],
+  ['kirari', 'kirari', { kirari: '0.1.1', rehype: '0.1.0', react: '0.1.0' }],
+] as const)('a %s patch changeset versions only that package', async (filter, name, versions) => {
+  const result = await runRelease({ args: ['--filter', filter], changes: { [name]: 'patch' } })
+  expect(result.exitCode, result.output).toBe(0)
+  expect(result.versions).toEqual(versions)
+  expect(result.changelogs).toEqual({ kirari: filter === 'kirari', rehype: filter === 'rehype', react: filter === 'react' })
+  expect(result.remainingChangesets).toEqual([])
+  expect(result.events.filter(event => event.startsWith('publish '))).toEqual([`publish ${filter}`])
+  expect(result.events).toContain(`git tag @vortexlabs/${name}@0.1.1`)
+})
+
+test('core changes requiring new peer ranges need explicit integration changesets before versioning', async () => {
+  const result = await runRelease({ args: ['--filter', 'kirari'], changes: { kirari: 'minor' } })
+  expect(result.exitCode).not.toBe(0)
+  expect(result.output).toContain('explicit changeset')
+  expect(result.output).toContain('@vortexlabs/kirari-react')
+  expect(result.output).toContain('@vortexlabs/kirari-rehype')
+  expect(result.versions).toEqual({ kirari: '0.1.0', rehype: '0.1.0', react: '0.1.0' })
+  expect(result.remainingChangesets).toEqual(['kirari.md'])
+  expect(result.events).not.toContain('changeset version')
+  expect(result.events.filter(event => event.startsWith('publish '))).toEqual([])
+})
+
+test('explicit integration changesets allow a core update while publishing only core', async () => {
+  const result = await runRelease({ args: ['--filter', 'kirari'], changes: {
+    kirari: 'minor', 'kirari-react': 'minor', 'kirari-rehype': 'minor',
+  } })
+  expect(result.exitCode, result.output).toBe(0)
+  expect(result.versions.kirari).toBe('0.2.0')
+  expect(result.changelogs).toEqual({ kirari: true, rehype: true, react: true })
+  expect(result.remainingChangesets).toEqual([])
+  expect(result.events.filter(event => event.startsWith('publish '))).toEqual(['publish kirari'])
+  expect(result.events).toContain('git tag @vortexlabs/kirari@0.2.0')
+})
 
 test('release waits for registry visibility and publishes the selected package only once', async () => {
   const result = await runRelease({ delay: 2 })

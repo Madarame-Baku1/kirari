@@ -87,14 +87,24 @@ check_git_status
 HAS_CHANGESETS=false
 if find .changeset -maxdepth 1 -name '*.md' ! -name 'README.md' | grep -q .; then
     HAS_CHANGESETS=true
-    print_status "Planning version updates"
-    # The filter selects publishing; Changesets versions the fixed group together.
+    print_status "Planning version updates for all pending packages"
+    # The filter selects publishing; Changesets applies all pending changesets.
     CHANGESET_STATUS_DIR=$(mktemp -d)
     trap 'rm -rf "$CHANGESET_STATUS_DIR"' EXIT
     bunx changeset status --output="$CHANGESET_STATUS_DIR/status.json"
     node -e '
       const plan = JSON.parse(require("node:fs").readFileSync(process.argv[1], "utf8"));
-      for (const release of plan.releases.filter(release => release.type !== "none")) {
+      const explicitPackages = new Set(plan.changesets.flatMap(changeset =>
+        changeset.releases.filter(release => release.type !== "none").map(release => release.name)
+      ));
+      const releases = plan.releases.filter(release => release.type !== "none");
+      const implicitPackages = releases.filter(release => !explicitPackages.has(release.name));
+      if (implicitPackages.length) {
+        console.error("Changesets requires additional version bumps. Add an explicit changeset for: " +
+          implicitPackages.map(release => release.name).join(", "));
+        process.exit(1);
+      }
+      for (const release of releases) {
         console.log(`  ${release.name}: ${release.oldVersion} → ${release.newVersion}`);
       }
     ' "$CHANGESET_STATUS_DIR/status.json"

@@ -2,29 +2,34 @@
 
 `@vortexlabs/kirari`, `@vortexlabs/kirari-rehype`, and `@vortexlabs/kirari-react` ship to npm as public packages under the `@vortexlabs` scope. The workspace root, the docs site, and the benchmarks are private and never publish.
 
-Versioning is driven by [Changesets](https://github.com/changesets/changesets). The three packages are a fixed group, so they always share one version, and the integrations' `peerDependencies` ranges follow Kirari when it moves out of range.
+Versioning is driven by [Changesets](https://github.com/changesets/changesets). Each package is versioned independently. Select only the packages affected by a change when creating its changeset. For example, a React-only patch increments `@vortexlabs/kirari-react` without changing core or Rehype.
+
+If a core update requires new integration peer ranges, the release script requires
+explicit changesets for those integrations before changing any versions. It prints
+the package names that need changesets, matching Vortex's release-plan validation.
 
 ## Release
 
 ```bash
-bunx changeset                                        # pick the bump (patch/minor/major) and write the note
+bun run changeset                                     # select affected packages, bumps, and release note
 git add .changeset && git commit -m "chore: add changeset"  # required — the release script needs a clean tree
-bun run release:kirari
-bun run release:kirari-rehype
-bun run release:kirari-react
+bun run release:kirari-react                           # example: publish the React update
 ```
 
 Each command uses the same `bin/release.sh` with a package filter. For example,
 `bun run release:kirari-react` publishes only React, without attempting Rehype.
-The filter selects what is published; pending Changesets still version the entire
-fixed group together. Publish core first when the integrations require a new core
-version. Subsequent commands use the versions already prepared by the first command.
+The filter selects what is published; Changesets applies all pending changesets
+in the workspace, with each affected package receiving its own version and changelog.
+Packages without a planned release keep their versions. When several packages have
+changesets, run each affected package's release command. Publish core first when
+the integrations require a new core version. Subsequent commands use the versions
+already prepared by the first command.
 
 There is no all-packages release command. The shared script requires `--filter`:
 
 1. Aborts if the working tree is dirty.
-2. Shows the pending version bump (or the current versions when no changesets are pending) and prompts for confirmation.
-3. Runs `bunx changeset version` when changesets are pending — updates versions and the peer range, and writes each package's `CHANGELOG.md`.
+2. Plans all pending releases and rejects automatic dependent bumps without an explicit changeset. Shows the version plan (or the selected package's current version when no changesets are pending) and prompts for confirmation.
+3. Runs `bunx changeset version` when changesets are pending — updates affected versions and peer ranges, and writes the affected packages' `CHANGELOG.md` files.
 4. Synchronizes workspace versions in `bun.lock`, then refreshes it with `bun install --lockfile-only --ignore-scripts`.
 5. Runs `bun run check`: typechecks, tests, builds, the docs site, and the packed-consumer install check. A failure stops before committing or publishing.
 6. Commits `chore: release` if files changed and pushes.
