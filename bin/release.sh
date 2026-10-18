@@ -50,16 +50,21 @@ manifest_field() {
 }
 
 verify_published_package() {
-    local package="$1" attempt output max_attempts=31
+    local package="$1" attempt output max_attempts=41
 
-    # npm processing can take minutes; allow five minutes of waits without another upload.
+    # npm scanning can exceed 15 minutes; wait up to 20 minutes plus request time without another upload.
     for ((attempt=1; attempt<=max_attempts; attempt++)); do
         if output=$(npm view "$package" version --prefer-online --fetch-retries=0 --fetch-timeout=10000 2>&1); then
             return 0
         fi
         if [ "$attempt" -lt "$max_attempts" ]; then
-            print_status "Registry has not confirmed $package (attempt $attempt/$max_attempts); retrying in 10s"
-            sleep 10
+            if [ "$attempt" -eq 1 ]; then
+                print_status "Waiting for registry availability of $package"
+                echo "npm processing can take 5–15 minutes or longer. Checking every 30 seconds; no need to publish again."
+            elif [ "$(( (attempt - 1) % 4 ))" -eq 0 ]; then
+                print_status "Still waiting for registry confirmation of $package"
+            fi
+            sleep 30
         fi
     done
 
@@ -181,7 +186,7 @@ else
         echo "Check availability later: npm view ${PACKAGE_NAME}@${PACKAGE_VERSION} version --prefer-online"
         exit 1
     fi
-    print_success "${PACKAGE_NAME}@${PACKAGE_VERSION} is live on npm"
+    print_success "Published and available on npm: ${PACKAGE_NAME}@${PACKAGE_VERSION}"
 fi
 
 TAG="${PACKAGE_NAME}@${PACKAGE_VERSION}"

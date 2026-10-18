@@ -175,6 +175,10 @@ test('explicit integration changesets allow a core update while publishing only 
 test('release waits for registry visibility and publishes the selected package only once', async () => {
   const result = await runRelease({ delay: 2 })
   expect(result.exitCode).toBe(0)
+  expect(result.output.match(/Waiting for registry availability/g)).toHaveLength(1)
+  expect(result.output).not.toContain('retrying in')
+  expect(result.output).toContain('Published and available on npm: @vortexlabs/kirari-react@0.1.0')
+  expect(result.output.indexOf('Waiting for registry availability')).toBeLessThan(result.output.indexOf('Published and available on npm:'))
   expect(result.events.filter(event => event.startsWith('publish '))).toEqual(['publish react'])
   expect(result.events.filter(event => event.startsWith('git tag '))).toEqual(['git tag @vortexlabs/kirari-react@0.1.0'])
   expect(result.events.at(-1)).toBe('git push --tags')
@@ -205,10 +209,13 @@ test('release waits through several minutes of npm processing without uploading 
   expect(result.events).toContain('git tag @vortexlabs/kirari-react@0.1.0')
 })
 
-test('release accepts visibility on the final verification attempt after five minutes of waiting', async () => {
-  const result = await runRelease({ delay: 30 })
+test('release accepts visibility on the final verification attempt after twenty minutes of waiting', async () => {
+  const result = await runRelease({ delay: 40 })
   expect(result.exitCode).toBe(0)
   expect(result.events.filter(event => event.startsWith('publish '))).toEqual(['publish react'])
+  expect(result.events.filter(event => event === 'sleep 30')).toHaveLength(40)
+  expect(result.output.match(/Still waiting for registry confirmation/g)).toHaveLength(9)
+  expect(result.output).toContain('Published and available on npm: @vortexlabs/kirari-react@0.1.0')
 })
 
 test.each([
@@ -263,6 +270,8 @@ test('immediately visible releases do not wait', async () => {
   const result = await runRelease()
   expect(result.exitCode).toBe(0)
   expect(result.events.filter(event => event.startsWith('sleep '))).toEqual([])
+  expect(result.output).not.toContain('Waiting for registry availability')
+  expect(result.output).toContain('Published and available on npm: @vortexlabs/kirari-react@0.1.0')
 })
 
 test('failed publishing stops without retrying the publish', async () => {
@@ -279,15 +288,16 @@ test.each(['npm error E404 package not found', 'npm error E503 registry unavaila
     const result = await runRelease({ args: ['--filter', 'kirari'], invisible: 'kirari', registryError })
     expect(result.exitCode).not.toBe(0)
     expect(result.output).toContain(registryError)
+    expect(result.output).not.toContain('Published and available on npm:')
     expect(result.events.filter(event => event.startsWith('publish '))).toEqual(['publish kirari'])
     expect(result.events.filter(event => event.startsWith('git tag '))).toEqual([])
     expect(result.events).not.toContain('git push --tags')
     const lookups = result.events.filter(event => event.startsWith('view '))
     expect(lookups.length).toBeGreaterThan(2)
-    expect(lookups.length).toBeLessThanOrEqual(32)
+    expect(lookups.length).toBe(42)
     const waited = result.events.filter(event => event.startsWith('sleep '))
       .reduce((seconds, event) => seconds + Number(event.split(' ')[1]), 0)
-    expect(waited).toBe(300)
+    expect(waited).toBe(1200)
     expect(result.output).toContain('may still be processing')
     expect(result.output).toContain('npm view @vortexlabs/kirari@0.1.0 version --prefer-online')
   },
