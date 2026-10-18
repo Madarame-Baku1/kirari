@@ -40,7 +40,7 @@ let usage: Usage = 'js'
 /** Code that reproduces the preview in plain JS, React, or a Markdown pipeline. */
 const usageCode = () => {
   const name = entry.language.name
-  const imports = `import { ${name} } from '@vortexlabs/kirari/languages/${name}'
+  const imports = `import { ${name} } from '@vortexlabs/kirari/languages'
 import '@vortexlabs/kirari/themes/${themeSelect.value}.css'`
   const literal = (value: string) => `\`${value.replace(/\\/g, '\\\\').replace(/`/g, '\\`').replace(/\$\{/g, '\\${')}\``
   if (usage === 'react') return `import { Code } from '@vortexlabs/kirari-react'
