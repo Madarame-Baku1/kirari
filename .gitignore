@@ -1,0 +1,12 @@
+node_modules/
+dist/
+coverage/
+.checks/
+*.tgz
+.DS_Store
+packages/benchmarks/results/
+packages/benchmarks/.bench-*/
+.playwright-cli/
+output/
+.packs/
+docs/superpowers/
