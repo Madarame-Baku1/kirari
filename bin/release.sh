@@ -50,16 +50,16 @@ manifest_field() {
 }
 
 verify_published_package() {
-    local package="$1" attempt output
+    local package="$1" attempt output max_attempts=31
 
-    # Registry reads can lag a successful publish; retry reads, never the upload.
-    for attempt in 1 2 3 4 5 6; do
+    # npm processing can take minutes; allow five minutes of waits without another upload.
+    for ((attempt=1; attempt<=max_attempts; attempt++)); do
         if output=$(npm view "$package" version --prefer-online --fetch-retries=0 --fetch-timeout=10000 2>&1); then
             return 0
         fi
-        if [ "$attempt" -lt 6 ]; then
-            print_status "Registry has not confirmed $package (attempt $attempt/6); retrying in 5s"
-            sleep 5
+        if [ "$attempt" -lt "$max_attempts" ]; then
+            print_status "Registry has not confirmed $package (attempt $attempt/$max_attempts); retrying in 10s"
+            sleep 10
         fi
     done
 
@@ -166,8 +166,9 @@ else
     # that is not on the registry.
     print_status "Verifying ${PACKAGE_NAME}@${PACKAGE_VERSION} reached the registry"
     if ! verify_published_package "${PACKAGE_NAME}@${PACKAGE_VERSION}"; then
-        print_error "Could not confirm ${PACKAGE_NAME}@${PACKAGE_VERSION} on the registry after 6 attempts."
-        print_error "Check the npm errors above before retrying; a previously used version cannot be republished."
+        print_error "Registry verification timed out for ${PACKAGE_NAME}@${PACKAGE_VERSION}; publication remains unconfirmed."
+        print_error "npm may still be processing the upload. If npm reported processing, wait for visibility before rerunning; do not republish or bump the version yet."
+        echo "Check availability later: npm view ${PACKAGE_NAME}@${PACKAGE_VERSION} version --prefer-online"
         exit 1
     fi
     print_success "${PACKAGE_NAME}@${PACKAGE_VERSION} is live on npm"

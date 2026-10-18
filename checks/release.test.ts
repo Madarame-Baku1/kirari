@@ -132,8 +132,18 @@ test('release publishes React when core and Rehype are already on npm', async ()
   expect(result.events.at(-1)).toBe('git push --tags')
 })
 
-test('release accepts visibility on the final verification attempt', async () => {
-  const result = await runRelease({ existing: ['kirari', 'rehype'], delay: 5 })
+test('release waits through several minutes of npm processing without uploading again', async () => {
+  const result = await runRelease({ delay: 18 })
+  expect(result.exitCode).toBe(0)
+  expect(result.events.filter(event => event.startsWith('publish '))).toEqual(['publish react'])
+  const waited = result.events.filter(event => event.startsWith('sleep '))
+    .reduce((seconds, event) => seconds + Number(event.split(' ')[1]), 0)
+  expect(waited).toBeGreaterThanOrEqual(180)
+  expect(result.events).toContain('git tag @vortexlabs/kirari-react@0.1.0')
+})
+
+test('release accepts visibility on the final verification attempt after five minutes of waiting', async () => {
+  const result = await runRelease({ delay: 30 })
   expect(result.exitCode).toBe(0)
   expect(result.events.filter(event => event.startsWith('publish '))).toEqual(['publish react'])
 })
@@ -211,6 +221,11 @@ test.each(['npm error E404 package not found', 'npm error E503 registry unavaila
     expect(result.events).not.toContain('git push --tags')
     const lookups = result.events.filter(event => event.startsWith('view '))
     expect(lookups.length).toBeGreaterThan(2)
-    expect(lookups.length).toBeLessThanOrEqual(10)
+    expect(lookups.length).toBeLessThanOrEqual(32)
+    const waited = result.events.filter(event => event.startsWith('sleep '))
+      .reduce((seconds, event) => seconds + Number(event.split(' ')[1]), 0)
+    expect(waited).toBe(300)
+    expect(result.output).toContain('may still be processing')
+    expect(result.output).toContain('npm view @vortexlabs/kirari@0.1.0 version --prefer-online')
   },
 )

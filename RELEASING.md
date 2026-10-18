@@ -29,10 +29,17 @@ There is no all-packages release command. The shared script requires `--filter`:
 5. Runs `bun run check`: typechecks, tests, builds, the docs site, and the packed-consumer install check. A failure stops before committing or publishing.
 6. Commits `chore: release` if files changed and pushes.
 7. Ensures npm auth (`npm login --auth-type=web` if needed).
-8. Publishes the selected package with `bun publish --access public`. The tarball is checked for unresolved `workspace:` references first. Afterwards, registry verification makes up to six fresh lookups, with a 10-second request timeout and five seconds between attempts. If publishing fails because an earlier lookup missed an existing version, the same verification must confirm it before continuing. If verification still fails, the last npm error is printed and the release stops.
+8. Publishes the selected package with `bun publish --access public`. The tarball is checked for unresolved `workspace:` references first. Afterwards, registry verification makes up to 31 fresh lookups, with a 10-second request timeout and 10 seconds between attempts: five minutes of retry waiting, plus request time. If publishing fails because an earlier lookup missed an existing version, the same verification must confirm it before continuing. If verification still fails, the last npm error is printed and the release stops without creating a tag.
 9. Tags `<name>@<version>` for the selected package and pushes tags.
 
 A failed release can be resumed by rerunning the same package-specific command: versions already committed are not bumped twice, and versions already on npm are skipped.
+
+If npm reports that the package is being processed, an availability check can
+still return 404 after a successful upload. A verification timeout leaves the
+publication status unconfirmed. Use the `npm view` command printed by the script
+to check later. Wait until the version is visible before rerunning the release
+command to finish tagging; do not republish or bump the version while processing
+is pending.
 
 To retry only one package, rerun its individual release command. A version that
 was previously published and then unpublished cannot be reused; it needs a new
