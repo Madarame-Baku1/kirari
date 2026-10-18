@@ -1,0 +1,65 @@
+{
+  "name": "@vortexlabs/kirari-react",
+  "version": "0.1.0",
+  "description": "Kirari syntax highlighting as React elements.",
+  "keywords": [
+    "react",
+    "react-component",
+    "syntax-highlighting",
+    "server-components"
+  ],
+  "author": "Ugi (https://ugi.dev)",
+  "license": "MIT",
+  "homepage": "https://kirari.vortex.design",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vortexlabs/kirari.git",
+    "directory": "packages/react"
+  },
+  "type": "module",
+  "sideEffects": false,
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE",
+    "CHANGELOG.md"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./stream": {
+      "types": "./dist/stream.d.ts",
+      "import": "./dist/stream.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "test": "bun test ./test",
+    "typecheck": "tsc --noEmit",
+    "check": "bun run typecheck && bun run test && bun run build && bun test ./checks",
+    "prepublishOnly": "bun run build"
+  },
+  "peerDependencies": {
+    "@types/react": "^19",
+    "@vortexlabs/kirari": "^0.1.0",
+    "react": "^19"
+  },
+  "peerDependenciesMeta": {
+    "@types/react": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@happy-dom/global-registrator": "^20.14.6",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vortexlabs/kirari": "workspace:*",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}
