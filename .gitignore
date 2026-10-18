@@ -10,3 +10,5 @@ packages/benchmarks/.bench-*/
 output/
 .packs/
 docs/superpowers/
+.vercel
+.env*
