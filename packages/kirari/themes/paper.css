@@ -1,0 +1,26 @@
+/* Paper (light) — an original Kirari palette */
+.kirari {
+  color: var(--kirari-text, #4a463f);
+  background: var(--kirari-background, #f6f2ea);
+}
+
+.kirari-text { color: var(--kirari-text, #4a463f); }
+.kirari-keyword { color: var(--kirari-keyword, #8b4e65); }
+.kirari-variable { color: var(--kirari-variable, #4a463f); }
+.kirari-property { color: var(--kirari-property, #4c6c7b); }
+.kirari-function { color: var(--kirari-function, #586c97); }
+.kirari-string { color: var(--kirari-string, #4c7153); }
+.kirari-number { color: var(--kirari-number, #916236); }
+.kirari-boolean { color: var(--kirari-boolean, #8b4e65); }
+.kirari-null { color: var(--kirari-null, #8b4e65); }
+.kirari-comment { color: var(--kirari-comment, #8d877b); }
+.kirari-operator { color: var(--kirari-operator, #7a6173); }
+.kirari-punctuation { color: var(--kirari-punctuation, #8d877b); }
+.kirari-type { color: var(--kirari-type, #806442); }
+.kirari-regex { color: var(--kirari-regex, #916236); }
+.kirari-inserted { color: var(--kirari-inserted, #4c7153); }
+.kirari-deleted { color: var(--kirari-deleted, #a64949); }
+.kirari-heading { color: var(--kirari-heading, #8b4e65); }
+.kirari-tag { color: var(--kirari-tag, #8b4e65); }
+.kirari-attribute { color: var(--kirari-attribute, #4c6c7b); }
+.kirari-entity { color: var(--kirari-entity, #916236); }
