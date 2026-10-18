@@ -8,6 +8,7 @@ import { renderDecorated } from '@vortexlabs/kirari/decorations'
 import { createRegistry } from '@vortexlabs/kirari/registry'
 import { createMarkdown } from '@vortexlabs/kirari/markdown'
 import { javascript } from '@vortexlabs/kirari/languages/javascript'
+import * as sharedLanguages from '@vortexlabs/kirari/languages'
 
 test('optional entrypoints work through public package exports', () => {
   const stream = createTokenStream(javascript)
@@ -30,11 +31,26 @@ test('built ESM exports run in Bun', () => {
 })
 
 test('every opt-in language resolves through package exports', async () => {
+  expect(Object.keys(sharedLanguages).sort()).toEqual(Object.keys(languages).sort())
   for (const name of Object.keys(languages)) {
     const module = await import(`@vortexlabs/kirari/languages/${name}`)
+    expect(sharedLanguages[name as keyof typeof sharedLanguages]).toBe(module[name])
     expect(module[name].name).toBe(name)
     expect(tokenize('🙂\r\n<&>', module[name]).map(token => token.value).join('')).toBe('🙂\r\n<&>')
   }
+})
+
+test('a named language import tree-shakes to the same bundle as its direct path', async () => {
+  const entry = new URL('../.checks/language-import.ts', import.meta.url)
+  const bundles: string[] = []
+  for (const path of ['languages', 'languages/javascript']) {
+    await Bun.write(entry, `export { javascript } from '@vortexlabs/kirari/${path}'`)
+    const result = Bun.spawnSync(['bun', 'build', entry.pathname, '--target=browser', '--minify-whitespace', '--minify-syntax'])
+    expect(result.exitCode).toBe(0)
+    bundles.push(result.stdout.toString())
+  }
+  expect(bundles[0]).toContain('javascript')
+  expect(bundles[0]).toBe(bundles[1])
 })
 
 test('Node runs the built package with no document or Bun global', () => {

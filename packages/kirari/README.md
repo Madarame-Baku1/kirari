@@ -58,10 +58,15 @@ JavaScript is the default. Choose another language by importing its definition:
 
 ```ts
 import { highlight } from '@vortexlabs/kirari'
-import { python } from '@vortexlabs/kirari/languages/python'
+import { python } from '@vortexlabs/kirari/languages'
 
 const html = highlight('print(answer)', { language: python })
 ```
+
+The shared `@vortexlabs/kirari/languages` entry exports all 48 definitions. Named
+imports work with bundler tree-shaking. Individual paths such as
+`@vortexlabs/kirari/languages/python` remain available to load only that grammar
+and its dependencies without a bundler.
 
 JSX and TSX have separate definitions, including markup and embedded expressions:
 

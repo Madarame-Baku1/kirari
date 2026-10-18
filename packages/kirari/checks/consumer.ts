@@ -1,6 +1,6 @@
 import { highlight, tokenize, type tokenTypes } from '@vortexlabs/kirari'
 import { render, tokenize as scan } from '@vortexlabs/kirari/core'
-import { python } from '@vortexlabs/kirari/languages/python'
+import { python } from '@vortexlabs/kirari/languages'
 import { tsx } from '@vortexlabs/kirari/languages/tsx'
 import { rust } from '@vortexlabs/kirari/languages/rust'
 import { markdown } from '@vortexlabs/kirari/languages/markdown'

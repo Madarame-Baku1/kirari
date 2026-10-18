@@ -52,6 +52,10 @@
       "types": "./dist/markdown.d.ts",
       "import": "./dist/markdown.js"
     },
+    "./languages": {
+      "types": "./dist/languages.d.ts",
+      "import": "./dist/languages.js"
+    },
     "./languages/*": {
       "types": "./dist/languages/*.d.ts",
       "import": "./dist/languages/*.js"

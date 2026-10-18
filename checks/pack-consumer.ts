@@ -1,6 +1,6 @@
 import { highlight } from '@vortexlabs/kirari'
 import { tokenize, type Language } from '@vortexlabs/kirari/core'
-import { javascript } from '@vortexlabs/kirari/languages/javascript'
+import { javascript } from '@vortexlabs/kirari/languages'
 import { python } from '@vortexlabs/kirari/languages/python'
 import { createTokenStream } from '@vortexlabs/kirari/stream'
 import { createRegistry } from '@vortexlabs/kirari/registry'
