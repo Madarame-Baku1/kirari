@@ -18,6 +18,7 @@ const runRelease = async (options: {
   args?: string[]
   hiddenExisting?: string[]
   changes?: Record<string, 'patch' | 'minor' | 'major'>
+  terminal?: boolean
 } = {}) => {
   const directory = await mkdtemp(join(tmpdir(), 'kirari-release-'))
   try {
@@ -103,6 +104,9 @@ const runRelease = async (options: {
         return 1
       }
       sleep() { echo "sleep $*" >> "$RELEASE_FIXTURE/events"; }
+      test() {
+        if [ "$1" = -t ]; then [ "$RELEASE_TERMINAL" = true ]; else builtin test "$@"; fi
+      }
       release_script="$1"
       shift
       source "$release_script" "$@"
@@ -118,6 +122,7 @@ const runRelease = async (options: {
         INVISIBLE: options.invisible ?? '',
         PUBLISH_FAILURE: options.publishFailure ?? '',
         REGISTRY_ERROR: options.registryError ?? 'npm error E404 package not found',
+        RELEASE_TERMINAL: String(options.terminal ?? false),
       },
       timeout: 10_000,
     })
@@ -183,12 +188,26 @@ test('release waits for registry visibility and publishes the selected package o
   expect(result.events.filter(event => event.startsWith('git tag '))).toEqual(['git tag @vortexlabs/kirari-react@0.1.0'])
   expect(result.events.at(-1)).toBe('git push --tags')
   expect(result.events.filter(event => event.startsWith('view ')).every(event => event.includes('--prefer-online'))).toBe(true)
+  expect(result.output).not.toContain('\r')
+})
+
+test('interactive registry waits show a live countdown and finish with a package summary', async () => {
+  const result = await runRelease({ delay: 1, terminal: true })
+  expect(result.exitCode).toBe(0)
+  expect(result.output).toContain('\r\x1b[K⏳ Waiting for npm; next check in 30s')
+  expect(result.output).toContain('\r\x1b[K⏳ Waiting for npm; next check in  1s')
+  expect(result.events.filter(event => event === 'sleep 1')).toHaveLength(30)
+  expect(result.events.filter(event => event.startsWith('publish '))).toEqual(['publish react'])
+  expect(result.output).toContain('Release of @vortexlabs/kirari-react@0.1.0 completed successfully!')
+  expect(result.output).toContain('Package available: https://www.npmjs.com/package/@vortexlabs/kirari-react/v/0.1.0')
+  expect(result.output).toContain('Git tag pushed: @vortexlabs/kirari-react@0.1.0')
 })
 
 test('release skips publishing when the selected package version already exists', async () => {
   const result = await runRelease({ existing: ['react'] })
   expect(result.exitCode).toBe(0)
   expect(result.events.filter(event => event.startsWith('publish '))).toEqual([])
+  expect(result.output).toContain('Release of @vortexlabs/kirari-react@0.1.0 completed successfully!')
 })
 
 test('release publishes React when core and Rehype are already on npm', async () => {
@@ -289,6 +308,7 @@ test.each(['npm error E404 package not found', 'npm error E503 registry unavaila
     expect(result.exitCode).not.toBe(0)
     expect(result.output).toContain(registryError)
     expect(result.output).not.toContain('Published and available on npm:')
+    expect(result.output).not.toContain('completed successfully!')
     expect(result.events.filter(event => event.startsWith('publish '))).toEqual(['publish kirari'])
     expect(result.events.filter(event => event.startsWith('git tag '))).toEqual([])
     expect(result.events).not.toContain('git push --tags')

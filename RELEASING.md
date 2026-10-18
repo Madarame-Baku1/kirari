@@ -37,6 +37,11 @@ There is no all-packages release command. The shared script requires `--filter`:
 8. Publishes the selected package with `bun publish --access public`. The tarball is checked for unresolved `workspace:` references first. Afterwards, registry verification makes up to 41 fresh lookups, with a 10-second request timeout and 30 seconds between attempts: twenty minutes of waiting, plus request time. It explains the waiting state once, prints progress roughly every two minutes, and reports `Published and available on npm` only after confirmation. If publishing fails because an earlier lookup missed an existing version, the same verification must confirm it before continuing. If verification still fails, the last npm error is printed and the release stops without creating a tag.
 9. Tags `<name>@<version>` for the selected package and pushes tags.
 
+In an interactive terminal, a countdown updates in place between registry checks
+so the wait remains visible. Captured logs keep plain progress messages. After
+registry confirmation and pushing the tag, the final summary names the released
+package and version, links to npm, and confirms the Git tag was pushed.
+
 A failed release can be resumed by rerunning the same package-specific command: versions already committed are not bumped twice, and versions already on npm are skipped.
 
 If npm reports that the package is being processed, an availability check can

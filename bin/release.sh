@@ -50,7 +50,7 @@ manifest_field() {
 }
 
 verify_published_package() {
-    local package="$1" attempt output max_attempts=41
+    local package="$1" attempt output remaining max_attempts=41
 
     # npm scanning can exceed 15 minutes; wait up to 20 minutes plus request time without another upload.
     for ((attempt=1; attempt<=max_attempts; attempt++)); do
@@ -64,7 +64,15 @@ verify_published_package() {
             elif [ "$(( (attempt - 1) % 4 ))" -eq 0 ]; then
                 print_status "Still waiting for registry confirmation of $package"
             fi
-            sleep 30
+            if test -t 1; then
+                for ((remaining=30; remaining>0; remaining--)); do
+                    printf '\r\033[K⏳ Waiting for npm; next check in %2ss' "$remaining"
+                    sleep 1
+                done
+                printf '\r\033[K'
+            else
+                sleep 30
+            fi
         fi
     done
 
@@ -195,4 +203,6 @@ git rev-parse -q --verify "refs/tags/$TAG" > /dev/null || git tag "$TAG"
 git push --tags
 
 echo
-print_success "Release completed successfully!"
+print_success "Release of ${PACKAGE_NAME}@${PACKAGE_VERSION} completed successfully!"
+echo "📦 Package available: https://www.npmjs.com/package/${PACKAGE_NAME}/v/${PACKAGE_VERSION}"
+echo "🏷️ Git tag pushed: $TAG"
