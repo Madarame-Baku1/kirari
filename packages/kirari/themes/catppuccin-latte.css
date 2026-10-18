@@ -1,0 +1,26 @@
+/* Catppuccin Latte (light) — based on Catppuccin (MIT) */
+.kirari {
+  color: var(--kirari-text, #4c4f69);
+  background: var(--kirari-background, #eff1f5);
+}
+
+.kirari-text { color: var(--kirari-text, #4c4f69); }
+.kirari-keyword { color: var(--kirari-keyword, #8839ef); }
+.kirari-variable { color: var(--kirari-variable, #4c4f69); }
+.kirari-property { color: var(--kirari-property, #7287fd); }
+.kirari-function { color: var(--kirari-function, #1e66f5); }
+.kirari-string { color: var(--kirari-string, #40a02b); }
+.kirari-number { color: var(--kirari-number, #fe640b); }
+.kirari-boolean { color: var(--kirari-boolean, #fe640b); }
+.kirari-null { color: var(--kirari-null, #fe640b); }
+.kirari-comment { color: var(--kirari-comment, #8c8fa1); }
+.kirari-operator { color: var(--kirari-operator, #04a5e5); }
+.kirari-punctuation { color: var(--kirari-punctuation, #7c7f93); }
+.kirari-type { color: var(--kirari-type, #df8e1d); }
+.kirari-regex { color: var(--kirari-regex, #ea76cb); }
+.kirari-inserted { color: var(--kirari-inserted, #40a02b); }
+.kirari-deleted { color: var(--kirari-deleted, #d20f39); }
+.kirari-heading { color: var(--kirari-heading, #d20f39); }
+.kirari-tag { color: var(--kirari-tag, #1e66f5); }
+.kirari-attribute { color: var(--kirari-attribute, #df8e1d); }
+.kirari-entity { color: var(--kirari-entity, #dc8a78); }
