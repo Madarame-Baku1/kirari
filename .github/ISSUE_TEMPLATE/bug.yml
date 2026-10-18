@@ -1,0 +1,66 @@
+name: Bug report
+description: Wrong highlighting, a crash, or broken output
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Search existing issues first. Report security vulnerabilities privately, see SECURITY.md.
+  - type: dropdown
+    id: package
+    attributes:
+      label: Package
+      options:
+        - "@vortexlabs/kirari"
+        - "@vortexlabs/kirari-rehype"
+        - "@vortexlabs/kirari-react"
+        - Documentation site
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      placeholder: "0.1.0"
+    validations:
+      required: true
+  - type: input
+    id: language
+    attributes:
+      label: Language
+      description: The language being highlighted.
+      placeholder: typescript
+    validations:
+      required: true
+  - type: input
+    id: theme
+    attributes:
+      label: Theme
+      placeholder: github-dark
+  - type: textarea
+    id: input
+    attributes:
+      label: Minimal input
+      description: The smallest snippet that reproduces the problem.
+      render: text
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected output
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual output
+      description: Tokens, HTML, an error, or a screenshot.
+    validations:
+      required: true
+  - type: input
+    id: runtime
+    attributes:
+      label: Runtime
+      description: Browser, Node, or Bun version, and framework if relevant.
+      placeholder: Chrome 140, Next.js 16
