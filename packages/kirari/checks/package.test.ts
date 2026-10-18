@@ -34,6 +34,7 @@ test('every opt-in language resolves through package exports', async () => {
   expect(Object.keys(sharedLanguages).sort()).toEqual(Object.keys(languages).sort())
   for (const name of Object.keys(languages)) {
     const module = await import(`@vortexlabs/kirari/languages/${name}`)
+    // biome-ignore lint/performance/noDynamicNamespaceImportAccess: This export-coverage test intentionally checks every language in the namespace.
     expect(sharedLanguages[name as keyof typeof sharedLanguages]).toBe(module[name])
     expect(module[name].name).toBe(name)
     expect(tokenize('🙂\r\n<&>', module[name]).map(token => token.value).join('')).toBe('🙂\r\n<&>')
