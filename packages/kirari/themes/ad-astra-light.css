@@ -1,0 +1,26 @@
+/* Ad Astra Light (light) — the Vortex docs syntax colors */
+.kirari {
+  color: var(--kirari-text, #333333);
+  background: var(--kirari-background, #f6f6f6);
+}
+
+.kirari-text { color: var(--kirari-text, #333333); }
+.kirari-keyword { color: var(--kirari-keyword, #646464); }
+.kirari-variable { color: var(--kirari-variable, #333333); }
+.kirari-property { color: var(--kirari-property, #646464); }
+.kirari-function { color: var(--kirari-function, #ab00fa); }
+.kirari-string { color: var(--kirari-string, #007869); }
+.kirari-number { color: var(--kirari-number, #ab00fa); }
+.kirari-boolean { color: var(--kirari-boolean, #ab00fa); }
+.kirari-null { color: var(--kirari-null, #ab00fa); }
+.kirari-comment { color: var(--kirari-comment, #999999); }
+.kirari-operator { color: var(--kirari-operator, #646464); }
+.kirari-punctuation { color: var(--kirari-punctuation, #646464); }
+.kirari-type { color: var(--kirari-type, #ab00fa); }
+.kirari-regex { color: var(--kirari-regex, #007869); }
+.kirari-inserted { color: var(--kirari-inserted, #007869); }
+.kirari-deleted { color: var(--kirari-deleted, #c2334d); }
+.kirari-heading { color: var(--kirari-heading, #ab00fa); }
+.kirari-tag { color: var(--kirari-tag, #ab00fa); }
+.kirari-attribute { color: var(--kirari-attribute, #646464); }
+.kirari-entity { color: var(--kirari-entity, #ab00fa); }

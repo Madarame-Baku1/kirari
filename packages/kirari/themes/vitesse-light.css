@@ -1,0 +1,26 @@
+/* Vitesse Light (light) — based on Vitesse by Anthony Fu (MIT) */
+.kirari {
+  color: var(--kirari-text, #393a34);
+  background: var(--kirari-background, #ffffff);
+}
+
+.kirari-text { color: var(--kirari-text, #393a34); }
+.kirari-keyword { color: var(--kirari-keyword, #1e754f); }
+.kirari-variable { color: var(--kirari-variable, #b07d48); }
+.kirari-property { color: var(--kirari-property, #998418); }
+.kirari-function { color: var(--kirari-function, #59873a); }
+.kirari-string { color: var(--kirari-string, #b56959); }
+.kirari-number { color: var(--kirari-number, #2f798a); }
+.kirari-boolean { color: var(--kirari-boolean, #1e754f); }
+.kirari-null { color: var(--kirari-null, #1e754f); }
+.kirari-comment { color: var(--kirari-comment, #a0ada0); }
+.kirari-operator { color: var(--kirari-operator, #ab5959); }
+.kirari-punctuation { color: var(--kirari-punctuation, #999999); }
+.kirari-type { color: var(--kirari-type, #2e8f82); }
+.kirari-regex { color: var(--kirari-regex, #ab5e3f); }
+.kirari-inserted { color: var(--kirari-inserted, #1e754f); }
+.kirari-deleted { color: var(--kirari-deleted, #ab5959); }
+.kirari-heading { color: var(--kirari-heading, #1e754f); }
+.kirari-tag { color: var(--kirari-tag, #1e754f); }
+.kirari-attribute { color: var(--kirari-attribute, #998418); }
+.kirari-entity { color: var(--kirari-entity, #a65e2b); }
