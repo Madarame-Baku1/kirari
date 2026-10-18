@@ -1,0 +1,52 @@
+{
+  "$schema": "https://biomejs.dev/schemas/2.5.15/schema.json",
+  "vcs": {
+    "enabled": true,
+    "clientKind": "git",
+    "useIgnoreFile": true
+  },
+  "files": {
+    "includes": [
+      "**",
+      "!**/results",
+      "!**/.checks",
+      "!packages/kirari/checks/browser.html"
+    ]
+  },
+  "formatter": {
+    "enabled": false
+  },
+  "assist": {
+    "enabled": false
+  },
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "preset": "recommended",
+      "complexity": {
+        "noImportantStyles": "off",
+        "noUselessEscapeInRegex": "off",
+        "noUselessStringRaw": "off"
+      },
+      "correctness": {
+        "noConstantCondition": "off",
+        "noEmptyCharacterClassInRegex": "off"
+      },
+      "style": {
+        "noDescendingSpecificity": "off",
+        "noNonNullAssertion": "off",
+        "useTemplate": "off"
+      },
+      "suspicious": {
+        "noMisleadingCharacterClass": "off",
+        "noShadowRestrictedNames": "off",
+        "noTemplateCurlyInString": "off",
+        "noUselessEscapeInString": "off",
+        "useIterableCallbackReturn": "off"
+      }
+    }
+  },
+  "plugins": [
+    "./biome/no-function-declarations.grit"
+  ]
+}
