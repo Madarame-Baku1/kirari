@@ -13,7 +13,7 @@
   "homepage": "https://kirari.vortex.design",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/vortexlabs/kirari.git",
+    "url": "git+https://github.com/vortexkit/kirari.git",
     "directory": "packages/kirari"
   },
   "type": "module",
