@@ -329,8 +329,10 @@ This is lexical highlighting, not parsing or validation. Parameters use the
 complex property contexts, and every regex-versus-division ambiguity are outside
 the implementation. JavaScript regexes following control-flow closing
 parentheses or statement blocks can be classified as operators. Escaped Unicode
-identifier spellings are not supported. TSX type arguments on JSX tags, such as
-`<Component<Props>>`, are not parsed.
+identifier spellings are not supported. TSX type arguments on JSX tags, including
+nested arguments such as `<Component<Map<string, Props>>>`, retain tag and
+attribute boundaries. Generic arrow functions, comparisons, and incomplete markup
+still use lexical heuristics; see [syntax coverage and limits](../../docs/accuracy.md).
 
 Python f-strings and shell double-quoted strings are colored as whole strings;
 their embedded expressions are not separately highlighted. Shell heredocs and
