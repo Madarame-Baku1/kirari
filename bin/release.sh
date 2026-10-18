@@ -52,6 +52,24 @@ manifest_field() {
     node -e "console.log(require('./$1/package.json').$2)"
 }
 
+verify_published_package() {
+    local package="$1" attempt output
+
+    # Registry reads can lag a successful publish; retry reads, never the upload.
+    for attempt in 1 2 3 4 5 6; do
+        if output=$(npm view "$package" version --prefer-online --fetch-retries=0 --fetch-timeout=10000 2>&1); then
+            return 0
+        fi
+        if [ "$attempt" -lt 6 ]; then
+            print_status "Registry has not confirmed $package (attempt $attempt/6); retrying in 5s"
+            sleep 5
+        fi
+    done
+
+    printf '%s\n' "$output" >&2
+    return 1
+}
+
 echo -e "${BLUE}🚀 Starting Kirari release...${NC}"
 echo
 
@@ -126,7 +144,7 @@ for dir in "${PACKAGE_DIRS[@]}"; do
     PACKAGE_VERSION=$(manifest_field "$dir" version)
 
     # A resumed release may have published Kirari before Rehype failed.
-    if npm view "${PACKAGE_NAME}@${PACKAGE_VERSION}" version > /dev/null 2>&1; then
+    if npm view "${PACKAGE_NAME}@${PACKAGE_VERSION}" version --prefer-online > /dev/null 2>&1; then
         print_success "${PACKAGE_NAME}@${PACKAGE_VERSION} is already on npm - skipping"
     else
         print_status "Publishing ${PACKAGE_NAME}@${PACKAGE_VERSION}"
@@ -139,8 +157,8 @@ for dir in "${PACKAGE_DIRS[@]}"; do
         # the version unpublished. Without this check the script tags a release
         # that is not on the registry.
         print_status "Verifying ${PACKAGE_NAME}@${PACKAGE_VERSION} reached the registry"
-        if ! npm view "${PACKAGE_NAME}@${PACKAGE_VERSION}" version > /dev/null 2>&1; then
-            print_error "Publish did not land: ${PACKAGE_NAME}@${PACKAGE_VERSION} is not on the registry."
+        if ! verify_published_package "${PACKAGE_NAME}@${PACKAGE_VERSION}"; then
+            print_error "Could not confirm ${PACKAGE_NAME}@${PACKAGE_VERSION} on the registry after 6 attempts."
             print_error "Re-run this script to retry the publish step."
             exit 1
         fi

@@ -21,7 +21,7 @@ bun run release
 5. Runs `bun run check`: typechecks, tests, builds, the docs site, and the packed-consumer install check. A failure stops before committing or publishing.
 6. Commits `chore: release` if files changed and pushes.
 7. Ensures npm auth (`npm login --auth-type=web` if needed).
-8. Publishes Kirari, then the Rehype and React integrations, with `bun publish --access public`. Each tarball is checked for unresolved `workspace:` references first, and each version is verified on the registry afterwards.
+8. Publishes Kirari, then the Rehype and React integrations, with `bun publish --access public`. Each tarball is checked for unresolved `workspace:` references first. Afterwards, registry verification makes up to six fresh lookups, with a 10-second request timeout and five seconds between attempts. If verification still fails, the last npm error is printed and the release stops before the next package.
 9. Tags `<name>@<version>` for each package and pushes tags.
 
 A failed release can be resumed by running `bun run release` again: versions already committed are not bumped twice, and versions already on npm are skipped.
