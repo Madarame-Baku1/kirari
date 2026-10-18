@@ -46,7 +46,7 @@ The core package has no runtime dependencies. Keep it that way: integration depe
    bunx changeset
    ```
 
-   The three published packages are versioned together, so pick the bump for the change as a whole. Docs-only, test-only, and internal changes do not need one.
+   The three published packages are versioned independently, so select each affected package and its bump. Docs-only, test-only, and internal changes do not need one.
 
 ## Commits
 
