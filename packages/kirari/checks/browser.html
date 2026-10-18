@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kirari browser checks</title>
+<style>__KIRARI_THEME__</style>
+<style>
+  body { margin: 2rem; font: 16px system-ui; }
+  pre { padding: 1.5rem; font: 15px/1.6 monospace; overflow: auto; }
+  .custom { --kirari-variable: rgb(120, 210, 180); }
+</style>
+<h1>Kirari browser checks</h1>
+<output id="result">Running…</output>
+<pre class="kirari"><code id="default"></code></pre>
+<div class="custom"><pre class="kirari"><code id="custom"></code></pre></div>
+<script type="module">
+  import { api } from '__KIRARI_BUNDLE__'
+  const { core, languages, createTokenStream, renderDecorated, createRegistry, createMarkdown, streamJavaScript } = api
+  const { highlight, tokenize, render } = core
+
+  const checks = []
+  function check(name, condition) {
+    if (!condition) throw new Error(name)
+    checks.push(name)
+  }
+  try {
+    const source = 'const message = `Hello ${user.name}!`\nconsole.log(message)'
+    document.querySelector('#default').innerHTML = highlight(source)
+    document.querySelector('#custom').innerHTML = highlight(source)
+    check('source preserved in DOM', document.querySelector('#default').textContent === source)
+    check('theme override inherits', getComputedStyle(document.querySelector('#custom .kirari-variable')).color === 'rgb(120, 210, 180)')
+    check('default theme unchanged', getComputedStyle(document.querySelector('#default .kirari-variable')).color === 'rgb(220, 225, 234)')
+
+    const probe = document.createElement('div')
+    probe.innerHTML = render([{ type: 'x" onclick="bad', value: '<img src=x onerror="bad">', start: 0, end: 27 }], {
+      className: () => 'x" onmouseover="bad',
+    })
+    check('source cannot create elements', !probe.querySelector('img') && probe.textContent === '<img src=x onerror="bad">')
+    check('classes cannot create attributes', probe.firstChild.attributes.length === 1)
+
+    const tokens = tokenize('🙂!', { name: 'unicode', rules: [
+      { type: 'high', pattern: /[\uD800-\uDBFF]/ }, { type: 'char', pattern: /./u },
+    ] })
+    check('V8 Unicode offsets', JSON.stringify(tokens.map(t => [t.start, t.end])) === '[[0,1],[1,2],[2,3]]')
+
+    for (const name of Object.keys(languages)) {
+      check(`${name} browser bundle`, tokenize(source, languages[name]).map(t => t.value).join('') === source)
+    }
+
+    for (const fixture of api.corpus) {
+      const tokens = tokenize(fixture.source, languages[fixture.language])
+      const matches = fixture.assertions.every(annotation => {
+        let start = -1
+        for (let occurrence = 0; occurrence <= (annotation.occurrence ?? 0); occurrence++) {
+          start = fixture.source.indexOf(annotation.text, start + 1)
+        }
+        const end = start + annotation.text.length
+        const overlapping = tokens.filter(token => token.start < end && token.end > start)
+        return start >= 0 && overlapping.length > 0 && overlapping[0].start <= start
+          && overlapping.at(-1).end >= end && overlapping.every(token => token.type === annotation.type)
+      })
+      check(`${fixture.id} annotated browser syntax`, matches && tokens.map(token => token.value).join('') === fixture.source)
+    }
+
+    const jsxHTML = highlight('<Card title="hi">{user.name}</Card>', { language: languages.tsx })
+    probe.innerHTML = jsxHTML
+    check('TSX tags and attributes are escaped source', !probe.querySelector('card') && probe.querySelector('.kirari-tag')?.textContent === 'Card')
+    probe.style.setProperty('--kirari-tag', 'rgb(240, 180, 120)')
+    probe.style.setProperty('--kirari-attribute', 'rgb(160, 200, 240)')
+    document.body.append(probe)
+    check('markup tokens have theme variables', getComputedStyle(probe.querySelector('.kirari-tag')).color === 'rgb(240, 180, 120)'
+      && getComputedStyle(probe.querySelector('.kirari-attribute')).color === 'rgb(160, 200, 240)')
+    probe.remove()
+
+    check('Vue template expressions', tokenize('<p>{{ user.name }}</p>', languages.vue).some(t => t.type === 'property' && t.value === 'name'))
+    check('Svelte block markers', tokenize('{#if ok}<p>{name}</p>{/if}', languages.svelte).some(t => t.type === 'keyword' && t.value === '/if'))
+
+    check('keyword properties keep division', !tokenize('object.return / 2 / 3').some(t => t.type === 'regex'))
+    check('keyword properties keep TSX comparisons', !tokenize('object.return <Foo > 1', languages.tsx).some(t => t.type === 'tag'))
+    const continued = '"a\\\r\nb"'
+    check('CRLF string continuations', ['javascript', 'typescript', 'tsx', 'python'].every(name => {
+      const result = tokenize(continued, languages[name])
+      return result.length === 1 && result[0].type === 'string' && result[0].value === continued
+    }))
+    check('shell escaped comment boundaries', !tokenize('echo word\\ #literal', languages.shell).some(t => t.type === 'comment')
+      && tokenize('echo \\\n#comment', languages.shell).some(t => t.type === 'comment' && t.value === '#comment'))
+
+    const stream = createTokenStream(streamJavaScript)
+    check('stream uses public checkpoint grammar', stream.mode === 'checkpoint')
+    const streamSource = 'const face = "🙂";\nconsole.log(face)\n'
+    let streamed = []
+    let streamParity = true
+    for (let end = 1; end <= streamSource.length; end++) {
+      const patch = stream.write(streamSource.slice(end - 1, end))
+      streamed = [...streamed.filter(token => token.start < patch.from), ...patch.tokens]
+      streamParity &&= JSON.stringify(streamed) === JSON.stringify(tokenize(streamSource.slice(0, end), streamJavaScript))
+    }
+    stream.end()
+    check('stream matches batch at every UTF-16 prefix', streamParity)
+    probe.innerHTML = render(streamed)
+    check('streamed source preserved in DOM', probe.textContent === streamSource)
+
+    const decoratedSource = 'const count = 1\r\n// <img src=x>\r\n'
+    probe.innerHTML = renderDecorated(tokenize(decoratedSource), {
+      lines: true, decorations: [{ start: 6, end: 11, className: 'selected x" onclick="bad' }],
+      lineClassName: () => 'active" onmouseover="bad',
+    })
+    check('decorations preserve DOM text and line breaks', probe.textContent === decoratedSource.replaceAll('\r\n', '\n'))
+    check('decorated line count includes trailing empty line', probe.querySelectorAll('.kirari-line').length === 3)
+    check('decorations cannot inject source or attributes', !probe.querySelector('img, [onclick], [onmouseover]')
+      && probe.querySelector('.kirari-variable.selected')?.textContent === 'count')
+
+    const registry = createRegistry([streamJavaScript, languages.json])
+    check('registry resolves filenames without loading absent languages', registry.resolve('/src/demo.js') === streamJavaScript
+      && registry.resolve('tsx') === undefined)
+    const fenced = '```js\nconst value = "<script>"\n```'
+    probe.innerHTML = render(tokenize(fenced, createMarkdown(registry)))
+    check('Markdown fences embed registered syntax safely', probe.textContent === fenced
+      && probe.querySelector('.kirari-keyword')?.textContent === 'const' && !probe.querySelector('script'))
+
+    const workerSource = `
+      import { api } from '__KIRARI_BUNDLE__';
+      const { core } = api;
+      postMessage({ domFree: typeof document === 'undefined', html: core.highlight('const count = 1') });
+    `
+    const workerURL = `data:text/javascript,${encodeURIComponent(workerSource)}`
+    const worker = new Worker(workerURL, { type: 'module' })
+    try {
+      const value = await new Promise((resolve, reject) => {
+        const timer = setTimeout(() => reject(new Error('Worker timeout')), 5000)
+        worker.onmessage = event => { clearTimeout(timer); resolve(event.data) }
+        worker.onerror = event => { clearTimeout(timer); reject(new Error(event.message || 'Worker failed to load')) }
+      })
+      check('module worker without DOM', value.domFree && value.html.includes('kirari-variable'))
+    } finally {
+      worker.terminate()
+    }
+    document.querySelector('#result').textContent = `${checks.length} checks passed`
+    window.kirariCheck = { passed: true, checks }
+  } catch (error) {
+    document.querySelector('#result').textContent = error.message
+    window.kirariCheck = { passed: false, error: error.message, checks }
+  }
+</script>
+</html>
