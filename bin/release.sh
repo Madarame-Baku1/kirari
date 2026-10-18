@@ -11,9 +11,6 @@ NC=$'\033[0m' # No Color
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/lib/verify-packed-manifest.sh"
 
-# Publish order matters: the integrations peer on Kirari.
-PACKAGE_DIRS=(packages/kirari packages/rehype packages/react)
-
 print_status() {
     echo "${BLUE}🔄 $1...${NC}"
 }
@@ -70,6 +67,17 @@ verify_published_package() {
     return 1
 }
 
+if [ "$#" -ne 2 ] || [ "$1" != --filter ]; then
+    print_error "Usage: bash bin/release.sh --filter kirari|rehype|react"
+    exit 1
+fi
+case "$2" in
+    kirari|rehype|react) PACKAGE_DIR="packages/$2" ;;
+    *) print_error "Unknown filter: $2. Use kirari, rehype or react."; exit 1 ;;
+esac
+PUBLISH_TARGET=$(manifest_field "$PACKAGE_DIR" name)
+echo "${BLUE}📦 Publish only: $PUBLISH_TARGET${NC}"
+
 echo -e "${BLUE}🚀 Starting Kirari release...${NC}"
 echo
 
@@ -80,7 +88,7 @@ HAS_CHANGESETS=false
 if find .changeset -maxdepth 1 -name '*.md' ! -name 'README.md' | grep -q .; then
     HAS_CHANGESETS=true
     print_status "Planning version updates"
-    # Both packages are a fixed group, so they always share one version.
+    # The filter selects publishing; Changesets versions the fixed group together.
     CHANGESET_STATUS_DIR=$(mktemp -d)
     trap 'rm -rf "$CHANGESET_STATUS_DIR"' EXIT
     bunx changeset status --output="$CHANGESET_STATUS_DIR/status.json"
@@ -93,13 +101,11 @@ if find .changeset -maxdepth 1 -name '*.md' ! -name 'README.md' | grep -q .; the
     rm -rf "$CHANGESET_STATUS_DIR"
     trap - EXIT
 else
-    print_status "No pending changesets - publishing the current versions"
-    for dir in "${PACKAGE_DIRS[@]}"; do
-        echo "  $(manifest_field "$dir" name)@$(manifest_field "$dir" version)"
-    done
+    print_status "No pending changesets - publishing the current version"
+    echo "  $PUBLISH_TARGET@$(manifest_field "$PACKAGE_DIR" version)"
 fi
 
-if ! prompt_for_confirmation "🔥 Apply this release plan and publish?"; then
+if ! prompt_for_confirmation "🔥 Apply this release plan and publish $PUBLISH_TARGET?"; then
     print_error "Release cancelled."
     exit 1
 fi
@@ -139,38 +145,36 @@ else
     print_success "Already authenticated with npm"
 fi
 
-for dir in "${PACKAGE_DIRS[@]}"; do
-    PACKAGE_NAME=$(manifest_field "$dir" name)
-    PACKAGE_VERSION=$(manifest_field "$dir" version)
+PACKAGE_NAME=$(manifest_field "$PACKAGE_DIR" name)
+PACKAGE_VERSION=$(manifest_field "$PACKAGE_DIR" version)
 
-    # A resumed release may have published Kirari before Rehype failed.
-    if npm view "${PACKAGE_NAME}@${PACKAGE_VERSION}" version --prefer-online > /dev/null 2>&1; then
-        print_success "${PACKAGE_NAME}@${PACKAGE_VERSION} is already on npm - skipping"
-    else
-        print_status "Publishing ${PACKAGE_NAME}@${PACKAGE_VERSION}"
-        pushd "$dir" > /dev/null
-        verify_packed_manifest
-        if ! bun publish --access public; then
-            # An earlier lookup can miss a version that npm refuses to overwrite.
-            print_status "Publish command failed; checking whether ${PACKAGE_NAME}@${PACKAGE_VERSION} already exists"
-        fi
-        popd > /dev/null
-
-        # 'bun publish' can exit 0 after a failed browser authentication, leaving
-        # the version unpublished. Without this check the script tags a release
-        # that is not on the registry.
-        print_status "Verifying ${PACKAGE_NAME}@${PACKAGE_VERSION} reached the registry"
-        if ! verify_published_package "${PACKAGE_NAME}@${PACKAGE_VERSION}"; then
-            print_error "Could not confirm ${PACKAGE_NAME}@${PACKAGE_VERSION} on the registry after 6 attempts."
-            print_error "Check the npm errors above before retrying; a previously used version cannot be republished."
-            exit 1
-        fi
-        print_success "${PACKAGE_NAME}@${PACKAGE_VERSION} is live on npm"
+# A resumed release may already have published this version.
+if npm view "${PACKAGE_NAME}@${PACKAGE_VERSION}" version --prefer-online > /dev/null 2>&1; then
+    print_success "${PACKAGE_NAME}@${PACKAGE_VERSION} is already on npm - skipping"
+else
+    print_status "Publishing ${PACKAGE_NAME}@${PACKAGE_VERSION}"
+    pushd "$PACKAGE_DIR" > /dev/null
+    verify_packed_manifest
+    if ! bun publish --access public; then
+        # An earlier lookup can miss a version that npm refuses to overwrite.
+        print_status "Publish command failed; checking whether ${PACKAGE_NAME}@${PACKAGE_VERSION} already exists"
     fi
+    popd > /dev/null
 
-    TAG="${PACKAGE_NAME}@${PACKAGE_VERSION}"
-    git rev-parse -q --verify "refs/tags/$TAG" > /dev/null || git tag "$TAG"
-done
+    # 'bun publish' can exit 0 after a failed browser authentication, leaving
+    # the version unpublished. Without this check the script tags a release
+    # that is not on the registry.
+    print_status "Verifying ${PACKAGE_NAME}@${PACKAGE_VERSION} reached the registry"
+    if ! verify_published_package "${PACKAGE_NAME}@${PACKAGE_VERSION}"; then
+        print_error "Could not confirm ${PACKAGE_NAME}@${PACKAGE_VERSION} on the registry after 6 attempts."
+        print_error "Check the npm errors above before retrying; a previously used version cannot be republished."
+        exit 1
+    fi
+    print_success "${PACKAGE_NAME}@${PACKAGE_VERSION} is live on npm"
+fi
+
+TAG="${PACKAGE_NAME}@${PACKAGE_VERSION}"
+git rev-parse -q --verify "refs/tags/$TAG" > /dev/null || git tag "$TAG"
 
 git push --tags
 

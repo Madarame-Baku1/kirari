@@ -13,6 +13,7 @@ const runRelease = async (options: {
   invisible?: string
   publishFailure?: string
   registryError?: string
+  args?: string[]
   hiddenExisting?: string[]
 } = {}) => {
   const directory = await mkdtemp(join(tmpdir(), 'kirari-release-'))
@@ -81,8 +82,10 @@ const runRelease = async (options: {
         return 1
       }
       sleep() { echo "sleep $*" >> "$RELEASE_FIXTURE/events"; }
-      source "$1"
-    `, 'release-test', release], {
+      release_script="$1"
+      shift
+      source "$release_script" "$@"
+    `, 'release-test', release, ...(options.args ?? ['--filter', 'react'])], {
       cwd: directory,
       stdin: Buffer.from('y\n'),
       env: {
@@ -99,28 +102,26 @@ const runRelease = async (options: {
     return {
       exitCode: result.exitCode,
       output: result.stdout.toString() + result.stderr.toString(),
-      events: (await Bun.file(join(directory, 'events')).text()).trim().split('\n'),
+      events: (await Bun.file(join(directory, 'events')).text()).trim().split('\n').filter(Boolean),
     }
   } finally {
     await rm(directory, { recursive: true, force: true })
   }
 }
 
-test('release waits for registry visibility and publishes all three packages once in dependency order', async () => {
+test('release waits for registry visibility and publishes the selected package only once', async () => {
   const result = await runRelease({ delay: 2 })
   expect(result.exitCode).toBe(0)
-  expect(result.events.filter(event => event.startsWith('publish '))).toEqual(['publish kirari', 'publish rehype', 'publish react'])
-  expect(result.events.filter(event => event.startsWith('git tag '))).toEqual([
-    'git tag @vortexlabs/kirari@0.1.0', 'git tag @vortexlabs/kirari-rehype@0.1.0', 'git tag @vortexlabs/kirari-react@0.1.0',
-  ])
+  expect(result.events.filter(event => event.startsWith('publish '))).toEqual(['publish react'])
+  expect(result.events.filter(event => event.startsWith('git tag '))).toEqual(['git tag @vortexlabs/kirari-react@0.1.0'])
   expect(result.events.at(-1)).toBe('git push --tags')
   expect(result.events.filter(event => event.startsWith('view ')).every(event => event.includes('--prefer-online'))).toBe(true)
 })
 
-test('release resumes after core was already published', async () => {
-  const result = await runRelease({ existing: ['kirari'] })
+test('release skips publishing when the selected package version already exists', async () => {
+  const result = await runRelease({ existing: ['react'] })
   expect(result.exitCode).toBe(0)
-  expect(result.events.filter(event => event.startsWith('publish '))).toEqual(['publish rehype', 'publish react'])
+  expect(result.events.filter(event => event.startsWith('publish '))).toEqual([])
 })
 
 test('release publishes React when core and Rehype are already on npm', async () => {
@@ -137,16 +138,48 @@ test('release accepts visibility on the final verification attempt', async () =>
   expect(result.events.filter(event => event.startsWith('publish '))).toEqual(['publish react'])
 })
 
+test.each([
+  ['kirari', '@vortexlabs/kirari'],
+  ['rehype', '@vortexlabs/kirari-rehype'],
+  ['react', '@vortexlabs/kirari-react'],
+])('filtered release publishes and tags only %s', async (filter, name) => {
+  const result = await runRelease({ args: ['--filter', filter!] })
+  expect(result.exitCode).toBe(0)
+  expect(result.events.filter(event => event.startsWith('publish '))).toEqual([`publish ${filter}`])
+  expect(result.events.filter(event => event.startsWith('git tag '))).toEqual([`git tag ${name}@0.1.0`])
+  expect(result.output).toContain(`Publish only: ${name}`)
+})
+
+test.each([['--filter'], ['--filter', 'unknown'], ['--filter', 'react', 'extra'], ['--unknown']])(
+  'invalid release arguments stop before any side effects: %j', async (...args) => {
+    const result = await runRelease({ args })
+    expect(result.exitCode).not.toBe(0)
+    expect(result.events).toEqual([])
+  },
+)
+
+test('release without a package filter stops before any side effects', async () => {
+  const result = await runRelease({ args: [] })
+  expect(result.exitCode).not.toBe(0)
+  expect(result.events).toEqual([])
+})
+
+test('React can publish independently of an unavailable Rehype release', async () => {
+  const result = await runRelease({ args: ['--filter', 'react'], publishFailure: 'rehype', invisible: 'rehype' })
+  expect(result.exitCode).toBe(0)
+  expect(result.events.filter(event => event.startsWith('publish '))).toEqual(['publish react'])
+})
+
 test('release recovers when an existing version is missing from the initial registry lookup', async () => {
-  const result = await runRelease({ existing: ['kirari'], hiddenExisting: ['rehype'], delay: 2 })
+  const result = await runRelease({ args: ['--filter', 'rehype'], hiddenExisting: ['rehype'], delay: 2 })
   expect(result.exitCode).toBe(0)
   expect(result.output).toContain('You cannot publish over the previously published versions')
-  expect(result.events.filter(event => event.startsWith('publish '))).toEqual(['publish rehype', 'publish react'])
-  expect(result.events).toContain('git tag @vortexlabs/kirari-react@0.1.0')
+  expect(result.events.filter(event => event.startsWith('publish '))).toEqual(['publish rehype'])
+  expect(result.events).toContain('git tag @vortexlabs/kirari-rehype@0.1.0')
 })
 
 test('a previously used but unavailable version is not tagged or treated as published', async () => {
-  const result = await runRelease({ existing: ['kirari'], hiddenExisting: ['rehype'], invisible: 'rehype' })
+  const result = await runRelease({ args: ['--filter', 'rehype'], hiddenExisting: ['rehype'], invisible: 'rehype' })
   expect(result.exitCode).not.toBe(0)
   expect(result.output).toContain('You cannot publish over the previously published versions')
   expect(result.events.filter(event => event.startsWith('publish '))).toEqual(['publish rehype'])
@@ -159,8 +192,8 @@ test('immediately visible releases do not wait', async () => {
   expect(result.events.filter(event => event.startsWith('sleep '))).toEqual([])
 })
 
-test('failed publishing stops before the next package without retrying the publish', async () => {
-  const result = await runRelease({ existing: ['kirari'], publishFailure: 'rehype' })
+test('failed publishing stops without retrying the publish', async () => {
+  const result = await runRelease({ args: ['--filter', 'rehype'], publishFailure: 'rehype' })
   expect(result.exitCode).not.toBe(0)
   expect(result.output).toContain('E403 publish denied')
   expect(result.events.filter(event => event.startsWith('publish '))).toEqual(['publish rehype'])
@@ -170,7 +203,7 @@ test('failed publishing stops before the next package without retrying the publi
 
 test.each(['npm error E404 package not found', 'npm error E503 registry unavailable'])(
   'unconfirmed publishing stops with the registry diagnostic: %s', async registryError => {
-    const result = await runRelease({ invisible: 'kirari', registryError })
+    const result = await runRelease({ args: ['--filter', 'kirari'], invisible: 'kirari', registryError })
     expect(result.exitCode).not.toBe(0)
     expect(result.output).toContain(registryError)
     expect(result.events.filter(event => event.startsWith('publish '))).toEqual(['publish kirari'])

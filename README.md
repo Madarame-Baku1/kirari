@@ -38,7 +38,9 @@ bun run size           # Measure library browser bundles
 bun run check:browser  # Generate the standalone browser checks
 bun run check:packages # Install archives in a fresh external consumer; check types and exports
 bun run changeset      # Describe a change for the next release
-bun run release        # Version, check, and publish; see RELEASING.md
+bun run release:kirari # Publish only the core package
+bun run release:kirari-rehype # Publish only the Rehype integration
+bun run release:kirari-react # Publish only the React integration
 ```
 
 Open `packages/kirari/.checks/browser.html` after `check:browser` to run the browser
