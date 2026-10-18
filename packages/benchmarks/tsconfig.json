@@ -1,0 +1,4 @@
+{
+  "extends": "../kirari/tsconfig.json",
+  "include": ["*.ts", "test"]
+}

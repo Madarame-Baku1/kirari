@@ -1,0 +1,13 @@
+{
+  "name": "@vortexlabs/kirari-benchmarks",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "benchmark": "bun benchmark.ts",
+    "benchmark:stream": "bun streaming.ts",
+    "check": "tsc --noEmit && bun test ./test"
+  },
+  "devDependencies": {
+    "@vortexlabs/kirari": "workspace:*"
+  }
+}
