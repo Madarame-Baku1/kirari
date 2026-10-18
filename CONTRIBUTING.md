@@ -34,7 +34,7 @@ The core package has no runtime dependencies. Keep it that way: integration depe
 
 1. Branch from `main`.
 2. Add or update tests next to the code you change. Language fixes should come with a fixture in the correctness corpus (`bun run test:corpus`).
-3. Run the full check before pushing. It is the same gate the release uses:
+3. Run the full check before pushing. It is the same gate the release and CI use:
 
    ```sh
    bun run check
@@ -62,6 +62,13 @@ docs: expand installation guide
 Keep each commit focused on one change.
 
 ## Pull requests
+
+The [CI workflow](.github/workflows/ci.yml) runs on pull requests and pushes to branches other than `main`.
+It installs the frozen lockfile with the Bun version from `package.json`, uses
+Node.js 24 for consumer checks, and runs `bun run check`. This covers linting,
+types, tests, package and docs builds, and installing packed packages outside the
+workspace. The separate browser harness still needs to be opened in a browser;
+CI does not execute it.
 
 - Describe what changed and why, and link the issue it addresses.
 - Keep pull requests small. Split unrelated changes.
