@@ -1,13 +1,9 @@
-import Link from 'next/link'
+import { ErrorPage } from '../components/ErrorPage'
 
-const NotFound = () => (
-	<main id="main" className="not-found">
-		<h1>Page not found</h1>
-		<p>This page doesn’t exist. You can find Kirari’s guides in the documentation.</p>
-		<Link className="button primary" href="/docs/">
-			Read the docs
-		</Link>
-	</main>
-)
+export const metadata = {
+	title: 'Page not found',
+}
+
+const NotFound = () => <ErrorPage status={404} />
 
 export default NotFound

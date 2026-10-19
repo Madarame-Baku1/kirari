@@ -876,11 +876,6 @@ dialog::backdrop {
 	gap: var(--size-16);
 	padding: var(--size-24) 0 var(--size-32);
 }
-.not-found {
-	max-width: 46.25rem;
-	margin: var(--size-80) auto;
-	padding: var(--size-24);
-}
 
 .docs-main {
 	--code-meta-font-size: var(--size-14);

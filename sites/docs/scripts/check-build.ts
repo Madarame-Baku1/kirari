@@ -8,6 +8,14 @@ import { site } from '../src/site'
 const output = '.next/server/app'
 const titles = new Set<string>()
 
+const notFound = await readFile(`${output}/_not-found.html`, 'utf8')
+assert.match(notFound, /<header\b/)
+assert.match(notFound, /<footer\b/)
+assert.match(notFound, /name="robots" content="noindex"/)
+assert.match(notFound, /This page is out of bounds/)
+assert.match(notFound, /Read the docs/)
+assert.doesNotMatch(notFound, /aria-current="page"/)
+
 for (const path of indexablePaths) {
   const file = path === '/' ? 'index' : path.slice(1, -1)
   const html = await readFile(`${output}/${file}.html`, 'utf8')
