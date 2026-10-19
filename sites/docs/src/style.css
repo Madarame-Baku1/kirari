@@ -763,6 +763,7 @@ dialog::backdrop {
 		display: none;
 	}
 	.row,
+	.row.reverse,
 	.closing {
 		grid-template-columns: minmax(0, 1fr);
 		gap: var(--size-32);

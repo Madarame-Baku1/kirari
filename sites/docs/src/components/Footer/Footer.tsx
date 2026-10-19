@@ -1,7 +1,9 @@
 import Link from 'next/link'
+import styles from './Footer.module.css'
 import { routes } from '../../navigation'
 import { site } from '../../site'
 import { Brand } from '../Brand'
+import { Icon } from '../Icon'
 
 export const Footer = () => (
 	<footer className="site-footer">
@@ -16,9 +18,25 @@ export const Footer = () => (
 				<Link href="/llms.txt" prefetch={false}>
 					llms.txt
 				</Link>
-				<Link href={site.npm}>npm</Link>
 			</nav>
-			<span>v{site.version}</span>
+			<div className={styles.socials}>
+				<Link
+					className="icon-button"
+					href={site.github}
+					aria-label="Kirari on GitHub"
+					title="Kirari on GitHub"
+				>
+					<Icon name="github" />
+				</Link>
+				<Link
+					className="icon-button"
+					href={site.x}
+					aria-label="Follow Ugi on X"
+					title="Follow Ugi on X"
+				>
+					<Icon name="x" />
+				</Link>
+			</div>
 		</div>
 	</footer>
 )
