@@ -1,5 +1,11 @@
 # @vortexlabs/kirari
 
+## 1.0.2
+
+### Patch Changes
+
+- 7d3bf4c: Fix JSX and TSX highlighting for adjacent element snippets without requiring a fragment wrapper. Component names and attributes retain their token types across siblings, while comparisons after JSX remain JavaScript.
+
 ## 1.0.1
 
 ### Patch Changes
