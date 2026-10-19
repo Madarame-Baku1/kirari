@@ -1,58 +1,38 @@
 # Kirari
 
-A small syntax highlighter with editable language definitions, source-aware
-tokens, and CSS-variable themes. Independently implemented in TypeScript with
-zero runtime dependencies. Returns escaped HTML without a DOM.
+A small, dependency-free syntax highlighter. Kirari turns source code into
+escaped HTML or a token array on the server, at build time, or in the browser,
+without a DOM. The default bundle is about 2.2 KB gzipped; 48 language
+definitions and 21 CSS-variable themes are available as separate imports.
+It is a lexical highlighter, not a parser.
 
 ```sh
 npm install @vortexlabs/kirari
 ```
 
-Documentation and playground: <https://kirari.vortex.design>
+Documentation and playground: <https://kirari.sh>
 
-## Development
+## Quick start
 
-Install dependencies from the workspace root, then run library commands here:
-
-```sh
-cd ../..
-bun install
-cd packages/kirari
-bun run check
-bun run size
-```
-
-`bun run check` type-checks the source, runs tests, builds ESM and declarations,
-and tests the public package exports in Bun and Node. `bun run build` uses the
-installed TypeScript compiler to preserve independently importable modules.
-Bun handles package management, tests, scripts, and browser bundle measurements.
-
-Run `bun run check:browser`, then open the generated `.checks/browser.html` file.
-It reports browser checks covering language bundles, HTML escaping, theme
-inheritance, Unicode offsets, optional APIs, and a module worker without a DOM. It is a
-self-contained local file and does not require a development server.
-
-`bun run test:corpus` runs original annotated examples for JavaScript, TypeScript,
-TSX, Python, JSON, and shell. It checks expected token spans, source offsets,
-HTML escaping, deterministic output, and every UTF-16 prefix of each example.
-The 14 formerly tracked gap annotations now pass as required assertions.
-These are bounded lexical checks, not compiler conformance or an accuracy score;
-see [syntax coverage and limits](../../docs/accuracy.md).
-
-From the workspace root, `bun run benchmark` measures highlighting speed and
-browser bundle size.
-See [benchmark methodology](../benchmarks/README.md) for scope and reproduction.
-
-## Highlight code
-
-The examples below use package imports, suitable for a linked or local-file
-dependency. Inside this checkout, run `bun run build` first.
+In an application that supports CSS imports:
 
 ```ts
 import { highlight } from '@vortexlabs/kirari'
+import '@vortexlabs/kirari/theme.css'
 
-const html = highlight('const count = 42')
+const code = 'const count = 42'
+const html = `<pre class="kirari"><code>${highlight(code)}</code></pre>`
 ```
+
+Use `html` in your page template. `highlight()` returns an escaped HTML fragment;
+the wrapper preserves whitespace, and `class="kirari"` applies the theme's
+background and base colors. If your app does not support CSS imports, serve the
+theme file as a stylesheet.
+
+Kirari uses ES modules and requires an ES2022-compatible runtime. It works without
+Bun, Node-specific APIs, or a DOM. Bun is only needed to develop this repository.
+
+## Choose a language
 
 JavaScript is the default. Choose another language by importing its definition:
 
@@ -86,59 +66,6 @@ import { python } from '@vortexlabs/kirari/languages/python'
 const html = render(tokenize('answer = 42', python))
 ```
 
-The HTML is a fragment. Place it inside your own `<pre><code>` elements.
-Kirari preserves whitespace and newlines without inserting line wrappers.
-
-## Optional integrations
-
-These features use separate entrypoints and are absent from the default bundle:
-
-| Import | API | Purpose |
-| --- | --- | --- |
-| `@vortexlabs/kirari/stream` | `createTokenStream(language)` | Source-offset token patches for appended code |
-| `@vortexlabs/kirari/decorations` | `renderDecorated(tokens, options)` | Overlapping source ranges and optional line classes |
-| `@vortexlabs/kirari/registry` | `createRegistry(languages)` | Resolve names, aliases, extensions, and filenames from explicit registrations |
-| `@vortexlabs/kirari/markdown` | `createMarkdown(registry)` | Highlight registered languages inside Markdown fences |
-
-```ts
-import { tokenize } from '@vortexlabs/kirari/core'
-import { javascript } from '@vortexlabs/kirari/languages/javascript'
-import { renderDecorated } from '@vortexlabs/kirari/decorations'
-import { createRegistry } from '@vortexlabs/kirari/registry'
-import { createMarkdown } from '@vortexlabs/kirari/markdown'
-
-const registry = createRegistry([javascript])
-registry.resolve('src/example.js') // javascript; unknown names return undefined
-const markdown = createMarkdown(registry)
-const tokens = tokenize('```js\nconst count = 1\n```', markdown)
-const html = renderDecorated(tokens, {
-  lines: true,
-  lineClassName: line => line.number === 2 ? 'selected-line' : undefined,
-})
-```
-
-Decorations accept `{ start, end, className }` ranges using UTF-16 offsets.
-They append escaped classes without changing token categories. Callbacks see
-each original token once, even when a range splits it. With `lines: true`, output
-uses `.kirari-line` wrappers and one-based `data-line` attributes. Define your own
-CSS for custom classes; line numbering UI is not added automatically.
-
-Streaming returns `{ from, tokens, length }`: replace your retained tokens from
-the source offset `from` onward. Exact built-in JavaScript, TypeScript, and JSON
-use conservative checkpoints; all other grammars use full re-tokenization.
-Long lines and unfinished multiline tokens can still require large rescans.
-Streams retain the full source. Do not mutate built-in definitions; copy them
-for customization. Calling `reset()` also requires clearing your retained view.
-
-See complete [streaming](../../docs/streaming.md),
-[decoration](../../docs/decorations.md), and
-[language integration](../../docs/language-integration.md) contracts and examples.
-
-For highlighted code blocks in rendered Markdown or MDX, use the separate
-[`@vortexlabs/kirari-rehype` package](../rehype/README.md). It accepts explicit language
-registrations and reuses Kirari token classes. The `createMarkdown()` API above
-highlights Markdown source; the Rehype plugin integrates with document rendering.
-
 ## Themes
 
 Import one theme with your application's CSS bundler, or serve its file as a
@@ -146,18 +73,16 @@ stylesheet. Add `class="kirari"` to your `<pre>` for the theme's background and
 base colors.
 
 ```js
-import '@vortexlabs/kirari/theme.css' // the default dark theme
-import '@vortexlabs/kirari/themes/github-light.css' // or any built-in theme
+import '@vortexlabs/kirari/themes/github-light.css'
 ```
 
 | Light | Dark |
 | --- | --- |
 | `daylight`, `paper`, `ad-astra-light`, `github-light`, `solarized-light`, `catppuccin-latte`, `rose-pine-dawn`, `vitesse-light` | `default`, `dusk`, `ad-astra-dark`, `github-dark`, `one-dark`, `dracula`, `nord`, `monokai`, `solarized-dark`, `catppuccin-mocha`, `tokyo-night`, `rose-pine`, `vitesse-dark` |
 
-Load one theme per page; each file styles the same classes. Ported themes adapt
-the original projects' published colors to Kirari's token categories, credited
-in each file's header. Theme files are generated from `scripts/themes.ts`; run
-`bun run themes` after editing it.
+Use this instead of the default theme import. Load one theme per page; each file
+styles the same classes. Ported themes adapt the original projects' published
+colors to Kirari's token categories, credited in each file's header.
 
 Override token colors on any ancestor:
 
@@ -221,8 +146,58 @@ exactly. An empty source produces `[]` and empty HTML.
 
 Use these tokens directly when rendering through React or another UI framework.
 Kirari does not require a framework adapter or expose a raw-HTML callback. For
-React, the optional [`@vortexlabs/kirari-react`](../react/README.md) package
+React, the optional [`@vortexlabs/kirari-react`](https://github.com/vortexkit/kirari/blob/main/packages/react/README.md) package
 provides a ready-made `<Code>` component and streaming hook.
+
+## Optional integrations
+
+These features use separate entrypoints and are absent from the default bundle:
+
+| Import | API | Purpose |
+| --- | --- | --- |
+| `@vortexlabs/kirari/stream` | `createTokenStream(language)` | Source-offset token patches for appended code |
+| `@vortexlabs/kirari/decorations` | `renderDecorated(tokens, options)` | Overlapping source ranges and optional line classes |
+| `@vortexlabs/kirari/registry` | `createRegistry(languages)` | Resolve names, aliases, extensions, and filenames from explicit registrations |
+| `@vortexlabs/kirari/markdown` | `createMarkdown(registry)` | Highlight registered languages inside Markdown fences |
+
+```ts
+import { tokenize } from '@vortexlabs/kirari/core'
+import { javascript } from '@vortexlabs/kirari/languages/javascript'
+import { renderDecorated } from '@vortexlabs/kirari/decorations'
+import { createRegistry } from '@vortexlabs/kirari/registry'
+import { createMarkdown } from '@vortexlabs/kirari/markdown'
+
+const registry = createRegistry([javascript])
+registry.resolve('src/example.js') // javascript; unknown names return undefined
+const markdown = createMarkdown(registry)
+const tokens = tokenize('```js\nconst count = 1\n```', markdown)
+const html = renderDecorated(tokens, {
+  lines: true,
+  lineClassName: line => line.number === 2 ? 'selected-line' : undefined,
+})
+```
+
+Decorations accept `{ start, end, className }` ranges using UTF-16 offsets.
+They append escaped classes without changing token categories. Callbacks see
+each original token once, even when a range splits it. With `lines: true`, output
+uses `.kirari-line` wrappers and one-based `data-line` attributes. Define your own
+CSS for custom classes; line numbering UI is not added automatically.
+
+Streaming returns `{ from, tokens, length }`: replace your retained tokens from
+the source offset `from` onward. Exact built-in JavaScript, TypeScript, and JSON
+use conservative checkpoints; all other grammars use full re-tokenization.
+Long lines and unfinished multiline tokens can still require large rescans.
+Streams retain the full source. Do not mutate built-in definitions; copy them
+for customization. Calling `reset()` also requires clearing your retained view.
+
+See complete [streaming](https://github.com/vortexkit/kirari/blob/main/docs/streaming.md),
+[decoration](https://github.com/vortexkit/kirari/blob/main/docs/decorations.md), and
+[language integration](https://github.com/vortexkit/kirari/blob/main/docs/language-integration.md) contracts and examples.
+
+For highlighted code blocks in rendered Markdown or MDX, use the separate
+[`@vortexlabs/kirari-rehype` package](https://github.com/vortexkit/kirari/blob/main/packages/rehype/README.md). It accepts explicit language
+registrations and reuses Kirari token classes. The `createMarkdown()` API above
+highlights Markdown source; the Rehype plugin integrates with document rendering.
 
 ## Extend a language
 
@@ -291,8 +266,8 @@ the default entry includes JavaScript, without a registry of the other languages
 | `css` | Selectors, declarations, custom properties, dimensions, colors, at-rules |
 | `json` | Keys, strings, numbers, booleans, null, punctuation |
 | `jsonc` | JSON plus line and block comments |
-| `python` | Keywords, identifiers, numeric literals, quoted/triple strings, comments |
-| `shell` | Keywords, names, parameter references, strings, basic operators, comments |
+| `python` | Keywords, identifiers, numbers, quoted/triple strings, f-string expressions, comments |
+| `shell` | Keywords, names, quoted parameters, nested expansions, heredocs, strings, comments |
 | `c` | Keywords, primitive types, directives, strings, numbers, comments |
 | `cpp` | C++ keywords, scoped names, raw strings, directives |
 | `csharp` | Keywords, types, escaped identifiers, verbatim/interpolated/raw strings |
@@ -329,56 +304,15 @@ the default entry includes JavaScript, without a registry of the other languages
 | `diff` | Unified diff headers, hunks, added/deleted lines |
 | `plaintext` | Escaped text without syntax coloring |
 
-This is lexical highlighting, not parsing or validation. Parameters use the
-`variable` category. Binding resolution, inferred types, contextual keywords,
-complex property contexts, and every regex-versus-division ambiguity are outside
-the implementation. JavaScript regexes following control-flow closing
-parentheses or statement blocks can be classified as operators. Escaped Unicode
-identifier spellings are not supported. TSX type arguments on JSX tags, including
-nested arguments such as `<Component<Map<string, Props>>>`, retain tag and
-attribute boundaries. Generic arrow functions, comparisons, and incomplete markup
-still use lexical heuristics; see [syntax coverage and limits](../../docs/accuracy.md).
+Kirari highlights source text without validating programs, resolving bindings,
+or inferring types. Coverage varies by language; malformed and incomplete code
+is preserved, but its coloring may differ from a compiler's interpretation.
 
-Python f-strings and shell double-quoted strings are colored as whole strings;
-their embedded expressions are not separately highlighted. Shell heredocs and
-nested parameter expansions are not parsed. TypeScript generic/type contexts
-are heuristic. Malformed code is retained but is not necessarily classified
-the same way as a compiler would classify it.
-
-Interpolation in C#, Ruby, PHP, Swift, and Kotlin strings stays inside the string
-token. Ruby nested percent delimiters and heredocs, PHP embedded HTML, and Swift
-regex literals are not parsed. Ruby `%=` is treated as modulo assignment; use
-`%q=...=` for an equals-delimited string.
-
-Markdown inline constructs and YAML quoted/flow values are line-local. Markdown
-fences are opaque by default; opt-in `createMarkdown(registry)` highlights
-registered fenced languages without recursive Markdown injection. SQL support is not a complete
-dialect grammar: dollar-quoted strings and nested comments are unsupported.
-Dockerfile heredocs, custom escape directives, and embedded shell syntax are not
-parsed. No definition claims compiler-level syntax coverage.
-
-Vue/Svelte use JavaScript/TypeScript expression tokens and select embedded scripts
-with `lang="js"` or `lang="ts"`. Unknown script/style preprocessors remain text.
-Vue `v-pre` and Svelte expressions inside quoted attribute strings are not parsed.
-Framework directives are highlighted lexically, without validating their meaning.
-
-Dart, Scala, Groovy, Julia, and Elixir strings keep interpolation opaque; nested
-expression quotes need a parser. Scala XML literals and Julia custom string-macro
-semantics are unsupported. Groovy slashy strings use expression-start heuristics.
-Elixir sigils stop at the first unescaped closing delimiter. Clojure reader
-discard and conditional forms retain ordinary lexical tokens. PowerShell command
-context is heuristic, and quoted subexpressions are not recursively parsed.
-
-GraphQL/Protobuf custom type names use capitalization heuristics. HCL/Terraform
-template expressions inside strings/heredocs stay opaque. INI dialect-specific
-continuations/interpolation and dotenv expansion are not parsed. Makefile uses
-default tab recipes without `.RECIPEPREFIX`, shell parsing, or make evaluation.
-Nginx directive positions are recognized without validating module directives;
-quoted variable references remain part of the string token.
-
-Modern ESM runtimes with ES2022 features are required. The runtime contains no
-Bun, Node, or DOM imports. Tests exercise Bun and Node; the browser smoke check
-also exercises a module worker without `document`.
+Supported cases include escaped JavaScript identifiers, nested TSX tag type
+arguments, Python f-string expressions, and shell parameters and heredocs.
+TypeScript type contexts and JavaScript regex-versus-division decisions still
+use lexical heuristics. See [syntax coverage and limits](https://github.com/vortexkit/kirari/blob/main/docs/accuracy.md)
+for the tested cases and remaining boundaries.
 
 Source and class attributes are HTML-escaped. Language rules and callbacks are
 trusted application code; arbitrary user-supplied regexes are not sandboxed.
@@ -400,6 +334,20 @@ Measured on 2026-10-17 using Bun 1.3.11:
 | JavaScript default | 4,648 | 2,240 |
 | All 48 languages | 51,964 | 16,044 |
 
+## Development
+
+After cloning the repository, run these commands from its root:
+
+```sh
+bun install
+bun run check:library
+bun run size
+```
+
+See [Contributing](https://github.com/vortexkit/kirari/blob/main/CONTRIBUTING.md) for setup and checks, and
+[benchmark methodology](https://github.com/vortexkit/kirari/blob/main/packages/benchmarks/README.md) for measurements. Applications
+using the published package do not need to build it first.
+
 ## License
 
-[MIT](LICENSE) © 2026 [Ugi](https://ugi.dev)
+[MIT](https://github.com/vortexkit/kirari/blob/main/packages/kirari/LICENSE) © 2026 [Ugi](https://ugi.dev)

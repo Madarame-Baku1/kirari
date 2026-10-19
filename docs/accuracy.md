@@ -23,6 +23,39 @@ The other definitions have sample, source-preservation, and targeted language
 tests, but not this same annotated corpus. Contributions should add original
 examples with expected token spans and nearby negative cases.
 
+## Other language boundaries
+
+Interpolation in C#, Ruby, PHP, Swift, and Kotlin strings stays inside the string
+token. Ruby nested percent delimiters and heredocs, PHP embedded HTML, and Swift
+regex literals are not parsed. Ruby `%=` is treated as modulo assignment; use
+`%q=...=` for an equals-delimited string.
+
+Markdown inline constructs and YAML quoted/flow values are line-local. Markdown
+fences are opaque by default; opt-in `createMarkdown(registry)` highlights
+registered fenced languages without recursive Markdown injection. SQL support is not a complete
+dialect grammar: dollar-quoted strings and nested comments are unsupported.
+Dockerfile heredocs, custom escape directives, and embedded shell syntax are not
+parsed. No definition claims compiler-level syntax coverage.
+
+Vue/Svelte use JavaScript/TypeScript expression tokens and select embedded scripts
+with `lang="js"` or `lang="ts"`. Unknown script/style preprocessors remain text.
+Vue `v-pre` and Svelte expressions inside quoted attribute strings are not parsed.
+Framework directives are highlighted lexically, without validating their meaning.
+
+Dart, Scala, Groovy, Julia, and Elixir strings keep interpolation opaque; nested
+expression quotes need a parser. Scala XML literals and Julia custom string-macro
+semantics are unsupported. Groovy slashy strings use expression-start heuristics.
+Elixir sigils stop at the first unescaped closing delimiter. Clojure reader
+discard and conditional forms retain ordinary lexical tokens. PowerShell command
+context is heuristic, and quoted subexpressions are not recursively parsed.
+
+GraphQL/Protobuf custom type names use capitalization heuristics. HCL/Terraform
+template expressions inside strings/heredocs stay opaque. INI dialect-specific
+continuations/interpolation and dotenv expansion are not parsed. Makefile uses
+default tab recipes without `.RECIPEPREFIX`, shell parsing, or make evaluation.
+Nginx directive positions are recognized without validating module directives;
+quoted variable references remain part of the string token.
+
 ## Reproduce
 
 ```sh
