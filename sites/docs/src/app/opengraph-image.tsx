@@ -40,7 +40,6 @@ const OpenGraphImage = () =>
 						marginRight: 16,
 					}}
 				>
-					<title>Kirari</title>
 					<path
 						d="M16 6c.8 5.6 4.4 9.2 10 10-5.6.8-9.2 4.4-10 10-.8-5.6-4.4-9.2-10-10 5.6-.8 9.2-4.4 10-10Z"
 						fill="#ffcf4a"

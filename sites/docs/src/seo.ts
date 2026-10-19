@@ -5,6 +5,14 @@ import { site } from './site'
 export const description =
 	'Lightweight syntax highlighting for JavaScript, TypeScript, React, and Markdown. Explore 48 languages, CSS themes, and streaming code with Kirari.'
 
+const imageOrigin =
+	process.env.NODE_ENV === 'development'
+		? `http://localhost:${process.env.PORT || '4173'}`
+		: process.env.VERCEL_ENV === 'preview' && process.env.VERCEL_URL
+			? `https://${process.env.VERCEL_URL}`
+			: site.url
+const imageUrl = new URL('/opengraph-image/', imageOrigin).href
+
 export const pageMetadata = (title: string, summary: string, path: string): Metadata => ({
 	title: {
 		absolute: `${title} | Kirari`,
@@ -28,7 +36,7 @@ export const pageMetadata = (title: string, summary: string, path: string): Meta
 		type: 'website',
 		images: [
 			{
-				url: '/opengraph-image',
+				url: imageUrl,
 				width: 1200,
 				height: 630,
 				alt: 'Kirari — lightweight syntax highlighting',
@@ -40,7 +48,7 @@ export const pageMetadata = (title: string, summary: string, path: string): Meta
 		title: `${title} | Kirari`,
 		description: summary,
 		images: [
-			'/opengraph-image',
+			imageUrl,
 		],
 	},
 })
