@@ -1,4 +1,6 @@
 import type { Language, Token } from './types.js'
+import { createFunctionLookup } from './grammars/functions.js'
+import { classifyDefinitions } from './grammars/definitions.js'
 
 export type Frame = { kind: 'template'; opening: boolean } | { kind: 'expression'; depth: number }
 export interface ScanContext {
@@ -9,6 +11,10 @@ export interface ScanContext {
   declaration?: string
   annotation?: boolean
   ternaries?: number
+  functionPending?: boolean
+  functionName?: boolean
+  classBody?: boolean
+  scopes?: boolean[]
 }
 
 const sticky = (pattern: RegExp): RegExp => {
@@ -16,7 +22,7 @@ const sticky = (pattern: RegExp): RegExp => {
 }
 
 export const tokenize = (source: string, language: Language): Token[] => {
-  if (language.tokenize) return language.tokenize(source, language)
+  if (language.tokenize) return classifyDefinitions(language.tokenize(source, language), language.name)
   const tokens: Token[] = []
   for (const token of scan(source, language)) {
     const last = tokens[tokens.length - 1]
@@ -24,11 +30,11 @@ export const tokenize = (source: string, language: Language): Token[] => {
       tokens[tokens.length - 1] = { ...last, value: last.value + token.value, end: token.end }
     } else tokens.push(token)
   }
-  return tokens
+  return classifyDefinitions(tokens, language.name)
 }
 
 // biome-ignore lint/plugin: generators have no arrow form.
-export function* scan(source: string, language: Language, start = 0, previous?: Token, failedRegexStates = new Set<number>(), frames: Frame[] = [], context: ScanContext = { parentheses: [] }): Generator<Token, void, number | undefined> {
+export function* scan(source: string, language: Language, start = 0, previous?: Token, failedRegexStates = new Set<number>(), frames: Frame[] = [], context: ScanContext = { parentheses: [] }, functions = true): Generator<Token, void, number | undefined> {
   const rules = language.rules.map(rule => ({ type: rule.type, pattern: sticky(rule.pattern) }))
   const identifier = language.identifier && sticky(language.identifier)
   const keywords = new Set(language.keywords)
@@ -39,6 +45,8 @@ export function* scan(source: string, language: Language, start = 0, previous?: 
   const unicodeEscape = /\\u(?:([\da-fA-F]{4})|\{([\da-fA-F]{1,6})\})/y
   const continuation = /[$\u200c\u200d\p{ID_Continue}]+/uy
   const typed = language.name === 'typescript' || language.name === 'tsx'
+  const lookup = functions && script ? createFunctionLookup(source, typed, offset => scan(source, language, offset, undefined, failedRegexStates, [], { parentheses: [] }, false)) : undefined
+  delete context.functionPending
   let pending: Token[] = []
   let position = start
 
@@ -72,6 +80,14 @@ export function* scan(source: string, language: Language, start = 0, previous?: 
         if (type === 'keyword' && /^(as|satisfies)$/.test(value)) context.annotation = true
       }
       if (script) {
+        if (token.value === '{' || token.value === '${') {
+          context.scopes ??= []
+          context.scopes.push(!!context.classBody || /^(=|\(|\[|,|:|return|yield)$/.test(previous?.value ?? ''))
+          context.classBody = false
+        }
+        if (token.value === '}') context.scopes?.pop()
+        if (type === 'keyword' && /^(class|interface)$/.test(token.value)) context.classBody = true
+        context.functionName = type === 'keyword' && token.value === 'function' || !!context.functionName && token.value === '*'
         if (token.value === '{' || token.value === '${') context.braces = (context.braces ?? 0) + 1
         if (token.value === '}') context.braces = Math.max(0, (context.braces ?? 0) - 1)
         if (token.value === '(') context.parentheses.push({ control: previous?.type === 'keyword' && /^(if|while|for|with|switch|catch)$/.test(previous.value) || !!context.forAwait, braces: context.braces ?? 0 })
@@ -177,6 +193,7 @@ export function* scan(source: string, language: Language, start = 0, previous?: 
       let type = 'variable'
       const end = position + name.length
       const member = previous?.value === '.' || previous?.value === '?.'
+      const method = !!context.scopes?.at(-1) && /^(\{|\}|,|;|\*|async|static|get|set|public|private|protected|abstract|override)$/.test(previous?.value ?? '')
       if (member) type = 'property'
       else if (typed && context.annotation && name === 'void') type = 'type'
       else if (keywords.has(name)) type = 'keyword'
@@ -185,6 +202,11 @@ export function* scan(source: string, language: Language, start = 0, previous?: 
       else if (types.has(name) || previous?.value === 'class' || typed && (context.annotation || previous?.type === 'keyword' && /^(type|interface)$/.test(previous.value))) type = 'type'
       else if ((previous?.value === '{' || previous?.value === ',') && /^\s*:/.test(source.slice(end))) type = 'property'
       else if (/^\s*\(/.test(source.slice(end))) type = 'function'
+      if (lookup && !member && (type === 'variable' || type === 'property' || context.functionName || method || /^(async|get|set|static)$/.test(name))) {
+        const found = lookup(end, typed && /^(const|let|var)$/.test(previous?.value ?? ''), !!context.functionName || method, type === 'property' || method, name === 'async' && !context.functionName && !method)
+        if (found.function) type = 'function'
+        if (found.pending) context.functionPending = true
+      }
       context.annotation = false
       emit(type, end)
       continue

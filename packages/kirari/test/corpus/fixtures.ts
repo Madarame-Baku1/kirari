@@ -147,6 +147,35 @@ export const corpus: readonly CorpusFixture[] = [
     ],
   },
   {
+    id: 'tsx-arrow-component-binding', language: 'tsx',
+    source: 'export const DismissibleUsage = () => {\n  const visible = true;\n  return visible ? <Dismissible onClose={() => setVisible(false)}>Ready</Dismissible> : null;\n};',
+    assertions: [
+      { text: 'DismissibleUsage', type: 'function' },
+      { text: 'visible', type: 'variable', occurrence: 0 }, { text: 'visible', type: 'variable', occurrence: 1 },
+      { text: 'Dismissible', type: 'tag', occurrence: 1 }, { text: 'Dismissible', type: 'tag', occurrence: 2 },
+      { text: 'onClose', type: 'attribute' }, { text: 'setVisible', type: 'function' },
+    ],
+  },
+  {
+    id: 'javascript-function-bindings', language: 'javascript',
+    source: 'const build = function named(value = make()) { return value };\nconst run = async (item = `x${load()}`) => item;\nconst actions = { save: () => true, get() { return 1 } };',
+    assertions: [
+      { text: 'build', type: 'function' }, { text: 'named', type: 'function' },
+      { text: 'make', type: 'function' }, { text: 'run', type: 'function' },
+      { text: 'async', type: 'keyword' }, { text: 'load', type: 'function' },
+      { text: 'save', type: 'function' }, { text: 'get', type: 'function' },
+    ],
+  },
+  {
+    id: 'tsx-generic-function-signatures', language: 'tsx',
+    source: 'export const select: Handler = <T,>(\n  value: T,\n): T => value;\nclass Worker { async *items<T>(value: T) { yield value } }',
+    assertions: [
+      { text: 'select', type: 'function' }, { text: 'Handler', type: 'type' },
+      { text: 'items', type: 'function' }, { text: 'Worker', type: 'type' },
+      { text: 'async', type: 'keyword' }, { text: 'yield', type: 'keyword' },
+    ],
+  },
+  {
     id: 'tsx-fragments-and-nested-expressions', language: 'tsx',
     source: 'const rows = <>{entries.map(entry => <Row key={entry.key}>{entry.done ? <b>✓</b> : `次 ${entry.title}`}</Row>)}<hr /></>;',
     assertions: [

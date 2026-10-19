@@ -39,7 +39,7 @@ test('Dart handles raw and multiline strings, metadata, cascades and symbols', (
 test('Scala handles interpolation, raw multiline strings, backticks, annotations and type bounds', () => {
   const tokens = pairs('@tailrec def `type`[T <: Any](x: Int): String = s"value $x"; val t = raw"""a\\\nb"""; 42L; true; null;', scala)
   for (const pair of [
-    ['attribute', '@tailrec'], ['keyword', 'def'], ['variable', '`type`'], ['operator', '<:'],
+    ['attribute', '@tailrec'], ['keyword', 'def'], ['function', '`type`'], ['operator', '<:'],
     ['type', 'Int'], ['string', 's"value $x"'], ['string', 'raw"""a\\\nb"""'],
     ['number', '42L'], ['boolean', 'true'], ['null', 'null'],
   ]) expect(tokens).toContainEqual(pair)
@@ -82,7 +82,7 @@ test('GLSL handles directives, vector/matrix/sampler types, qualifiers and built
 test('R handles raw strings, quoted names, special infix operators, assignments and typed constants', () => {
   const tokens = pairs('`some name` <- function(x) r"--["quoted" ]-]--"; x %in% c(1L, 2i, NA_real_, TRUE); .value <<- Inf; pkg:::fn()', r)
   for (const pair of [
-    ['variable', '`some name`'], ['operator', '<-'], ['keyword', 'function'], ['string', 'r"--["quoted" ]-]--"'],
+    ['function', '`some name`'], ['operator', '<-'], ['keyword', 'function'], ['string', 'r"--["quoted" ]-]--"'],
     ['operator', '%in%'], ['number', '1L'], ['number', '2i'], ['null', 'NA_real_'], ['boolean', 'TRUE'],
     ['variable', '.value'], ['operator', '<<-'], ['number', 'Inf'], ['operator', ':::'],
   ]) expect(tokens).toContainEqual(pair)

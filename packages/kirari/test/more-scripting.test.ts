@@ -30,7 +30,7 @@ test('Elixir recognizes atoms, aliases, module attributes, sigils and heredocs',
 test('Clojure recognizes keywords, qualified symbols, reader forms and numeric literals', () => {
   const tokens = pairs('(defn ready? [user] {:person/name (::alias/key user) :ok true :missing nil :ratio 22/7})\nclojure.core/map x# *out* \\newline \\) #"\\d+;[a-z]" #inst "2026-01-01" 36r16 42N 1.5M ##Inf', clojure)
   for (const token of [
-    ['keyword', 'defn'], ['variable', 'ready?'], ['property', ':person/name'], ['property', '::alias/key'],
+    ['keyword', 'defn'], ['function', 'ready?'], ['property', ':person/name'], ['property', '::alias/key'],
     ['variable', 'clojure.core/map'], ['variable', 'x#'], ['variable', '*out*'],
     ['boolean', 'true'], ['null', 'nil'], ['number', '22/7'], ['number', '36r16'],
     ['number', '42N'], ['number', '1.5M'], ['number', '##Inf'],

@@ -43,17 +43,17 @@ export const createTokenStream = (language: Language): TokenStream => {
     let nextOffset = offset
     let nextPrevious = previous
     let nextContext = context
-    const activeContext = { ...context, parentheses: [...context.parentheses] }
+    const activeContext = { ...context, parentheses: [...context.parentheses], scopes: [...context.scopes ?? []] }
     let significant = previous
     const tokens: Token[] = []
     const frames: Frame[] = []
     for (const token of scan(next, language, offset, previous, undefined, frames, activeContext)) {
       const last = tokens[tokens.length - 1]
-      // Wait for a non-whitespace lookahead before committing a possibly reclassified name/key.
-      if (token.type === 'text' && /[\r\n\u2028\u2029]/.test(token.value) && token.end < next.length && !frames.length) {
+      // Keep names revisable until their whitespace lookahead and function signatures are resolved.
+      if (token.type === 'text' && /[\r\n\u2028\u2029]/.test(token.value) && token.end < next.length && !frames.length && activeContext.functionPending === undefined) {
         nextOffset = last?.type === 'text' ? last.start : token.start
         nextPrevious = significant
-        nextContext = { ...activeContext, parentheses: [...activeContext.parentheses] }
+        nextContext = { ...activeContext, parentheses: [...activeContext.parentheses], scopes: [...activeContext.scopes] }
       }
       if (token.type === 'text' && last?.type === 'text') {
         tokens[tokens.length - 1] = { ...last, value: last.value + token.value, end: token.end }
