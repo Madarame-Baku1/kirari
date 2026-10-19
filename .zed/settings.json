@@ -1,0 +1,105 @@
+{
+	"format_on_save": "on",
+	"auto_indent_on_paste": true,
+	"tab_size": 4,
+	"hard_tabs": false,
+	"file_scan_exclusions": [
+		"**/.git",
+		"**/.svn",
+		"**/.hg",
+		"**/.jj",
+		"**/CVS",
+		"**/.DS_Store",
+		"**/Thumbs.db",
+		"**/.classpath",
+		"**/.settings"
+	],
+	"file_types": {
+		"CSS": ["**/*.module.css"],
+		"Plain Text": ["bun.lock"]
+	},
+	"languages": {
+		"TypeScript": {
+			"prettier": {
+				"allowed": false
+			},
+			"formatter": [
+				{
+					"code_action": "source.fixAll.biome"
+				},
+				{
+					"code_action": "source.organizeImports.biome"
+				},
+				{
+					"external": {
+						"command": "bunx",
+						"arguments": ["biome", "format", "--stdin-file-path", "{buffer_path}"]
+					}
+				}
+			]
+		},
+		"TSX": {
+			"prettier": {
+				"allowed": false
+			},
+			"formatter": [
+				{
+					"code_action": "source.fixAll.biome"
+				},
+				{
+					"code_action": "source.organizeImports.biome"
+				},
+				{
+					"external": {
+						"command": "bunx",
+						"arguments": ["biome", "format", "--stdin-file-path", "{buffer_path}"]
+					}
+				}
+			]
+		},
+		"JavaScript": {
+			"prettier": {
+				"allowed": false
+			},
+			"formatter": [
+				{
+					"code_action": "source.fixAll.biome"
+				},
+				{
+					"code_action": "source.organizeImports.biome"
+				},
+				{
+					"external": {
+						"command": "bunx",
+						"arguments": ["biome", "format", "--stdin-file-path", "{buffer_path}"]
+					}
+				}
+			]
+		},
+		"JSON": {
+			"prettier": {
+				"allowed": false
+			},
+			"formatter": {
+				"external": {
+					"command": "bunx",
+					"arguments": ["biome", "format", "--stdin-file-path", "{buffer_path}"]
+				}
+			}
+		},
+		"JSONC": {
+			"prettier": {
+				"allowed": false
+			},
+			"formatter": {
+				"external": {
+					"command": "bunx",
+					"arguments": ["biome", "format", "--stdin-file-path", "{buffer_path}"]
+				}
+			}
+		},
+		"CSS": {
+			"formatter": "language_server"
+		}
+	}
+}
