@@ -4,7 +4,7 @@
 .root + .root {
 	border-left: var(--hairline) solid var(--line);
 }
-:where(.root) .statValue {
+.statValue {
 	margin: 0;
 	font-size: 2.75rem;
 	font-weight: var(--weight-heading);
@@ -12,14 +12,14 @@
 	letter-spacing: -0.04em;
 	font-variant-numeric: tabular-nums;
 }
-:where(.root) .statValue small {
+.statValue small {
 	margin-left: var(--size-4);
 	font-size: var(--size-20);
 	font-weight: var(--weight-emphasis);
 	color: var(--muted);
 	letter-spacing: -0.01em;
 }
-:where(.root) .statLabel {
+.statLabel {
 	margin: var(--size-10) 0 0;
 	font-size: var(--size-15);
 	color: var(--muted);
@@ -39,13 +39,13 @@
 	}
 }
 @media (max-width: 35rem) {
-	:where(.root) .statValue {
+	.statValue {
 		font-size: var(--size-34);
 		min-width: 6.5rem;
 	}
 }
 @media (max-width: 35rem) {
-	:where(.root) .statLabel {
+	.statLabel {
 		margin: 0;
 	}
 }

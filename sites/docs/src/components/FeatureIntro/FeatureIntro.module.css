@@ -18,7 +18,7 @@
 .root .textLink:hover svg {
 	transform: translateX(var(--size-3));
 }
-:where(.root) .eyebrow {
+.eyebrow {
 	display: inline-flex;
 	align-items: center;
 	gap: var(--size-7);
