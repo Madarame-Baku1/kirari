@@ -54,7 +54,9 @@ export const Header = (props: Types.Props) => {
 					<nav className={styles.topLinks} aria-label="Primary">
 						<PageLink target="docs" label="Docs" current={page} />
 						<PageLink target="playground" label="Playground" current={page} />
-						<Link href={site.npm}>npm</Link>
+						<Link href={site.npm} target="_blank" rel="noopener noreferrer">
+							npm
+						</Link>
 					</nav>
 					<div className={styles.topActions}>
 						<button
