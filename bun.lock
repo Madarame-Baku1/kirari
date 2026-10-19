@@ -19,7 +19,7 @@
     },
     "packages/kirari": {
       "name": "@vortexlabs/kirari",
-      "version": "1.0.2",
+      "version": "1.0.3",
     },
     "packages/react": {
       "name": "@vortexlabs/kirari-react",

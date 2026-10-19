@@ -1,6 +1,6 @@
 {
   "name": "@vortexlabs/kirari",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Small, extensible syntax highlighting without a DOM.",
   "keywords": [
     "syntax-highlighting",
