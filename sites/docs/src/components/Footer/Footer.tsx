@@ -23,6 +23,8 @@ export const Footer = () => (
 				<Link
 					className="icon-button"
 					href={site.github}
+					target="_blank"
+					rel="noopener noreferrer"
 					aria-label="Kirari on GitHub"
 					title="Kirari on GitHub"
 				>
@@ -31,6 +33,8 @@ export const Footer = () => (
 				<Link
 					className="icon-button"
 					href={site.x}
+					target="_blank"
+					rel="noopener noreferrer"
 					aria-label="Follow Ugi on X"
 					title="Follow Ugi on X"
 				>

@@ -71,6 +71,8 @@ export const Header = (props: Types.Props) => {
 						<Link
 							className="icon-button"
 							href={site.github}
+							target="_blank"
+							rel="noopener noreferrer"
 							aria-label="Kirari on GitHub"
 							title="Kirari on GitHub"
 						>
