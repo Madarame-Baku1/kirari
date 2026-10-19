@@ -8,6 +8,8 @@ Run it while building your content to send highlighted HTML and CSS to the
 browser, with no client-side highlighter. The integration is separate from the
 core package and does not change its bundle.
 
+[Documentation](https://kirari.sh/docs/) · [Playground](https://kirari.sh/playground/)
+
 ## Install
 
 ```sh
@@ -15,7 +17,6 @@ npm install @vortexlabs/kirari @vortexlabs/kirari-rehype
 ```
 
 The plugin uses your application's Kirari through a peer dependency.
-Inside this workspace, use `workspace:*` for both packages instead.
 
 ## Markdown to HTML
 
@@ -74,7 +75,7 @@ and children.
 ## Register only what you need
 
 No languages are registered by default. Import each definition and pass it in
-`languages`. Labels resolve through [Kirari's language registry](../../docs/language-integration.md),
+`languages`. Labels resolve through [Kirari's language registry](https://github.com/vortexkit/kirari/blob/main/docs/language-integration.md),
 so `js` selects registered JavaScript and `ts` selects registered TypeScript.
 There is no language detection or automatic grammar loading. JSX and TSX need
 their own definitions.
@@ -122,6 +123,7 @@ The `lineClassName` callback can append your own classes:
 
 ```ts
 import type { Options } from '@vortexlabs/kirari-rehype'
+import { javascript } from '@vortexlabs/kirari/languages/javascript'
 
 const options = {
   languages: [javascript],
@@ -171,4 +173,4 @@ remain trusted application code.
 
 ## License
 
-[MIT](LICENSE) © 2026 [Ugi](https://ugi.dev)
+[MIT](https://github.com/vortexkit/kirari/blob/main/packages/rehype/LICENSE) © 2026 [Ugi](https://ugi.dev)
