@@ -1,17 +1,70 @@
 # Kirari
 
-A Bun workspace for the Kirari syntax highlighter and its documentation site.
-Published on npm as `@vortexlabs/kirari`, `@vortexlabs/kirari-rehype`, and `@vortexlabs/kirari-react`.
-Documentation: <https://kirari.vortex.design>.
+Kirari is a small, dependency-free syntax highlighter for JavaScript and
+TypeScript apps. It turns source code into escaped HTML or a token array on the
+server, at build time, or in the browser, without a DOM. It is a lexical
+highlighter, not a parser.
 
-- [`packages/kirari`](packages/kirari/README.md): the dependency-free TypeScript library, language definitions, theme, and tests.
-- [`packages/rehype`](packages/rehype/README.md): the optional Rehype plugin for Markdown and MDX code blocks.
-- [`packages/react`](packages/react/README.md): the optional React component and streaming hook.
-- [`sites/docs`](sites/docs): the documentation site, consuming the workspace `@vortexlabs/kirari` package.
-- [`packages/benchmarks`](packages/benchmarks/README.md): speed and bundle-size benchmarks.
-- [`docs`](docs): guides and design notes linked from this README.
+- **Small:** about 2.2 KB gzipped with JavaScript, about 16 KB with all 48 languages.
+- **Streaming:** emits token patches as code arrives, such as LLM output.
+- **Themeable:** CSS-variable themes, with 21 built in.
+- **Integrations:** a React `<Code>` component that works in Server Components,
+  and a Rehype plugin for Markdown and MDX.
 
-Run commands from this directory:
+[Documentation](https://kirari.sh/docs/) · [Playground](https://kirari.sh/playground/)
+
+## Quick start
+
+```sh
+npm install @vortexlabs/kirari
+```
+
+In an application that supports CSS imports:
+
+```ts
+import { highlight } from '@vortexlabs/kirari'
+import '@vortexlabs/kirari/theme.css'
+
+const code = 'const count = 42'
+const html = `<pre class="kirari"><code>${highlight(code)}</code></pre>`
+```
+
+Use `html` in your page template. JavaScript is the default language, and code
+text is HTML-escaped. Import other languages explicitly:
+
+```ts
+import { highlight } from '@vortexlabs/kirari'
+import { python } from '@vortexlabs/kirari/languages'
+
+const html = highlight('print("Hello")', { language: python })
+```
+
+Kirari uses ES modules and requires an ES2022-compatible runtime. Bun is used to
+develop the library; applications do not need Bun to use it.
+
+## Packages
+
+| Package | Use it for |
+| --- | --- |
+| [`@vortexlabs/kirari`](packages/kirari/README.md) | HTML highlighting, tokens, languages, and themes |
+| [`@vortexlabs/kirari-react`](packages/react/README.md) | React components and a streaming hook; requires React 19 |
+| [`@vortexlabs/kirari-rehype`](packages/rehype/README.md) | Highlighted code blocks in Markdown and MDX |
+
+## Guides
+
+- [Languages and syntax limits](docs/accuracy.md)
+- [Streaming code](docs/streaming.md)
+- [Line highlighting and decorations](docs/decorations.md)
+- [Language lookup and Markdown fences](docs/language-integration.md)
+- [Installation](docs/installation.md) and [benchmarks](packages/benchmarks/README.md)
+
+Kirari highlights source text without validating programs or resolving types.
+Language coverage varies; see the accuracy guide for supported cases and limits.
+
+## Development
+
+Clone this repository and run these commands from its root, using the Bun version
+in `package.json`:
 
 ```sh
 bun install
@@ -49,42 +102,6 @@ See the [installation guide](docs/installation.md) and [release process](RELEASI
 
 Packages are versioned independently. Run `bun run changeset` and select the
 affected packages, then use their package-specific release commands.
-
-The docs build writes three static pages to `sites/docs/dist/`: a landing page,
-`/docs/`, and `/playground/`. GSAP powers the site's motion and stays out of the
-library package. Reduced-motion preferences disable the animations.
-
-The docs include editable examples for all 48 languages, token inspection,
-per-category color controls, theme CSS export, HTML export, search, and local
-installation instructions. Documentation content is rendered at build time.
-
-The correctness corpus covers six priority languages with 30 original fixtures.
-All 14 formerly tracked gap annotations are now required passing assertions;
-see [syntax coverage and limits](docs/accuracy.md). Benchmarks generate a local report in
-`packages/benchmarks/results/`; timings are environment-specific. See the
-benchmark README for methodology.
-
-Optional APIs add [token streaming](docs/streaming.md),
-[range/line decorations](docs/decorations.md), and
-[language lookup with Markdown fence highlighting](docs/language-integration.md).
-The default bundle stays independent of these integrations.
-
-[`@vortexlabs/kirari-rehype`](packages/rehype/README.md) uses those tokens in rendered Markdown
-and MDX documents. Register languages explicitly, then run it after
-`remark-rehype` or through MDX's `rehypePlugins`. It creates structured HTML nodes,
-supports optional line wrappers and fence line selections, and keeps unknown
-languages unchanged. It is a separate package; its dependencies do not
-enter Kirari's core or default browser bundle.
-
-[`@vortexlabs/kirari-react`](packages/react/README.md) renders the same tokens as
-React elements. `<Code>` uses no hooks, so it works as a Server Component, and it
-supports line wrappers, highlighted line ranges, and decorations. The
-`useTokenStream` hook highlights code that arrives in chunks.
-
-The streaming benchmark compares full-prefix and checkpoint rendering at matching
-update boundaries, including adverse inputs. It records total response work and
-timing in separate `streaming-latest` reports. Performance depends on the source,
-language, and how callers apply token patches.
 
 ## Contributing
 
