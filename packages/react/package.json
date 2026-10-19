@@ -1,6 +1,6 @@
 {
   "name": "@vortexlabs/kirari-react",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Kirari syntax highlighting as React elements.",
   "keywords": [
     "react",

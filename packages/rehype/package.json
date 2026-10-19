@@ -1,6 +1,6 @@
 {
   "name": "@vortexlabs/kirari-rehype",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Kirari syntax highlighting for Rehype and MDX.",
   "keywords": [
     "rehype",

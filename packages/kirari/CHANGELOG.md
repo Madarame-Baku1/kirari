@@ -1,5 +1,11 @@
 # @vortexlabs/kirari
 
+## 1.0.1
+
+### Patch Changes
+
+- 3ee99c0: Update the package homepage and documentation links to https://kirari.sh.
+
 ## 1.0.0
 
 ### Major Changes
