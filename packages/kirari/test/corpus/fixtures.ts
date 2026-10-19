@@ -159,6 +159,17 @@ export const corpus: readonly CorpusFixture[] = [
     ],
   },
   {
+    id: 'tsx-sibling-snippets', language: 'tsx',
+    source: '<Container width="100%" padding={4}><Placeholder /></Container>\n\n<Container width="100%"><Placeholder /></Container>\n<Last />',
+    assertions: [
+      { text: 'Container', type: 'tag', occurrence: 0 }, { text: 'Container', type: 'tag', occurrence: 1 },
+      { text: 'Container', type: 'tag', occurrence: 2 }, { text: 'Container', type: 'tag', occurrence: 3 },
+      { text: 'width', type: 'attribute', occurrence: 0 }, { text: 'width', type: 'attribute', occurrence: 1 },
+      { text: 'Placeholder', type: 'tag', occurrence: 0 }, { text: 'Placeholder', type: 'tag', occurrence: 1 },
+      { text: 'Last', type: 'tag' },
+    ],
+  },
+  {
     id: 'tsx-markup-looking-literals', language: 'tsx',
     source: 'const text = "<Fake />"; /* <Ghost /> */\nconst view = <p title="<&">🚀 中文 &lt; {2 < limit && /ok/.test(value)}</p>;',
     assertions: [

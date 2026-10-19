@@ -20,6 +20,7 @@ type Markup = {
   attribute: string
   language: string
   rawEnd: number | undefined
+  sibling?: { start: number; tokens: number; openings: { name: string; start: number }[] }
 }
 
 export const markup = (source: string, code?: Language, embedded?: Readonly<Record<string, Language>>, template?: 'vue' | 'svelte'): Token[] => {
@@ -34,8 +35,20 @@ export const markup = (source: string, code?: Language, embedded?: Readonly<Reco
   const typed = code?.name === 'tsx'
   // Expression scanners use the same source offsets; failed lookahead remains reusable.
   const failedRegexStates = new Set<number>()
+  const failedSiblingStarts = new Set<number>()
   const createCode = (container: boolean): Code => ({ kind: 'code', scanner: scan(source, expressionLanguage!, position, undefined, failedRegexStates), container, braces: 0, resume: undefined, previous: undefined })
   const stack: (Code | Markup)[] = [code ? createCode(false) : createMarkup(false)]
+
+  const rejectSibling = (context: Markup): void => {
+    const sibling = context.sibling!
+    failedSiblingStarts.add(sibling.start)
+    for (const opening of sibling.openings) failedSiblingStarts.add(opening.start)
+    tokens.length = sibling.tokens
+    position = sibling.start
+    stack.length = stack.indexOf(context)
+    const parent = stack[stack.length - 1] as Code
+    parent.resume = position
+  }
 
   const append = (token: Token): void => {
     const last = tokens[tokens.length - 1]
@@ -76,6 +89,7 @@ export const markup = (source: string, code?: Language, embedded?: Readonly<Reco
     stack.push(createCode(true))
   }
   const finishTag = (context: Markup, selfClosing: boolean): void => {
+    if (selfClosing && !context.closing) context.sibling?.openings.pop()
     if (context.closing) context.depth--
     else if (!selfClosing) context.depth++
     context.phase = 'text'
@@ -95,16 +109,25 @@ export const markup = (source: string, code?: Language, embedded?: Readonly<Reco
     }
   }
 
-  while (position < source.length && stack.length) {
+  while (stack.length) {
+    if (position >= source.length) {
+      const pending = [...stack].reverse().find((context): context is Markup => context.kind === 'markup' && !!context.sibling)
+      if (!pending) break
+      rejectSibling(pending)
+    }
     const context = stack[stack.length - 1]!
     if (context.kind === 'code') {
       const next = context.scanner.next(context.resume)
       context.resume = undefined
       if (next.done) break
       const token = next.value
-      if (!template && token.value === '<' && canStartElement(context.previous) && looksLikeTag(source, token.start, typed)) {
+      const sibling = context.previous?.type === 'tag' && !failedSiblingStarts.has(token.start)
+      if (!template && token.value === '<' && (canStartElement(context.previous) || sibling) && looksLikeTag(source, token.start, typed)) {
         position = token.start
-        stack.push(createMarkup(true))
+        const element = createMarkup(true)
+        // Accept adjacent JSX snippets only when the element closes; otherwise keep comparison operators.
+        if (sibling) element.sibling = { start: position, tokens: tokens.length, openings: [] }
+        stack.push(element)
         continue
       }
       if (context.container && token.type === 'punctuation') {
@@ -185,10 +208,17 @@ export const markup = (source: string, code?: Language, embedded?: Readonly<Reco
       }
       emit('keyword', end)
     } else if (source[position] === '<' && looksLikeTag(source, position, typed)) {
+      const start = position
       context.closing = source[position + 1] === '/'
       emit('punctuation', position + (context.closing ? 2 : 1))
       const value = match(name)
       context.name = value ?? ''
+      if (context.sibling) {
+        if (context.closing) {
+          if (context.sibling.openings.at(-1)?.name !== context.name) { rejectSibling(context); continue }
+          context.sibling.openings.pop()
+        } else context.sibling.openings.push({ name: context.name, start })
+      }
       context.attribute = ''
       context.language = ''
       if (value) emit('tag', position + value.length)

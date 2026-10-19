@@ -4,8 +4,83 @@ import { jsx } from '../src/languages/jsx.js'
 import { tsx } from '../src/languages/tsx.js'
 import { html } from '../src/languages/html.js'
 import { xml } from '../src/languages/xml.js'
+import { createTokenStream } from '../src/stream.js'
 
 const pairs = (source: string, language = jsx) => tokenize(source, language).map(t => [t.type, t.value])
+
+for (const language of [jsx, tsx]) {
+  test(`${language.name} highlights sibling JSX snippets without adding fragments`, () => {
+    const source = 'import { Container, Placeholder } from "@vortexlabs/vortex";\n\n'
+      + '<Container width="100%" padding={4}>\n  <Placeholder width="100%" backgroundColor="surface" />\n</Container>\n\n'
+      + '<Container width="100%">\n  <Placeholder width="100%" backgroundColor="surface" />\n</Container>'
+    const tokens = tokenize(source, language)
+    expect(tokens.filter(t => t.type === 'tag').map(t => t.value)).toEqual([
+      'Container', 'Placeholder', 'Container', 'Container', 'Placeholder', 'Container',
+    ])
+    expect(tokens.filter(t => t.type === 'attribute' && t.value === 'width')).toHaveLength(4)
+    expect(tokens.map(t => t.value).join('')).toBe(source)
+    let end = 0
+    for (const token of tokens) {
+      expect(token.start).toBe(end)
+      expect(token.value).toBe(source.slice(token.start, token.end))
+      end = token.end
+    }
+    expect(end).toBe(source.length)
+    expect(highlight(source, { language }).match(/class="kirari-tag">Container<\/span>/g)).toHaveLength(4)
+  })
+
+  test(`${language.name} handles self-closing, paired and fragment siblings`, () => {
+    for (const separator of ['', ' ', '\n', '\r\n\r\n', ' /* examples */ ']) {
+      const source = `<First />${separator}<Second title=">" onClick={() => save({ ok: true })} />${separator}<><Third>{value}</Third></>`
+      const result = pairs(source, language)
+      expect(result.filter(t => t[0] === 'tag').map(t => t[1])).toEqual(['First', 'Second', 'Third', 'Third'])
+      expect(result).toContainEqual(['attribute', 'onClick'])
+      expect(result).toContainEqual(['function', 'save'])
+    }
+  })
+
+  test(`${language.name} keeps comparisons after JSX in JavaScript`, () => {
+    for (const expression of ['<Card /> <limit > floor', '<Card />\n<limit > floor', '<Card /> <limit / divisor > floor']) {
+      for (const source of [expression, `<Outer>{${expression}}</Outer>`]) {
+        const result = pairs(source, language)
+        expect(result).toContainEqual(['variable', 'limit'])
+        expect(result).not.toContainEqual(['tag', 'limit'])
+        expect(tokenize(source, language).map(t => t.value).join('')).toBe(source)
+      }
+    }
+    expect(pairs('<Card /> <limit > floor; const next = <Next />', language).filter(t => t[0] === 'tag').map(t => t[1])).toEqual(['Card', 'Next'])
+  })
+
+  test(`${language.name} preserves unfinished siblings`, () => {
+    for (const source of ['<First />\n<Second', '<First />\n<Second title="open', '<First />\n<Second>{value', '<First />\n<Second><Nested />']) {
+      expect(tokenize(source, language).map(t => t.value).join('')).toBe(source)
+    }
+  })
+
+  test(`${language.name} updates sibling highlighting as streamed elements close`, () => {
+    const source = '<First />\n<Second><Nested>{value}</Nested></Second>\n<Third />'
+    const stream = createTokenStream(language)
+    for (let end = 1; end <= source.length; end++) {
+      const patch = stream.write(source[end - 1]!)
+      expect(patch.from).toBe(0)
+      expect(patch.tokens).toEqual(tokenize(source.slice(0, end), language))
+    }
+  })
+}
+
+test('unfinished sibling candidates do not repeatedly rescan nested openings', () => {
+  const source = '<First /><Second>'.repeat(10_000)
+  const start = performance.now()
+  expect(tokenize(source, tsx).map(t => t.value).join('')).toBe(source)
+  expect(performance.now() - start).toBeLessThan(1500)
+}, 5000)
+
+test('TSX siblings preserve generic component arguments and generic arrows', () => {
+  const result = pairs('<First />\n<List<Item> items={items} />; const id = <T,>(value: T): T => value', tsx)
+  expect(result.filter(t => t[0] === 'tag').map(t => t[1])).toEqual(['First', 'List'])
+  expect(result).toContainEqual(['attribute', 'items'])
+  expect(result).toContainEqual(['type', 'Item'])
+})
 
 test('JSX highlights elements, attributes, entities and JavaScript expressions', () => {
   const source = 'const view = <Button disabled title="a > b" onClick={() => save(user.name)}>Hello &amp; {name}<Icon /></Button>'
