@@ -29,4 +29,4 @@ browser. Theme presets reset custom token colors. Copy CSS exports the current p
 Copy code exports the usage snippet.
 
 No reference-site source or assets are reused. The site is deployed at
-<https://kirari.vortex.design>.
+<https://kirari.sh>.

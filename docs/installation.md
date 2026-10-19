@@ -20,7 +20,7 @@ For React 19, add the React integration:
 npm install @vortexlabs/kirari @vortexlabs/kirari-react
 ```
 
-Documentation: <https://kirari.vortex.design>
+Documentation: <https://kirari.sh>
 
 ## Developing inside this workspace
 

@@ -9,7 +9,7 @@ export type Page = 'home' | 'docs' | 'playground'
 
 export const site = {
   name: 'Kirari',
-  url: 'https://kirari.vortex.design',
+  url: 'https://kirari.sh',
   npm: 'https://www.npmjs.com/package/@vortexlabs/kirari',
   github: 'https://github.com/vortexkit/kirari',
   version: kirariPackage.version,
