@@ -3,7 +3,7 @@ import type { SectionId } from '../../navigation.types'
 import type { Entry } from '../SearchDialog/SearchDialog.types'
 
 export type Props = {
-	page: Page
+	page?: Page
 	activeSection?: SectionId
 	searchEntries: Entry[]
 }

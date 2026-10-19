@@ -4,6 +4,6 @@ import type { SectionId } from '../../navigation.types'
 export type Props = {
 	open: boolean
 	onClose: () => void
-	page: Page
+	page?: Page
 	activeSection?: SectionId
 }

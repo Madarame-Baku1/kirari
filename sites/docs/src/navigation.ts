@@ -96,3 +96,18 @@ export const routes = {
 
 export const docsPath = (id: Types.SectionId) =>
 	id === 'overview' ? routes.docs : `${routes.docs}${id}/`
+
+export const pageSearchEntries = [
+	{
+		title: 'Playground',
+		description: 'Edit code, inspect tokens, and try themes.',
+		category: 'Page',
+		href: routes.playground,
+	},
+	...sections.map(section => ({
+		title: section.title,
+		description: section.description,
+		category: 'Docs',
+		href: docsPath(section.id),
+	})),
+]
