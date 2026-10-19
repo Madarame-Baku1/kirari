@@ -1,0 +1,1 @@
+export { LanguageTable } from './LanguageTable'

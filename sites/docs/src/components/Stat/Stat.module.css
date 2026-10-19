@@ -1,0 +1,51 @@
+.root {
+	padding: var(--size-32) var(--size-28);
+}
+.root + .root {
+	border-left: var(--hairline) solid var(--line);
+}
+:where(.root) .statValue {
+	margin: 0;
+	font-size: 2.75rem;
+	font-weight: var(--weight-heading);
+	line-height: var(--leading-none);
+	letter-spacing: -0.04em;
+	font-variant-numeric: tabular-nums;
+}
+:where(.root) .statValue small {
+	margin-left: var(--size-4);
+	font-size: var(--size-20);
+	font-weight: var(--weight-emphasis);
+	color: var(--muted);
+	letter-spacing: -0.01em;
+}
+:where(.root) .statLabel {
+	margin: var(--size-10) 0 0;
+	font-size: var(--size-15);
+	color: var(--muted);
+}
+@media (max-width: 35rem) {
+	.root {
+		padding: var(--size-22) var(--size-4);
+		display: flex;
+		align-items: baseline;
+		gap: var(--size-16);
+	}
+}
+@media (max-width: 35rem) {
+	.root + .root {
+		border-left: 0;
+		border-top: var(--hairline) solid var(--line);
+	}
+}
+@media (max-width: 35rem) {
+	:where(.root) .statValue {
+		font-size: var(--size-34);
+		min-width: 6.5rem;
+	}
+}
+@media (max-width: 35rem) {
+	:where(.root) .statLabel {
+		margin: 0;
+	}
+}

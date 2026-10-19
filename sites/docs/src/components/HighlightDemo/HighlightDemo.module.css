@@ -1,0 +1,139 @@
+:where(.root) .demoTabs button:focus-visible,
+:where(.root) .demoCode:focus-visible {
+	outline-offset: calc(-1 * var(--size-2));
+}
+.root {
+	max-width: 53.75rem;
+	margin: var(--size-8) auto 0;
+}
+:where(.root) .demoWindow {
+	--bar-ink: color-mix(in srgb, var(--kirari-text) 55%, transparent);
+	--bar-line: color-mix(in srgb, var(--kirari-text) 10%, transparent);
+	border-radius: var(--size-16);
+	overflow: hidden;
+	background: var(--kirari-background);
+	box-shadow:
+		0 0 0 var(--hairline) var(--line),
+		0 var(--size-30) var(--size-80) calc(-1 * var(--size-30)) #0b0c1a66;
+	transition: background 0.35s;
+}
+:where(.root) .demoWindow[data-palette="ad-astra-dark"] {
+	box-shadow:
+		0 0 0 var(--hairline) #ffffff0f inset,
+		0 0 0 var(--hairline) var(--line),
+		0 var(--size-30) var(--size-80) calc(-1 * var(--size-30)) #0b0c1a99;
+}
+:where(.root) .demoBar {
+	display: flex;
+	align-items: center;
+	gap: var(--size-16);
+	height: var(--size-48);
+	padding: 0 var(--size-10) 0 var(--size-12);
+	border-bottom: var(--hairline) solid var(--bar-line);
+}
+:where(.root) .demoTabs {
+	display: flex;
+	gap: var(--size-2);
+	overflow-x: auto;
+	scrollbar-width: none;
+	min-width: 0;
+}
+:where(.root) .demoTabs button {
+	height: var(--size-30);
+	padding: 0 var(--size-12);
+	border: 0;
+	border-radius: var(--size-7);
+	background: transparent;
+	color: var(--bar-ink);
+	font: var(--size-12-5) var(--mono);
+	white-space: nowrap;
+	transition:
+		background var(--duration-fast),
+		color var(--duration-fast);
+}
+:where(.root) .demoTabs button[aria-selected="true"] {
+	background: var(--bar-line);
+	color: var(--kirari-text);
+}
+:where(.root) .demoTabs button:hover {
+	background: color-mix(in srgb, var(--kirari-text) 18%, transparent);
+	color: var(--kirari-text);
+}
+:where(.root) .demoPalettes {
+	display: flex;
+	gap: var(--size-2);
+	min-width: 0;
+	margin: 0 0 0 auto;
+	padding: 0;
+	border: 0;
+	flex: none;
+}
+:where(.root) .demoPalettes button {
+	display: grid;
+	place-items: center;
+	width: var(--size-28);
+	height: var(--size-28);
+	padding: 0;
+	border: 0;
+	border-radius: var(--radius-round);
+	background: transparent;
+}
+:where(.root) .demoPalettes i {
+	width: var(--size-14);
+	height: var(--size-14);
+	border-radius: var(--radius-round);
+	background: linear-gradient(135deg, var(--kirari-background) 50%, var(--kirari-keyword) 50%);
+	box-shadow: 0 0 0 var(--hairline) var(--bar-line);
+	transition:
+		transform var(--duration-fast),
+		box-shadow var(--duration-fast);
+}
+:where(.root) .demoPalettes button:hover i {
+	transform: scale(1.15);
+}
+:where(.root) .demoPalettes button[aria-pressed="true"] i {
+	box-shadow:
+		0 0 0 var(--size-2) var(--kirari-background),
+		0 0 0 0.21875rem var(--gold);
+}
+:where(.root) .demoCode span {
+	transition: color 0.3s;
+}
+:where(.root) .demoCode {
+	margin: 0;
+	padding: var(--size-24) var(--size-28) var(--size-28);
+	min-height: 15.75rem;
+	overflow-x: auto;
+	font: 0.90625rem / 1.85 var(--mono);
+}
+:where(.root) .demoCaption {
+	margin: var(--size-16) 0 0;
+	text-align: center;
+	font-size: var(--size-14);
+	color: var(--faint);
+}
+:where(.root) .demoCaption a {
+	color: var(--muted);
+}
+:where(.root) .demoCaption a:hover {
+	color: var(--ink);
+}
+@media (max-width: 35rem) {
+	:where(.root) .demoBar {
+		padding: 0 var(--size-6);
+		gap: var(--size-6);
+	}
+}
+@media (max-width: 35rem) {
+	:where(.root) .demoTabs button {
+		padding: 0 var(--size-6);
+		font-size: var(--size-12);
+	}
+}
+@media (max-width: 35rem) {
+	:where(.root) .demoCode {
+		padding: var(--size-18);
+		font-size: var(--size-12-5);
+		min-height: 0;
+	}
+}

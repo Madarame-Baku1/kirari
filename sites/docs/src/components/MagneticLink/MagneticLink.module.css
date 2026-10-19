@@ -1,0 +1,20 @@
+.root {
+	display: inline-block;
+	padding: var(--size-6) var(--size-13);
+	border: var(--hairline) solid var(--line);
+	border-radius: 62.4375rem;
+	font-size: var(--size-14);
+	color: var(--muted);
+	transition:
+		color var(--duration-fast),
+		border-color var(--duration-fast),
+		background var(--duration-fast);
+}
+.root span {
+	display: inline-block;
+}
+.root:hover {
+	color: var(--gold-text);
+	border-color: var(--gold-text);
+	background: color-mix(in srgb, var(--gold) 8%, var(--bg));
+}

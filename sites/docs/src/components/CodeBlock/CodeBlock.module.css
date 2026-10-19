@@ -1,0 +1,50 @@
+.root .codeMeta .iconButton[data-copied] {
+	opacity: 1;
+}
+.root {
+	position: relative;
+	margin: var(--size-20) 0;
+	border-radius: var(--size-12);
+	background: var(--kirari-background);
+	border: var(--hairline) solid var(--line);
+}
+.root .codeMeta {
+	display: flex;
+	justify-content: flex-end;
+	align-items: center;
+	gap: var(--size-4);
+	padding: var(--size-6) var(--size-6) 0 var(--size-20);
+	font-size: var(--code-meta-font-size, var(--size-12));
+	color: var(--faint);
+}
+.root .codeMeta .iconButton {
+	width: var(--size-30);
+	height: var(--size-30);
+	opacity: 0.55;
+}
+.root:hover .codeMeta .iconButton,
+.root .codeMeta .iconButton:focus-visible {
+	opacity: 1;
+}
+.root pre {
+	margin: 0;
+	padding: var(--size-2) var(--size-20) var(--size-18);
+	overflow-x: auto;
+	font: 0.84375rem / var(--leading-code) var(--mono);
+	background: transparent;
+	border-radius: inherit;
+}
+.root pre code {
+	font: inherit;
+}
+@media (hover: none) {
+	.root .codeMeta .iconButton {
+		opacity: 1;
+	}
+}
+@media (max-width: 35rem) {
+	.root pre {
+		font-size: var(--size-12-5);
+		padding: var(--size-2) var(--size-16) var(--size-16);
+	}
+}

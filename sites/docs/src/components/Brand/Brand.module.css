@@ -1,0 +1,13 @@
+.root {
+	display: grid;
+	place-items: center;
+	width: var(--size-26);
+	height: var(--size-26);
+	border-radius: var(--size-8);
+	background: #111318;
+	color: #ffcf4a;
+}
+.root svg {
+	fill: currentColor;
+	stroke: none;
+}

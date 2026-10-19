@@ -12,3 +12,6 @@ output/
 docs/superpowers/
 .vercel
 .env*
+
+.next/
+*.tsbuildinfo

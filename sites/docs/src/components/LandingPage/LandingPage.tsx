@@ -1,0 +1,186 @@
+import { highlight } from '@vortexlabs/kirari'
+import { css } from '@vortexlabs/kirari/languages/css'
+import { typescript } from '@vortexlabs/kirari/languages/typescript'
+import { languageEntries } from '../../languages'
+import { docsPath, routes } from '../../navigation'
+import { theme, themes } from '../../themes'
+import { ButtonLink } from '../ButtonLink'
+import { CodeBlock } from '../CodeBlock'
+import { FeatureIntro } from '../FeatureIntro'
+import { Footer } from '../Footer'
+import { HighlightDemo } from '../HighlightDemo'
+import { InstallCommand } from '../InstallCommand'
+import { LandingMotion } from '../LandingMotion'
+import { MagneticLink } from '../MagneticLink'
+import { SiteLayout } from '../SiteLayout'
+import { Stat } from '../Stat'
+import { StreamDemo } from '../StreamDemo'
+import { ThemeCard } from '../ThemeCard'
+
+const demoLanguages = [
+	'typescript',
+	'python',
+	'rust',
+	'css',
+] as const
+const palettes = [
+	'ad-astra-dark',
+	'daylight',
+	'github-dark',
+	'dracula',
+	'nord',
+	'catppuccin-latte',
+	'tokyo-night',
+	'rose-pine-dawn',
+].map(id => {
+	const entry = theme(id)
+	return {
+		id: entry.id,
+		label: entry.label,
+	}
+})
+const cards = [
+	'dusk',
+	'github-light',
+	'catppuccin-mocha',
+	'solarized-light',
+].map(theme)
+const themeCSS = `@import '@vortexlabs/kirari/themes/github-light.css';
+
+/* Then tweak any token you like */
+.my-code {
+  --kirari-keyword: #7a3fd1;
+}`
+const quickStart = `import { highlight } from '@vortexlabs/kirari'
+import '@vortexlabs/kirari/theme.css'
+
+const html = highlight('const answer = 42')`
+const languageCount = languageEntries.length
+
+export const LandingPage = () => {
+	const demos = demoLanguages.map(id => {
+		const entry = languageEntries.find(item => item.id === id)!
+		return {
+			id: entry.id,
+			filename: entry.filename,
+			html: highlight(entry.sample, {
+				language: entry.language,
+			}),
+		}
+	})
+
+	return (
+		<SiteLayout page="home">
+			<LandingMotion>
+				<section className="hero" aria-labelledby="hero-title">
+					<h1 id="hero-title" className="hero-title">
+						Syntax highlighting with a little <span className="glint-text">light</span>
+					</h1>
+					<p className="hero-lede">
+						Kirari is a tiny, DOM-free highlighter for {languageCount}&nbsp;languages.
+						Every token becomes a class, and your CSS picks the colors.
+					</p>
+					<div className="hero-cta">
+						<InstallCommand id="hero-install" />
+						<ButtonLink href={routes.docs} label="Get started" />
+					</div>
+				</section>
+				<HighlightDemo demos={demos} palettes={palettes} />
+				<section className="stats" aria-label="At a glance">
+					<Stat value="2.9" unit="kB" label="core with JavaScript, gzipped" />
+					<Stat
+						value={String(languageCount)}
+						unit=""
+						label="languages, imported one by one"
+					/>
+					<Stat value="0" unit="" label="runtime dependencies or DOM APIs" />
+				</section>
+				<section className="row" aria-labelledby="stream-title">
+					<FeatureIntro
+						id="stream-title"
+						icon="bolt"
+						eyebrow="Streaming"
+						title="Colors that keep up with the text"
+						description="Feed chunks as they arrive from a model or a socket. Each write returns a patch for the tail that changed, so you re-render only that, not the whole block."
+						href={docsPath('streaming')}
+						linkLabel="How streaming works"
+					/>
+					<StreamDemo />
+				</section>
+				<section className="row reverse" aria-labelledby="themes-title">
+					<FeatureIntro
+						id="themes-title"
+						icon="palette"
+						eyebrow="Theming"
+						title={`${themes.length} themes in the box`}
+						description="GitHub, Dracula, Nord, Catppuccin, Tokyo Night and more, each one CSS file. Each token type maps to one CSS variable, so you can tweak a theme or write your own without re-highlighting."
+						href={docsPath('themes')}
+						linkLabel="Browse all themes"
+					/>
+					<div className="theme-stack" data-reveal>
+						{cards.map(entry => (
+							<ThemeCard key={entry.id} theme={entry} />
+						))}
+						<CodeBlock
+							id="theme-snippet"
+							label="CSS"
+							text={themeCSS}
+							html={highlight(themeCSS, {
+								language: css,
+							})}
+						/>
+					</div>
+				</section>
+				<section className="row" aria-labelledby="languages-title">
+					<FeatureIntro
+						id="languages-title"
+						icon="feather"
+						eyebrow="Languages"
+						title={`${languageCount} languages. Ship only yours.`}
+						description={`Every grammar is its own import, so a blog with three languages never carries the other ${languageCount - 3}. Pick one to try it in the playground.`}
+						href={docsPath('languages')}
+						linkLabel="All languages"
+					/>
+					<nav className="language-cloud" aria-label="Try a language" data-reveal>
+						{languageEntries.map(entry => (
+							<MagneticLink
+								key={entry.id}
+								href={`${routes.playground}?lang=${entry.id}`}
+							>
+								{entry.label}
+							</MagneticLink>
+						))}
+					</nav>
+				</section>
+				<section className="closing" aria-labelledby="closing-title" data-reveal>
+					<div className="closing-copy">
+						<h2 id="closing-title">Three lines to start</h2>
+						<p>Install, import a theme, and highlight.</p>
+						<div className="closing-actions">
+							<ButtonLink
+								href={`${routes.docs}#installation`}
+								label="Installation guide"
+							/>
+							<ButtonLink
+								href={routes.playground}
+								label="Open playground"
+								variant="ghost"
+							/>
+						</div>
+					</div>
+					<div className="closing-code" data-palette="dusk">
+						<CodeBlock
+							id="quick-start"
+							label="TypeScript"
+							text={quickStart}
+							html={highlight(quickStart, {
+								language: typescript,
+							})}
+						/>
+					</div>
+				</section>
+			</LandingMotion>
+			<Footer />
+		</SiteLayout>
+	)
+}

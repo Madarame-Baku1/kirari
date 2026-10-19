@@ -1,0 +1,54 @@
+.root {
+	display: grid;
+	align-items: center;
+	gap: var(--size-4) var(--size-6);
+	width: fit-content;
+	max-width: 100%;
+	padding: var(--size-8) var(--size-10);
+	border-radius: var(--size-7);
+	color: var(--ink);
+	transition: background var(--duration-fast);
+}
+.root:hover {
+	color: var(--muted);
+}
+.root small {
+	color: var(--muted);
+	font-size: var(--size-14);
+}
+.root span {
+	grid-row: 2;
+	font-weight: var(--weight-medium);
+}
+.root svg {
+	grid-row: 2;
+	color: var(--faint);
+	transition: color var(--duration-fast);
+}
+.root:hover svg {
+	color: var(--ink);
+}
+.root[rel="prev"] {
+	grid-column: 1;
+	grid-template-columns: auto minmax(0, 1fr);
+}
+.root[rel="prev"] :is(small, span) {
+	grid-column: 2;
+}
+.root[rel="prev"] svg {
+	grid-column: 1;
+	transform: rotate(90deg);
+}
+.root[rel="next"] {
+	grid-column: 2;
+	grid-template-columns: minmax(0, 1fr) auto;
+	justify-self: end;
+	text-align: right;
+}
+.root[rel="next"] :is(small, span) {
+	grid-column: 1;
+}
+.root[rel="next"] svg {
+	grid-column: 2;
+	transform: rotate(-90deg);
+}

@@ -1,0 +1,27 @@
+.root {
+	display: inline-flex;
+	align-items: center;
+	gap: var(--size-10);
+	height: 2.875rem;
+	padding: 0 var(--size-6) 0 var(--size-16);
+	border: var(--hairline) solid var(--line);
+	border-radius: var(--size-11);
+	background: var(--soft);
+	font: var(--size-14) var(--mono);
+	max-width: 100%;
+}
+.root code {
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+.root .installPrompt {
+	color: var(--faint);
+	user-select: none;
+}
+@media (max-width: 35rem) {
+	.root {
+		width: 100%;
+		font-size: var(--size-13);
+	}
+}

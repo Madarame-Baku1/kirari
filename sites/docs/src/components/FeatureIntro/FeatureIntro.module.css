@@ -1,0 +1,29 @@
+.root > p:not(.eyebrow) {
+	margin: var(--size-14) 0 var(--size-20);
+	color: var(--muted);
+	font-size: var(--size-17);
+}
+.root .textLink {
+	display: inline-flex;
+	align-items: center;
+	gap: var(--size-6);
+	color: var(--ink);
+}
+.root .textLink:hover {
+	color: var(--muted);
+}
+.root .textLink svg {
+	transition: transform var(--duration-normal);
+}
+.root .textLink:hover svg {
+	transform: translateX(var(--size-3));
+}
+:where(.root) .eyebrow {
+	display: inline-flex;
+	align-items: center;
+	gap: var(--size-7);
+	margin: 0 0 var(--size-14);
+	font-size: var(--size-13);
+	font-weight: var(--weight-semibold);
+	color: var(--gold-text);
+}

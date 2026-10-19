@@ -1,0 +1,19 @@
+.root {
+	position: fixed;
+	right: var(--size-24);
+	bottom: var(--size-24);
+	z-index: 50;
+	padding: var(--size-10) var(--size-18);
+	border-radius: var(--size-10);
+	background: var(--ink);
+	color: var(--bg);
+	font-size: var(--size-14);
+	box-shadow: var(--shadow);
+	max-width: calc(100vw - var(--size-32));
+}
+@media (max-width: 35rem) {
+	.root {
+		right: var(--size-16);
+		bottom: var(--size-16);
+	}
+}

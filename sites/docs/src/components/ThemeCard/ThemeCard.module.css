@@ -1,0 +1,36 @@
+.root {
+	margin: 0;
+	border-radius: var(--size-12);
+	overflow: hidden;
+	background: var(--kirari-background);
+	border: var(--hairline) solid var(--line);
+	transition:
+		transform 0.25s,
+		box-shadow 0.25s;
+}
+.root:hover {
+	transform: translateY(calc(-1 * var(--size-3)));
+	box-shadow: var(--shadow);
+}
+.root pre {
+	margin: 0;
+	padding: var(--size-16) var(--size-16) var(--size-8);
+	font: 0.71875rem / var(--leading-code) var(--mono);
+	overflow: hidden;
+}
+.root figcaption {
+	padding: var(--size-4) var(--size-16) var(--size-12);
+	font-size: var(--size-12);
+	color: var(--kirari-comment);
+}
+@media (max-width: 35rem) {
+	.root pre {
+		padding: var(--size-12) var(--size-12) var(--size-6);
+		font-size: var(--size-11);
+	}
+}
+@media (max-width: 35rem) {
+	.root figcaption {
+		padding: var(--size-2) var(--size-12) var(--size-10);
+	}
+}

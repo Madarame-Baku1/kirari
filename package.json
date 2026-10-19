@@ -7,7 +7,7 @@
     "sites/*"
   ],
   "scripts": {
-    "dev": "bun run build:library && bun run --cwd sites/docs dev",
+    "dev": "bun run build:integrations && bun run --cwd sites/docs dev",
     "build": "bun run build:integrations && bun run --cwd sites/docs build",
     "build:library": "bun run --cwd packages/kirari build",
     "build:integrations": "bun run build:library && bun run --cwd packages/rehype build && bun run --cwd packages/react build",

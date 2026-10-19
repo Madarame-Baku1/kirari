@@ -3,13 +3,30 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "bun scripts/dev.ts",
-    "build": "bun scripts/build.ts",
-    "typecheck": "tsc --noEmit",
-    "check": "bun run typecheck && bun test ./test && bun run build"
+    "dev": "next dev --port 4173",
+    "build": "next build",
+    "start": "next start --port 4173",
+    "typecheck": "next typegen && tsc --noEmit",
+    "check": "bun run typecheck && bun test ./test && bun run build && bun scripts/check-build.ts"
   },
   "dependencies": {
+    "@vortexlabs/kirari": "workspace:*",
+    "@vortexlabs/kirari-rehype": "workspace:*",
     "gsap": "^3.15.0",
-    "@vortexlabs/kirari": "workspace:*"
+    "next": "16.4.2",
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
+    "rehype-react": "^8.0.0",
+    "rehype-stringify": "^10.0.1",
+    "remark-gfm": "^4.0.1",
+    "remark-parse": "^11.0.0",
+    "remark-rehype": "^11.1.2",
+    "unified": "^11.0.5"
+  },
+  "devDependencies": {
+    "@types/hast": "^3.0.5",
+    "@types/node": "^24",
+    "@types/react": "^19",
+    "@types/react-dom": "^19.3.0"
   }
 }

@@ -1,0 +1,110 @@
+.root {
+	position: sticky;
+	top: 0;
+	z-index: 30;
+	height: var(--top);
+	background: var(--bg);
+	border-bottom: var(--hairline) solid transparent;
+	transition: border-color var(--duration-normal);
+}
+.root[data-scrolled],
+[data-page="docs"] .root,
+[data-page="playground"] .root {
+	border-bottom-color: var(--line);
+}
+.root .topbarInner {
+	height: 100%;
+	max-width: var(--page-width);
+	margin: 0 auto;
+	padding: 0 var(--size-24);
+	display: flex;
+	align-items: center;
+	gap: var(--size-32);
+}
+.root .topLinks {
+	display: flex;
+	gap: var(--size-24);
+	font-size: var(--size-14);
+}
+.root .topLinks a {
+	color: var(--muted);
+	transition: color var(--duration-fast);
+}
+.root .topLinks a:hover,
+.root .topLinks a[aria-current="page"] {
+	color: var(--ink);
+}
+.root .topLinks a[aria-current="page"]:hover {
+	color: var(--muted);
+}
+.root .topActions {
+	margin-left: auto;
+	display: flex;
+	align-items: center;
+	gap: var(--size-8);
+}
+.root .searchButton {
+	display: flex;
+	align-items: center;
+	gap: var(--size-8);
+	height: var(--size-34);
+	padding: 0 var(--size-6) 0 var(--size-10);
+	min-width: 11.25rem;
+	border: var(--hairline) solid var(--line);
+	border-radius: var(--size-9);
+	background: var(--soft);
+	color: var(--faint);
+	font-size: var(--size-14);
+	transition: border-color var(--duration-fast);
+}
+.root .searchButton:hover {
+	border-color: var(--line-strong);
+	background: var(--soft-2);
+	color: var(--ink);
+}
+.root .searchButton kbd {
+	margin-left: auto;
+}
+.root .mobileNavButton {
+	display: none;
+}
+@media (max-width: 63.9375rem) {
+	.root .searchButton {
+		min-width: 0;
+	}
+}
+@media (max-width: 63.9375rem) {
+	.root .searchButton kbd {
+		display: none;
+	}
+}
+@media (max-width: 53.75rem) {
+	.root .mobileNavButton {
+		display: inline-flex;
+	}
+}
+@media (max-width: 53.75rem) {
+	.root .topbarInner {
+		gap: var(--size-12);
+		padding: 0 var(--size-16);
+	}
+}
+@media (max-width: 53.75rem) {
+	.root .topLinks {
+		display: none;
+	}
+}
+@media (max-width: 35rem) {
+	.root .searchButton {
+		width: var(--size-34);
+		padding: 0;
+		justify-content: center;
+		border: 0;
+		background: transparent;
+	}
+}
+@media (max-width: 35rem) {
+	.root .searchButton span {
+		display: none;
+	}
+}
