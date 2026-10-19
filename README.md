@@ -71,10 +71,11 @@ bun install
 bun run dev
 ```
 
-`dev` builds the library before starting the documentation server. After changing
-library source, run `bun run build:library` to refresh its exported files.
-Open [localhost:4173](http://localhost:4173). The server rebuilds when site files
-or the library's built files change; refresh the browser to see updates.
+`dev` builds the packages before starting the Next.js documentation site at
+[localhost:4173](http://localhost:4173). After changing package source, run
+`bun run build:integrations` to refresh its exported files. Guides live in plain
+Markdown under `sites/docs/content/`; the site also serves individual `.md` URLs,
+`/llms.txt`, and `/llms-full.txt`.
 
 ```sh
 bun run build          # Build all packages and the documentation site

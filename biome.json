@@ -48,5 +48,26 @@
   },
   "plugins": [
     "./biome/no-function-declarations.grit"
+  ],
+  "overrides": [
+    {
+      "includes": [
+        "sites/docs/src/**"
+      ],
+      "formatter": {
+        "enabled": true,
+        "indentStyle": "tab",
+        "indentWidth": 4,
+        "lineWidth": 100
+      },
+      "javascript": {
+        "formatter": {
+          "quoteStyle": "single",
+          "semicolons": "asNeeded",
+          "arrowParentheses": "asNeeded",
+          "expand": "always"
+        }
+      }
+    }
   ]
 }
