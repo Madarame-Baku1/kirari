@@ -129,6 +129,18 @@ test('Python line checkpoints bound rescanning', () => {
   expect(createTokenStream({ ...python }).mode).toBe('full')
 })
 
+test('script lookahead stays revisable while a slash on the last line may become a regex', () => {
+  for (const language of [typescript, tsx]) {
+    const source = '[{a\n</]/>(1)'
+    const stream = createTokenStream(language)
+    const tokens: Token[] = []
+    for (let index = 0; index < source.length; index++) {
+      apply(tokens, stream.write(source[index]!))
+      expect(tokens).toEqual(tokenize(source.slice(0, index + 1), language))
+    }
+  }
+})
+
 test('line checkpoints bound rescanning for ordinary multiline code', () => {
   const source = 'const value = 42;\n'.repeat(1000)
   const stream = createTokenStream(javascript)

@@ -25,6 +25,8 @@ export interface LookupOptions {
 export const createFunctionLookup = (source: string, typed: boolean, scan: (start: number) => Generator<Token, void, number | undefined>) => {
   // Reuse nested groups, including unfinished ones, instead of rescanning each signature suffix.
   const groups = new Map<number, Group>()
+  // A slash after the last line break may still become a regex literal once more source arrives.
+  const lastLine = Math.max(source.lastIndexOf('\n'), source.lastIndexOf('\r'), source.lastIndexOf('\u2028'), source.lastIndexOf('\u2029'))
   return (start: number, { annotation, generic, property, asyncModifier }: LookupOptions): Result => {
     let reader = scan(start)
     let token: Token | undefined
@@ -38,6 +40,7 @@ export const createFunctionLookup = (source: string, typed: boolean, scan: (star
       do {
         const value = reader.next()
         token = value.done || value.value.start >= limit ? undefined : value.value
+        if (token?.type === 'operator' && /^\/=?$/.test(token.value) && token.start > lastLine) pending = true
       } while (token && !isSignificant(token.type))
     }
     // Restarts scanning at `position`.
