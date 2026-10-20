@@ -184,8 +184,8 @@ uses `.kirari-line` wrappers and one-based `data-line` attributes. Define your o
 CSS for custom classes; line numbering UI is not added automatically.
 
 Streaming returns `{ from, tokens, length }`: replace your retained tokens from
-the source offset `from` onward. Exact built-in JavaScript, TypeScript, JSON, and
-Python use conservative checkpoints; all other grammars use full re-tokenization.
+the source offset `from` onward. Exact built-in JavaScript, TypeScript, JSX, TSX,
+JSON, JSONC, and Python use conservative checkpoints; all other grammars use full re-tokenization.
 Long lines and unfinished multiline tokens can still require large rescans.
 Streams retain the full source. Do not mutate built-in definitions; copy them
 for customization. Calling `reset()` also requires clearing your retained view.

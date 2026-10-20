@@ -1,8 +1,9 @@
-import { appendToken, scan, tokenize } from './tokenize.js'
+import { appendToken, cloneContext, scan, tokenize } from './tokenize.js'
 import type { Frame, ScanContext } from './tokenize.js'
 import { javascript } from './languages/javascript.js'
 import { typescript } from './languages/typescript.js'
 import { json } from './languages/json.js'
+import { jsonc } from './languages/jsonc.js'
 import { resumableScanOf } from './resumable.js'
 import type { ResumableScan, ResumePoint } from './resumable.js'
 import { advanceDefinitionState, breakDefinitionLine, classifyDefinitions, copyDefinitionState, createDefinitionState, endsLine, isDefinitionBoundary } from './grammars/definitions.js'
@@ -24,10 +25,6 @@ export interface TokenStream {
   reset(): void
 }
 
-const cloneContext = (context: ScanContext): ScanContext => {
-  return { ...context, parentheses: [...context.parentheses], scopes: [...context.scopes ?? []] }
-}
-
 const openBrackets = (state: DefinitionState): string[] => state.brackets.map(bracket => bracket.close)
 
 /** Advances `state` through `tokens[from..to]`, returning the next index. */
@@ -41,10 +38,12 @@ const walkDefinitions = (state: DefinitionState, tokens: readonly Token[], from:
 }
 
 /**
- * Streams for built-in Python rescan from the last resume point, then reclassify definitions from
- * the last point where `classifyDefinitions` cannot see across. Tokens before that point are final.
+ * Streams for built-in resumable grammars rescan from the last resume point. Python then
+ * reclassifies definitions from the last point where `classifyDefinitions` cannot see across.
+ * Tokens before that point are final.
  */
 const createResumableStream = (language: Language, scanResumable: ResumableScan): TokenStream => {
+  const classified = language.name === 'python'
   let source = ''
   let raw: Token[] = []
   let resume: ResumePoint | undefined
@@ -63,6 +62,11 @@ const createResumableStream = (language: Language, scanResumable: ResumableScan)
     const found: { resume: ResumePoint; index: number }[] = []
     const tail = scanResumable(next, language, resume, (point, index) => found.push({ resume: point, index: resumeIndex + index }))
     source = next
+    if (!classified) {
+      const from = resume?.offset ?? 0
+      resume = found.at(-1)?.resume ?? resume
+      return { from, tokens: tail, length: source.length }
+    }
     raw.length = resumeIndex
     for (const token of tail) raw.push(token)
     points = points.filter(point => point.index < resumeIndex)
@@ -119,7 +123,7 @@ export const createTokenStream = (language: Language): TokenStream => {
   const scanResumable = resumableScanOf(language)
   if (scanResumable) return createResumableStream(language, scanResumable)
   // shortcut: long/open tails are rescanned; track more lexical state if those workloads become a bottleneck.
-  const mode = !language.tokenize && (language === javascript || language === typescript || language === json) ? 'checkpoint' : 'full'
+  const mode = !language.tokenize && (language === javascript || language === typescript || language === json || language === jsonc) ? 'checkpoint' : 'full'
   let source = ''
   let offset = 0
   let previous: Token | undefined

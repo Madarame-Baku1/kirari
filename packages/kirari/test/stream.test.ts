@@ -5,6 +5,8 @@ import { render } from '../src/render.js'
 import { javascript } from '../src/languages/javascript.js'
 import { typescript } from '../src/languages/typescript.js'
 import { json } from '../src/languages/json.js'
+import { jsonc } from '../src/languages/jsonc.js'
+import { jsx } from '../src/languages/jsx.js'
 import { tsx } from '../src/languages/tsx.js'
 import { python } from '../src/languages/python.js'
 import { shell } from '../src/languages/shell.js'
@@ -127,6 +129,22 @@ test('Python line checkpoints bound rescanning', () => {
     expect(work).toBeLessThan(source.length * 20)
   }
   expect(createTokenStream({ ...python }).mode).toBe('full')
+})
+
+test('JSX, TSX, and JSONC streams checkpoint at root lines and copies use full mode', () => {
+  const component = 'export function Item({ name }: { name: string }) {\n  return (\n    <li className="item" onClick={() => open(name)}>\n      {name}\n    </li>\n  )\n}\n'
+  for (const [language, block] of [[jsx, component.replace(': { name: string }', '')], [tsx, component], [jsonc, '{\n  // note\n  "key": [1, 2],\n}\n']] as const) {
+    const source = block.repeat(100)
+    const stream = createTokenStream(language)
+    expect(stream.mode).toBe('checkpoint')
+    expect(createTokenStream({ ...language }).mode).toBe('full')
+    let work = 0
+    for (let start = 0; start < source.length; start += 4) {
+      const patch = stream.write(source.slice(start, start + 4))
+      work += patch.length - patch.from
+    }
+    expect(work).toBeLessThan(source.length * 60)
+  }
 })
 
 test('script lookahead stays revisable while a slash on the last line may become a regex', () => {

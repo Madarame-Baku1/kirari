@@ -1,6 +1,8 @@
-import { appendToken, scan, tokenize } from '../tokenize.js'
+import { appendToken, cloneContext, scan, tokenize } from '../tokenize.js'
+import type { Frame, ScanContext } from '../tokenize.js'
 import { isSignificant } from '../types.js'
 import type { Language, Token } from '../types.js'
+import type { ResumePoint } from '../resumable.js'
 
 type Code = {
   kind: 'code'
@@ -24,24 +26,37 @@ type Markup = {
   sibling?: { start: number; tokens: number; openings: { name: string; start: number }[] }
 }
 
-export const markup = (source: string, code?: Language, embedded?: Readonly<Record<string, Language>>, template?: 'vue' | 'svelte'): Token[] => {
+/** Where a JSX scan starts, and where to report root-level newlines it can resume from. */
+interface MarkupResume {
+  readonly from?: ResumePoint | undefined
+  readonly checkpoint?: ((point: ResumePoint, index: number) => void) | undefined
+}
+
+export const markup = (source: string, code?: Language, embedded?: Readonly<Record<string, Language>>, template?: 'vue' | 'svelte', resume?: MarkupResume): Token[] => {
   const tokens: Token[] = []
   const name = /[$_\p{ID_Start}][\p{ID_Continue}.$:-]*/uy
   const attribute = /[^\s"'<>/={}]+/y
   const entity = /&(?:#x[\da-f]+|#\d+|[a-z][\da-z]*);/iy
   const whitespace = /\s+/y
-  let position = 0
+  let position = resume?.from?.offset ?? 0
   const createMarkup = (bounded: boolean): Markup => ({ kind: 'markup', bounded, depth: 0, phase: 'text', closing: false, name: '', value: false, attribute: '', language: '', rawEnd: undefined })
   const expressionLanguage = code ?? embedded?.['script:ts'] ?? embedded?.script
   const typed = code?.name === 'tsx'
   // Expression scanners use the same source offsets; failed lookahead remains reusable.
   const failedRegexStates = new Set<number>()
   const failedSiblingStarts = new Set<number>()
-  const createCode = (container: boolean): Code => ({ kind: 'code', scanner: scan(source, expressionLanguage!, position, undefined, failedRegexStates), container, braces: 0, resume: undefined, previous: undefined })
-  const stack: (Code | Markup)[] = [code ? createCode(false) : createMarkup(false)]
+  const createCode = (container: boolean, previous?: Token, frames?: Frame[], context?: ScanContext): Code => ({ kind: 'code', scanner: scan(source, expressionLanguage!, position, previous, failedRegexStates, frames, context), container, braces: 0, resume: undefined, previous })
+  // Root script state, read at newlines outside elements to report resume points.
+  const rootFrames: Frame[] = []
+  const rootContext = resume?.from?.context ? cloneContext(resume.from.context) : { parentheses: [] }
+  const points: { point: ResumePoint; index: number }[] = []
+  // A rejected sibling may close once more source arrives, so later resume points are dropped.
+  let rewound = source.length
+  const stack: (Code | Markup)[] = [code ? createCode(false, resume?.from?.previous, rootFrames, rootContext) : createMarkup(false)]
 
   const rejectSibling = (context: Markup): void => {
     const sibling = context.sibling!
+    rewound = Math.min(rewound, sibling.start)
     failedSiblingStarts.add(sibling.start)
     for (const opening of sibling.openings) failedSiblingStarts.add(opening.start)
     tokens.length = sibling.tokens
@@ -143,6 +158,11 @@ export const markup = (source: string, code?: Language, embedded?: Readonly<Reco
     context.resume = undefined
     if (next.done) return false
     const token = next.value
+    if (resume?.checkpoint && stack.length === 1 && token.type === 'text' && /[\r\n\u2028\u2029]/.test(token.value) && token.end < source.length && !rootFrames.length && rootContext.functionPending === undefined) {
+      const last = tokens[tokens.length - 1]
+      const merged = last?.type === 'text'
+      points.push({ point: { offset: merged ? last.start : token.start, previous: context.previous, context: cloneContext(rootContext) }, index: merged ? tokens.length - 1 : tokens.length })
+    }
     const sibling = context.previous?.type === 'tag' && !failedSiblingStarts.has(token.start)
     if (!template && token.value === '<' && (canStartElement(context.previous) || sibling) && looksLikeTag(source, token.start, typed)) {
       position = token.start
@@ -264,6 +284,7 @@ export const markup = (source: string, code?: Language, embedded?: Readonly<Reco
     } else if (context.phase === 'tag') stepTag(context)
     else stepContent(context)
   }
+  for (const { point, index } of points) if (point.offset < rewound) resume!.checkpoint!(point, index)
   return tokens
 }
 

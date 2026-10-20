@@ -35,6 +35,10 @@ export interface ScanContext {
   scopes?: boolean[]
 }
 
+export const cloneContext = (context: ScanContext): ScanContext => {
+  return { ...context, parentheses: [...context.parentheses], scopes: [...context.scopes ?? []] }
+}
+
 const sticky = (pattern: RegExp): RegExp => {
   return new RegExp(pattern.source, pattern.flags.replace(/[gy]/g, '') + 'y')
 }
