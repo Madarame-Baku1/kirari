@@ -202,11 +202,6 @@ kbd {
 	gap: var(--size-12);
 	margin: var(--size-20) 0;
 }
-.language-cloud {
-	display: flex;
-	flex-wrap: wrap;
-	gap: var(--size-8);
-}
 
 .closing {
 	display: grid;

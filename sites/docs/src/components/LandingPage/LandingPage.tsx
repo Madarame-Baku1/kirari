@@ -11,7 +11,7 @@ import { Footer } from '../Footer'
 import { HighlightDemo } from '../HighlightDemo'
 import { Icon } from '../Icon'
 import { InstallCommand } from '../InstallCommand'
-import { MagneticLink } from '../MagneticLink'
+import { LanguageCloud } from '../LanguageCloud'
 import { SiteLayout } from '../SiteLayout'
 import { Stat } from '../Stat'
 import { StreamDemo } from '../StreamDemo'
@@ -153,16 +153,14 @@ export const LandingPage = () => {
 						href={docsPath('languages')}
 						linkLabel="All languages"
 					/>
-					<nav className="language-cloud" aria-label="Try a language">
-						{languageEntries.map(entry => (
-							<MagneticLink
-								key={entry.id}
-								href={`${routes.playground}?lang=${entry.id}`}
-							>
-								{entry.label}
-							</MagneticLink>
-						))}
-					</nav>
+					<LanguageCloud
+						label="Try a language"
+						links={languageEntries.map(entry => ({
+							id: entry.id,
+							label: entry.label,
+							href: `${routes.playground}?lang=${entry.id}`,
+						}))}
+					/>
 				</section>
 				<section className="closing" aria-labelledby="closing-title" data-reveal="stagger">
 					<div className="closing-copy">

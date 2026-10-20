@@ -20,3 +20,5 @@ export const animateIn = (target: HTMLElement | null) => {
 		},
 	)
 }
+
+export const finePointer = () => matchMedia('(hover: hover) and (pointer: fine)').matches

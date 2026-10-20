@@ -1,8 +1,9 @@
 'use client'
 
 import styles from './HighlightDemo.module.css'
-import { useEffect, useRef, useState } from 'react'
-import { animateIn } from '../../client/motion'
+import { useRef, useState } from 'react'
+import { gsap } from 'gsap'
+import { reducedMotion } from '../../client/motion'
 import { focusableWhenScrollable } from '../../client/scrollable'
 import { HighlightedCode } from '../HighlightedCode'
 import { Link } from '../Link'
@@ -14,11 +15,6 @@ export const HighlightDemo = (props: Types.Props) => {
 	const [selected, setSelected] = useState(demos[0]!.id)
 	const [palette, setPalette] = useState(palettes[0]!.id)
 	const panels = useRef(new Map<string, HTMLElement>())
-	useEffect(() => {
-		animateIn(panels.current.get(selected) ?? null)
-	}, [
-		selected,
-	])
 
 	return (
 		<section className={styles.root} aria-label="Highlighting demo">
@@ -46,7 +42,25 @@ export const HighlightDemo = (props: Types.Props) => {
 										name="demo-palette"
 										value={entry.id}
 										checked={entry.id === palette}
-										onChange={() => setPalette(entry.id)}
+										onChange={event => {
+											setPalette(entry.id)
+											if (reducedMotion()) return
+											gsap.fromTo(
+												event.currentTarget.parentElement?.querySelector(
+													'i',
+												) ?? null,
+												{
+													scale: 0.55,
+												},
+												{
+													scale: 1,
+													duration: 0.6,
+													ease: 'elastic.out(1, .4)',
+													clearProps: 'transform',
+													overwrite: true,
+												},
+											)
+										}}
 									/>
 									<span className="sr-only">{entry.label} theme</span>
 									<i data-palette={entry.id} aria-hidden="true" />

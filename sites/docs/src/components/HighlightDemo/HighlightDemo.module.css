@@ -15,7 +15,6 @@
 	box-shadow:
 		0 0 0 var(--hairline) var(--line),
 		0 var(--size-30) var(--size-80) calc(-1 * var(--size-30)) #0b0c1a66;
-	transition: background 0.35s;
 }
 .demoWindow[data-palette="ad-astra-dark"] {
 	box-shadow:
@@ -99,9 +98,6 @@
 	box-shadow:
 		0 0 0 var(--size-2) var(--kirari-background),
 		0 0 0 0.21875rem var(--gold);
-}
-.demoCode span {
-	transition: color 0.3s;
 }
 .demoCode {
 	margin: 0;

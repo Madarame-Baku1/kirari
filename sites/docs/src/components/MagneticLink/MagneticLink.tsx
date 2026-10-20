@@ -3,7 +3,7 @@
 import styles from './MagneticLink.module.css'
 import { useEffect, useRef } from 'react'
 import { gsap } from 'gsap'
-import { reducedMotion } from '../../client/motion'
+import { finePointer, reducedMotion } from '../../client/motion'
 import { Link } from '../Link'
 import type * as Types from './MagneticLink.types'
 
@@ -28,8 +28,7 @@ export const MagneticLink = (props: Types.Props) => {
 			href={href}
 			ref={link}
 			onPointerEnter={event => {
-				if (reducedMotion() || !matchMedia('(hover: hover) and (pointer: fine)').matches)
-					return
+				if (reducedMotion() || !finePointer()) return
 				gsap.set(
 					[
 						link.current,
