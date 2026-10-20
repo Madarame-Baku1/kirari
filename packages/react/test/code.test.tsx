@@ -57,3 +57,12 @@ test('a trailing newline does not add an empty line wrapper', () => {
   const html = renderToStaticMarkup(<Code highlightLines={[2]}>{'a\nb\n'}</Code>)
   expect(html.match(/data-line="\d+"/g)).toEqual(['data-line="1"', 'data-line="2"'])
 })
+
+test('joins text children like React and rejects elements', () => {
+  const count = 2
+  expect(renderToStaticMarkup(<Code>let x = {count}</Code>)).toBe(renderToStaticMarkup(<Code>{'let x = 2'}</Code>))
+  expect(renderToStaticMarkup(<Code>{['a', null, false, [1n, undefined]]}</Code>)).toBe(renderToStaticMarkup(<Code>{'a1'}</Code>))
+  expect(renderToStaticMarkup(<Code>{null}</Code>)).toBe('<pre class="kirari"><code></code></pre>')
+  // @ts-expect-error elements are not code text
+  expect(() => renderToStaticMarkup(<Code><b>x</b></Code>)).toThrow(TypeError)
+})

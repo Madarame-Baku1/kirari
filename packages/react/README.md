@@ -31,8 +31,9 @@ export const CodeExample = () => (
 
 Output is `<pre class="kirari"><code>…</code></pre>` with the standard
 `kirari-*` classes, so every Kirari theme works. Code text is escaped by React;
-the component does not use `dangerouslySetInnerHTML`. `language` defaults to
-JavaScript. Other props go to the `<pre>`.
+the component does not use `dangerouslySetInnerHTML`. Text children are joined
+as React joins text, so `{value}` interpolation works; elements throw. `language`
+defaults to JavaScript. Other props go to the `<pre>`.
 
 ## Lines and customization
 
@@ -83,7 +84,7 @@ export const StreamExample = () => {
 This example adds one chunk per click. In your app, call `write(chunk)` as text
 arrives. The hook also returns `end()`, which closes the stream when it is complete.
 
-- Built-in JavaScript, TypeScript, and JSON reuse completed scanning work. Other languages rescan the full source. Long unfinished tokens can still be expensive; see [token streaming](https://github.com/vortexkit/kirari/blob/main/docs/streaming.md).
+- Built-in JavaScript, TypeScript, JSON, and Python reuse completed scanning work. Other languages rescan the full source. Long unfinished tokens can still be expensive; see [token streaming](https://github.com/vortexkit/kirari/blob/main/docs/streaming.md).
 - Changing `language` starts a new, empty stream.
 - After `end()`, call `reset()` before writing again.
 - `/stream` is a client module; `<Code>` is not.

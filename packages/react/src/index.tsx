@@ -12,9 +12,12 @@ export interface Line {
   readonly end: number
 }
 
+/** Text children, joined like React text: `null`, `undefined`, and booleans render nothing. */
+export type CodeText = string | number | bigint | boolean | null | undefined | readonly CodeText[]
+
 export interface CodeProps extends Omit<ComponentPropsWithoutRef<'pre'>, 'children'> {
   /** Source to highlight. Ignored when `tokens` is set. */
-  readonly children?: string
+  readonly children?: CodeText
   /** Pre-scanned tokens, such as the output of `useTokenStream`. */
   readonly tokens?: readonly Token[]
   readonly language?: Language
@@ -30,6 +33,13 @@ export interface CodeProps extends Omit<ComponentPropsWithoutRef<'pre'>, 'childr
 
 const join = (...names: (string | undefined)[]): string => {
   return names.filter(Boolean).join(' ')
+}
+
+const sourceText = (children: unknown): string => {
+  if (children == null || typeof children === 'boolean') return ''
+  if (typeof children === 'string' || typeof children === 'number' || typeof children === 'bigint') return String(children)
+  if (Array.isArray(children)) return children.map(sourceText).join('')
+  throw new TypeError('Kirari: <Code> children must be text')
 }
 
 const splitsSurrogate = (source: string, offset: number): boolean => {
@@ -135,10 +145,10 @@ const codeNodes = (tokens: readonly Token[], options: Omit<CodeProps, 'children'
 
 /** Highlighted code as React elements. Uses no hooks, so it also renders as a Server Component. */
 export const Code = ({
-  children = '', tokens, language = javascript, classes, tokenClassName, decorations, lines, lineClassName,
+  children, tokens, language = javascript, classes, tokenClassName, decorations, lines, lineClassName,
   highlightLines, className, ...props
 }: CodeProps): ReactNode => {
-  const nodes = codeNodes(tokens ?? tokenize(children, language), {
+  const nodes = codeNodes(tokens ?? tokenize(sourceText(children), language), {
     ...(classes && { classes }),
     ...(tokenClassName && { tokenClassName }),
     ...(decorations && { decorations }),
