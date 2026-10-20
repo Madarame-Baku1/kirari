@@ -12,7 +12,8 @@ the package names that need changesets, matching Vortex's release-plan validatio
 
 ```bash
 bun run changeset                                     # select affected packages, bumps, and release note
-git add .changeset && git commit -m "chore: add changeset"  # required — the release script needs a clean tree
+bun run changelog:new                                 # scaffold the site changelog file, then fill it in
+git add .changeset sites/docs/changelog && git commit -m "chore: add changeset"  # required — the release script needs a clean tree
 bun run release:kirari-react                           # example: publish the React update
 ```
 

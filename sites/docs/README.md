@@ -45,6 +45,13 @@ The **Copy page** button at the end of the breadcrumbs copies the guide. The adj
 `/docs/installation/` redirects to `/docs/#installation`. Existing links such as `/docs/#react`
 continue to work through a browser redirect to the corresponding guide.
 
+## Changelog
+
+`/changelog/` is built from one Markdown file per release in
+`changelog/<package>/<version>.md`. Run `bun run changelog:new` from the
+repository root to scaffold a file for each pending changeset. See
+[Site changelog](../../RELEASING.md#site-changelog) for the file format.
+
 ## Styling
 
 Shared design values live in `src/tokens.css`. Reuse a token when a size, color,
@@ -128,13 +135,16 @@ site's `start` command. This is a Next.js application, not a `dist/` static fold
 ## Files
 
 - `content/`: plain Markdown guides.
+- `changelog/`: one Markdown release file per package version.
 - `src/app/`: page routes, metadata, Markdown endpoints, and AI indexes.
 - `src/components/`: React components with colocated types, CSS Modules, and helpers.
 - `src/content.ts`: plain Markdown parsing and Kirari highlighting; `MarkdownContent` renders the tree as React.
 - `src/client/`: shared animation utilities.
 - `src/tokens.css`: shared design values.
 - `src/style.css`: site styles; package themes supply code colors.
+- `src/changelog.ts`: changelog categories and packages; `src/changelog.content.tsx` parses and validates release files.
 - `scripts/check-build.ts`: checks the actual prerendered HTML and text output.
+- `scripts/changelog-new.ts`: scaffolds release files from pending changesets.
 
 The playground processes code in the browser and keeps its 20,000-character
 limit. Its language definitions are loaded only when visiting the playground.

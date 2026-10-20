@@ -43,10 +43,13 @@ The core package has no runtime dependencies. Keep it that way: integration depe
 4. Add a changeset for any change users will notice:
 
    ```sh
-   bunx changeset
+   bun run changeset
+   bun run changelog:new
    ```
 
    The three published packages are versioned independently, so select each affected package and its bump. Docs-only, test-only, and internal changes do not need one.
+
+   `changelog:new` scaffolds the docs site release file for each pending changeset. Fill in its sections and commit it with the changeset, because `bun run check` fails when a version has no release file. See [Site changelog](RELEASING.md#site-changelog).
 
 ## Commits
 
