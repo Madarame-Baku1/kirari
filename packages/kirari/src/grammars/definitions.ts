@@ -27,9 +27,10 @@ const pairs: Record<string, string> = { '(': ')', '[': ']', '{': '}', '#(': ')',
 /**
  * Indexes bracket structure over significant tokens: `closes` maps an opening index to its
  * closing index (including `<…>` generics), `opens` maps a closing `>` back, and `parents`
- * maps each token to its innermost enclosing bracket.
+ * maps each token to its innermost enclosing bracket. Without `generics`, `<` and `>` stay
+ * comparison operators.
  */
-const matchBrackets = (parts: readonly Token[]) => {
+const matchBrackets = (parts: readonly Token[], generics: boolean) => {
   const closes = new Map<number, number>()
   const opens = new Map<number, number>()
   const parents = new Map<number, number>()
@@ -42,6 +43,7 @@ const matchBrackets = (parts: readonly Token[]) => {
       if (pairs[token.value]) stack.push({ index, close: pairs[token.value]! })
       else if (token.value === stack.at(-1)?.close) closes.set(stack.pop()!.index, index)
     }
+    if (!generics) continue
     if (token.type === 'operator' && token.value === '<') angles.push(index)
     else if (token.type === 'operator' && /^>+$/.test(token.value)) {
       for (const _ of token.value) if (angles.length) {
@@ -68,7 +70,11 @@ export const classifyDefinitions = (tokens: Token[], language: string): Token[] 
     positions.push(index)
     return true
   })
-  const { closes, opens, parents } = matchBrackets(parts)
+  const { closes, opens, parents } = matchBrackets(parts, language !== 'python')
+  const lineBreakBefore = (index: number): boolean => {
+    for (let at = positions[index - 1]! + 1; at < positions[index]!; at++) if (endsLine(tokens[at]!.value)) return true
+    return false
+  }
   const value = (index: number): string => parts[index]?.value ?? ''
   const invoked = (end: number): boolean => /^(\(|\[|\.|\?\.|::)$/.test(value(end + 1))
   const block = (start: number): boolean => {
@@ -200,7 +206,10 @@ export const classifyDefinitions = (tokens: Token[], language: string): Token[] 
     if (!member) {
       if (value(next) === ':' && /^(python|kotlin|scala|swift|rust)$/.test(language)
         || language === 'go' && value(index - 1) === 'var' && value(next) !== '=') {
-        while (++next < parts.length && value(next) !== '=') {
+        while (++next < parts.length) {
+          // A top-level Python annotation ends with its logical line.
+          if (language === 'python' && !parents.has(index) && lineBreakBefore(next)) { next = -1; break }
+          if (value(next) === '=') break
           if (/^[;{},):\]]$/.test(value(next)) || /^(val|var|let|def)$/.test(value(next))) break
           if (pairs[value(next)] && !closes.has(next)) break
           next = closes.get(next) ?? next
@@ -220,3 +229,6 @@ export const classifyDefinitions = (tokens: Token[], language: string): Token[] 
   }
   return tokens
 }
+
+/** Whether text contains a newline that is not a backslash line continuation. */
+export const endsLine = (text: string): boolean => /[\r\n]/.test(text.replace(/\\(?:\r\n|\r|\n)/g, ''))

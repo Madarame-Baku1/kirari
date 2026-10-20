@@ -122,3 +122,17 @@ test('Python custom string openers do not trigger built-in f-string processing',
   expect(tokens[0]).toEqual({ type: 'string', value: 'f"', start: 0, end: 2 })
   expect(tokens).toContainEqual({ type: 'variable', value: 'literal', start: 2, end: 9 })
 })
+
+test('Python annotations bind a function literal only within their logical line', () => {
+  const functions = (source: string) => tokenize(source, python).filter(token => token.type === 'function').map(token => token.value)
+  expect(functions('if ready:\n    handler = lambda: 0\n')).toEqual(['handler'])
+  expect(functions('for item in items:\n    callback = lambda: 0\n')).toEqual(['callback'])
+  expect(functions('count: int\nreset = lambda: 0\n')).toEqual(['reset'])
+  expect(functions('count: int  # note\nreset = lambda: 0\n')).toEqual(['reset'])
+  expect(functions('handler: Callable[\n    [int], str] = lambda n: str(n)\n')).toContain('handler')
+  expect(functions('handler: int \\\n    = lambda: 0\n')).toContain('handler')
+  expect(functions('handler: int \\\r\n    = lambda: 0\n')).toContain('handler')
+  expect(functions('def run(callback: Callable\n        = lambda: 0): pass\n')).toContain('callback')
+  expect(functions('handler: int if a < b else str = lambda: 0\nif x > 2:\n    pass\n')).toContain('handler')
+})
+
