@@ -9,6 +9,7 @@ const ClipboardContext = createContext<Types.Copy | null>(null)
 export const ClipboardProvider = (props: Types.Props) => {
 	const { children } = props
 	const [message, setMessage] = useState('')
+	const [failed, setFailed] = useState(false)
 	const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
 	const fallback = useRef<HTMLTextAreaElement>(null)
 	useEffect(() => () => clearTimeout(timer.current), [])
@@ -33,6 +34,7 @@ export const ClipboardProvider = (props: Types.Props) => {
 			/* Keep failure feedback available to keyboard and screen-reader users. */
 		}
 		clearTimeout(timer.current)
+		setFailed(!copied)
 		setMessage(copied ? success : 'Couldn’t copy. Select the text and copy it manually.')
 		timer.current = setTimeout(() => setMessage(''), 2400)
 		return copied
@@ -49,7 +51,7 @@ export const ClipboardProvider = (props: Types.Props) => {
 				readOnly
 			/>
 			<div
-				className={styles.root}
+				className={failed ? styles.root : 'sr-only'}
 				id="toast"
 				role="status"
 				aria-live="polite"
