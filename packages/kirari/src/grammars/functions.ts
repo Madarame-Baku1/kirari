@@ -26,7 +26,12 @@ export const createFunctionLookup = (source: string, typed: boolean, scan: (star
   // Reuse nested groups, including unfinished ones, instead of rescanning each signature suffix.
   const groups = new Map<number, Group>()
   // A slash after the last line break may still become a regex literal once more source arrives.
-  const lastLine = Math.max(source.lastIndexOf('\n'), source.lastIndexOf('\r'), source.lastIndexOf('\u2028'), source.lastIndexOf('\u2029'))
+  let lastLine = source.length - 1
+  while (lastLine >= 0) {
+    const char = source.charCodeAt(lastLine)
+    if (char === 10 || char === 13 || char === 0x2028 || char === 0x2029) break
+    lastLine--
+  }
   return (start: number, { annotation, generic, property, asyncModifier }: LookupOptions): Result => {
     let reader = scan(start)
     let token: Token | undefined

@@ -171,12 +171,14 @@ for (const language of [jsx, tsx]) {
 
 test('script lookahead stays revisable while a slash on the last line may become a regex', () => {
   for (const language of [typescript, tsx]) {
-    const source = '[{a\n</]/>(1)'
-    const stream = createTokenStream(language)
-    const tokens: Token[] = []
-    for (let index = 0; index < source.length; index++) {
-      apply(tokens, stream.write(source[index]!))
-      expect(tokens).toEqual(tokenize(source.slice(0, index + 1), language))
+    for (const newline of ['', '\n', '\r\n', '\r', '\u2028', '\u2029']) {
+      const source = `[{a${newline}</]/>(1)`
+      const stream = createTokenStream(language)
+      const tokens: Token[] = []
+      for (let index = 0; index < source.length; index++) {
+        apply(tokens, stream.write(source[index]!))
+        expect(tokens).toEqual(tokenize(source.slice(0, index + 1), language))
+      }
     }
   }
 })
