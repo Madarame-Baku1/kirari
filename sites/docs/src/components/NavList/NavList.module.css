@@ -1,0 +1,65 @@
+.root {
+	display: flex;
+	flex-direction: column;
+	gap: var(--size-2);
+}
+.group {
+	display: flex;
+	flex-direction: column;
+	margin-bottom: var(--size-26);
+}
+.groupTitle {
+	margin: 0 0 var(--size-8) var(--size-12);
+	font-size: var(--size-12);
+	font-weight: var(--weight-semibold);
+	color: var(--ink);
+}
+.item {
+	position: relative;
+	display: block;
+	transition:
+		color var(--duration-fast),
+		background var(--duration-fast);
+}
+.item:hover {
+	background: var(--soft);
+}
+.item[aria-current="page"] {
+	background: var(--soft-2);
+}
+.item[aria-current="page"]:hover {
+	background: var(--line);
+}
+
+.sidebar {
+	gap: 0;
+}
+.sidebar .item {
+	padding: var(--size-5) var(--size-12);
+	border-radius: var(--size-7);
+	font-size: var(--size-14);
+	color: var(--muted);
+}
+.sidebar .item:hover,
+.sidebar .item[aria-current="page"] {
+	color: var(--ink);
+}
+.sidebar .item[aria-current="page"] {
+	font-weight: var(--weight-emphasis);
+}
+.sidebar .item[aria-current="page"]::before {
+	content: "";
+	position: absolute;
+	left: calc(-1 * var(--hairline));
+	top: var(--size-8);
+	bottom: var(--size-8);
+	width: var(--size-2);
+	border-radius: var(--size-2);
+	background: var(--accent);
+}
+
+.menu .item {
+	padding: var(--size-8) var(--size-12);
+	border-radius: var(--size-8);
+	font-weight: var(--weight-emphasis);
+}

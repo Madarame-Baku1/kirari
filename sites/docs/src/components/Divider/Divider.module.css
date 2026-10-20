@@ -1,0 +1,15 @@
+/* Zero specificity so callers can set spacing with a single class. */
+:where(.root) {
+	flex: none;
+	margin: 0;
+	border: 0;
+	background: var(--divider-color, var(--line));
+}
+:where(.horizontal) {
+	height: var(--hairline);
+}
+:where(.vertical) {
+	align-self: stretch;
+	width: var(--hairline);
+	height: auto;
+}

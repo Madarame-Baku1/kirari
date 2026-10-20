@@ -1,0 +1,32 @@
+.subtle {
+	color: var(--muted);
+	transition: color var(--duration-fast);
+}
+.subtle:hover,
+.subtle[aria-current="page"] {
+	color: var(--ink);
+}
+.strong {
+	color: var(--ink);
+	font-weight: var(--weight-medium);
+}
+.strong:hover {
+	color: var(--muted);
+}
+.withArrow {
+	display: inline-flex;
+	align-items: center;
+	gap: var(--size-6);
+}
+.arrow {
+	display: inline-flex;
+	transition: transform var(--duration-normal);
+}
+:hover > .withArrow {
+	display: inline-flex;
+	align-items: center;
+	gap: var(--size-6);
+}
+.arrow {
+	transform: translateX(var(--size-3));
+}

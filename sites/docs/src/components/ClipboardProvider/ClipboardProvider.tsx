@@ -49,7 +49,7 @@ export const ClipboardProvider = (props: Types.Props) => {
 				readOnly
 			/>
 			<div
-				className={`${styles.root} toast`}
+				className={styles.root}
 				id="toast"
 				role="status"
 				aria-live="polite"
@@ -65,4 +65,26 @@ export const useClipboard = () => {
 	const copy = useContext(ClipboardContext)
 	if (!copy) throw new Error('Clipboard controls require ClipboardProvider')
 	return copy
+}
+
+/** Copies `text` and reports a short-lived `copied` flag for confirmation UI. */
+export const useCopy = (options: Types.CopyOptions) => {
+	const { text, message, onCopied } = options
+	const copyText = useClipboard()
+	const [copied, setCopied] = useState(false)
+	const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
+	useEffect(() => () => clearTimeout(timer.current), [])
+
+	const copy = async () => {
+		if (!(await copyText(typeof text === 'function' ? text() : text, message))) return
+		clearTimeout(timer.current)
+		setCopied(true)
+		timer.current = setTimeout(() => setCopied(false), 1600)
+		onCopied?.()
+	}
+
+	return {
+		copied,
+		copy,
+	}
 }

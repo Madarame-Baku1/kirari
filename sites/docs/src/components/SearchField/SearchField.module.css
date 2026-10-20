@@ -1,0 +1,39 @@
+.root {
+	display: flex;
+	align-items: center;
+	min-width: 0;
+	color: var(--faint);
+}
+.input {
+	flex: 1;
+	min-width: 0;
+	padding: 0;
+	border: 0;
+	background: transparent;
+	color: var(--ink);
+	outline: none;
+}
+.outline {
+	gap: var(--size-8);
+	height: var(--size-40);
+	padding: 0 var(--size-12);
+	border: var(--hairline) solid var(--line);
+	border-radius: var(--size-10);
+}
+.outline .input {
+	font-size: var(--size-16);
+}
+.outline:hover:not(:focus-within) {
+	border-color: var(--line-strong);
+	background: var(--soft);
+}
+.outline:focus-within {
+	border-color: var(--accent);
+	box-shadow: 0 0 0 var(--size-3) var(--accent-soft);
+}
+.bare {
+	gap: var(--size-12);
+}
+.bare .input {
+	font-size: var(--size-17);
+}

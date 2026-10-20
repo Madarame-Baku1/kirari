@@ -1,0 +1,26 @@
+.root {
+	--segmented-control-ink: var(--segmented-control-color, var(--ink));
+	display: flex;
+	gap: var(--size-2);
+	padding: var(--size-2);
+	border-radius: var(--size-7);
+	background: color-mix(in srgb, var(--segmented-control-ink) 8%, transparent);
+}
+.item {
+	height: var(--size-22);
+	padding: 0 var(--size-9);
+	border: 0;
+	border-radius: var(--size-5);
+	background: transparent;
+	color: color-mix(in srgb, var(--segmented-control-ink) 75%, transparent);
+	font-size: var(--size-12);
+}
+.item[aria-pressed="true"] {
+	background: var(--segmented-control-surface, var(--bg));
+	color: var(--segmented-control-ink);
+	box-shadow: 0 var(--hairline) var(--size-2) #0000001f;
+}
+.item:hover {
+	background: color-mix(in srgb, var(--segmented-control-ink) 16%, transparent);
+	color: var(--segmented-control-ink);
+}

@@ -1,1 +1,1 @@
-export { ClipboardProvider, useClipboard } from './ClipboardProvider'
+export { ClipboardProvider, useClipboard, useCopy } from './ClipboardProvider'
