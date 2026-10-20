@@ -1,8 +1,8 @@
 import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-import { isPackageId, packages } from '@/changelog'
-import { releaseTemplate } from '@/changelog.content'
+import { isPackageId, packages } from '@/features/changelog/changelog.data'
+import { releaseTemplate } from '@/features/changelog/changelog.content'
 
 const usage = 'Usage: bun run changelog:new [package] [version]'
 const [id, explicitVersion] = process.argv.slice(2)

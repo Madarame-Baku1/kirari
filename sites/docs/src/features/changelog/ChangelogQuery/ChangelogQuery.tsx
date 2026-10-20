@@ -1,7 +1,7 @@
 'use client'
 
 import { useSearchParams } from 'next/navigation'
-import { isPackageId } from '@/changelog'
+import { isPackageId } from '@/features/changelog/changelog.data'
 import { Changelog } from '@/features/changelog/Changelog'
 import type * as Types from './ChangelogQuery.types'
 

@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import type { categories, packages } from './changelog'
+import type { categories, packages } from './changelog.data'
 
 export type Category = (typeof categories)[number]['id']
 export type PackageId = (typeof packages)[number]['id']

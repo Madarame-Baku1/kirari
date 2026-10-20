@@ -1,4 +1,4 @@
-import type { PackageId, Release } from '@/changelog.types'
+import type { PackageId, Release } from '@/features/changelog/changelog.types'
 
 export type Props = {
 	releases: readonly Release[]
