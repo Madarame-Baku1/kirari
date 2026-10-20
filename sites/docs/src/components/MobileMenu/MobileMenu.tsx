@@ -7,22 +7,8 @@ import { Dialog } from '../Dialog'
 import { Divider } from '../Divider'
 import { DocsNavigation } from '../DocsNavigation'
 import { NavList } from '../NavList'
+import { pageLinks } from './MobileMenu.data'
 import type * as Types from './MobileMenu.types'
-
-const pages = [
-	{
-		target: 'home',
-		label: 'Home',
-	},
-	{
-		target: 'docs',
-		label: 'Docs',
-	},
-	{
-		target: 'playground',
-		label: 'Playground',
-	},
-] as const
 
 export const MobileMenu = (props: Types.Props) => {
 	const { open, onClose, page, activeSection } = props
@@ -43,7 +29,7 @@ export const MobileMenu = (props: Types.Props) => {
 			</div>
 			<nav aria-label="Pages">
 				<NavList variant="menu">
-					{pages.map(item => (
+					{pageLinks.map(item => (
 						<NavList.Item
 							key={item.target}
 							href={routes[item.target]}

@@ -1,10 +1,10 @@
 import styles from './Footer.module.css'
 import { routes } from '../../navigation'
-import { site } from '../../site'
 import { Logo } from '../Logo'
 import { Icon } from '../Icon'
 import { IconButton } from '../IconButton'
 import { Link } from '../Link'
+import { iconLinks, links } from './Footer.data'
 
 export const Footer = () => (
 	<footer className="site-footer">
@@ -14,24 +14,24 @@ export const Footer = () => (
 			</Link>
 			<p>A little light for your code.</p>
 			<nav aria-label="Footer">
-				<Link href={routes.docs}>Docs</Link>
-				<Link href={routes.playground}>Playground</Link>
-				<Link href="/llms.txt" prefetch={false}>
-					llms.txt
-				</Link>
+				{links.map(link => (
+					<Link key={link.href} href={link.href} prefetch={link.prefetch}>
+						{link.label}
+					</Link>
+				))}
 			</nav>
 			<div className={styles.socials}>
-				<IconButton
-					href={site.github}
-					external
-					label="Kirari on GitHub"
-					title="Kirari on GitHub"
-				>
-					<Icon name="github" />
-				</IconButton>
-				<IconButton href={site.x} external label="Follow Ugi on X" title="Follow Ugi on X">
-					<Icon name="x" />
-				</IconButton>
+				{iconLinks.map(link => (
+					<IconButton
+						key={link.href}
+						href={link.href}
+						external
+						label={link.label}
+						title={link.label}
+					>
+						<Icon name={link.icon} />
+					</IconButton>
+				))}
 			</div>
 		</div>
 	</footer>
