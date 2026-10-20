@@ -22,7 +22,7 @@ export const HighlightDemo = (props: Types.Props) => {
 
 	return (
 		<section className={styles.root} aria-label="Highlighting demo">
-			<div className={styles.demoWindow} data-palette={palette} data-demo-window>
+			<div className={styles.demoWindow} data-palette={palette}>
 				<Tabs value={selected} onChange={setSelected}>
 					<div className={styles.demoBar}>
 						<Tabs.List className={styles.demoTabs} label="Demo language">

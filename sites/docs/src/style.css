@@ -490,6 +490,63 @@ tr:last-child td {
 		margin-left: 0;
 	}
 }
+/*
+ * Landing motion, CSS only so server-rendered content never flashes before hydration.
+ * `data-intro` plays once on load; `data-reveal` is driven by scroll position where
+ * scroll-driven animations are supported, and content stays static elsewhere.
+ * `="stagger"` animates direct children in sequence instead of the element itself.
+ */
+@keyframes rise {
+	from {
+		opacity: 0;
+		transform: translateY(var(--rise-distance, var(--size-16)));
+	}
+}
+@keyframes glint {
+	from {
+		background-position: 100% 0;
+	}
+	47%,
+	to {
+		background-position: 0 0;
+	}
+}
+@media (prefers-reduced-motion: no-preference) {
+	.glint-text {
+		animation: glint 3s var(--ease-in-out) 0.6s infinite both;
+	}
+	[data-intro]:not([data-intro="stagger"]),
+	[data-intro="stagger"] > * {
+		animation: rise var(--intro-duration, 0.7s) var(--ease-out) both;
+		animation-delay: calc(var(--motion-index, 0) * 80ms + var(--intro-delay, 0ms));
+	}
+	[data-intro="delayed"] {
+		--rise-distance: var(--size-28);
+		--intro-delay: 0.3s;
+		--intro-duration: 0.9s;
+	}
+	:is([data-intro="stagger"], [data-reveal="stagger"]) > :nth-child(2) {
+		--motion-index: 1;
+	}
+	:is([data-intro="stagger"], [data-reveal="stagger"]) > :nth-child(3) {
+		--motion-index: 2;
+	}
+	:is([data-intro="stagger"], [data-reveal="stagger"]) > :nth-child(4) {
+		--motion-index: 3;
+	}
+	@supports (animation-timeline: view()) {
+		[data-reveal]:not([data-reveal="stagger"]),
+		[data-reveal="stagger"] > * {
+			--rise-distance: var(--size-24);
+			animation: rise linear both;
+			animation-timing-function: var(--ease-out);
+			animation-timeline: view();
+			/* Lengths, not percentages, so tall and short blocks settle after the same scroll. */
+			animation-range: entry calc(var(--motion-index, 0) * 3rem) entry
+				calc(14rem + var(--motion-index, 0) * 3rem);
+		}
+	}
+}
 @media (prefers-reduced-motion: reduce) {
 	html {
 		scroll-behavior: auto;

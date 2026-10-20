@@ -82,7 +82,6 @@ export const StreamDemo = () => {
 			ref={frame}
 			className={styles.root}
 			data-palette="dusk"
-			data-reveal
 			data-streaming={streaming ? '' : undefined}
 		>
 			<div className={styles.streamBar}>

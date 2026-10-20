@@ -1,1 +1,0 @@
-export { LandingMotion } from './LandingMotion'

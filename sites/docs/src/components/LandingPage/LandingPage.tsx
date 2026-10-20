@@ -11,7 +11,6 @@ import { Footer } from '../Footer'
 import { HighlightDemo } from '../HighlightDemo'
 import { Icon } from '../Icon'
 import { InstallCommand } from '../InstallCommand'
-import { LandingMotion } from '../LandingMotion'
 import { MagneticLink } from '../MagneticLink'
 import { SiteLayout } from '../SiteLayout'
 import { Stat } from '../Stat'
@@ -72,8 +71,8 @@ export const LandingPage = () => {
 
 	return (
 		<SiteLayout page="home">
-			<LandingMotion>
-				<section className="hero" aria-labelledby="hero-title">
+			<main id="main" tabIndex={-1} className="landing">
+				<section className="hero" aria-labelledby="hero-title" data-intro="stagger">
 					<h1 id="hero-title" className="hero-title">
 						Syntax highlighting with a little <span className="glint-text">light</span>
 					</h1>
@@ -92,8 +91,10 @@ export const LandingPage = () => {
 						</Button>
 					</div>
 				</section>
-				<HighlightDemo demos={demos} palettes={palettes} />
-				<section className="stats" aria-label="At a glance">
+				<div data-intro="delayed">
+					<HighlightDemo demos={demos} palettes={palettes} />
+				</div>
+				<section className="stats" aria-label="At a glance" data-reveal="stagger">
 					<Stat value="2.9" unit="kB" label="core with JavaScript, gzipped" />
 					<Stat
 						value={String(languageCount)}
@@ -102,7 +103,7 @@ export const LandingPage = () => {
 					/>
 					<Stat value="0" unit="" label="runtime dependencies or DOM APIs" />
 				</section>
-				<section className="row" aria-labelledby="stream-title">
+				<section className="row" aria-labelledby="stream-title" data-reveal="stagger">
 					<FeatureIntro
 						id="stream-title"
 						icon="bolt"
@@ -114,7 +115,11 @@ export const LandingPage = () => {
 					/>
 					<StreamDemo />
 				</section>
-				<section className="row reverse" aria-labelledby="themes-title">
+				<section
+					className="row reverse"
+					aria-labelledby="themes-title"
+					data-reveal="stagger"
+				>
 					<FeatureIntro
 						id="themes-title"
 						icon="palette"
@@ -124,7 +129,7 @@ export const LandingPage = () => {
 						href={docsPath('themes')}
 						linkLabel="Browse all themes"
 					/>
-					<div className="theme-stack" data-reveal>
+					<div className="theme-stack">
 						{cards.map(entry => (
 							<ThemeCard key={entry.id} theme={entry} />
 						))}
@@ -138,7 +143,7 @@ export const LandingPage = () => {
 						/>
 					</div>
 				</section>
-				<section className="row" aria-labelledby="languages-title">
+				<section className="row" aria-labelledby="languages-title" data-reveal="stagger">
 					<FeatureIntro
 						id="languages-title"
 						icon="feather"
@@ -148,7 +153,7 @@ export const LandingPage = () => {
 						href={docsPath('languages')}
 						linkLabel="All languages"
 					/>
-					<nav className="language-cloud" aria-label="Try a language" data-reveal>
+					<nav className="language-cloud" aria-label="Try a language">
 						{languageEntries.map(entry => (
 							<MagneticLink
 								key={entry.id}
@@ -159,7 +164,7 @@ export const LandingPage = () => {
 						))}
 					</nav>
 				</section>
-				<section className="closing" aria-labelledby="closing-title" data-reveal>
+				<section className="closing" aria-labelledby="closing-title" data-reveal="stagger">
 					<div className="closing-copy">
 						<h2 id="closing-title">Three lines to start</h2>
 						<p>Install, import a theme, and highlight.</p>
@@ -187,7 +192,7 @@ export const LandingPage = () => {
 						/>
 					</div>
 				</section>
-			</LandingMotion>
+			</main>
 			<Footer />
 		</SiteLayout>
 	)

@@ -7,7 +7,7 @@ export const FeatureIntro = (props: Types.Props) => {
 	const { id, icon, eyebrow, title, description, href, linkLabel } = props
 
 	return (
-		<div className={styles.root} data-reveal>
+		<div className={styles.root}>
 			<p className={styles.eyebrow}>
 				<Icon name={icon} size={15} /> {eyebrow}
 			</p>

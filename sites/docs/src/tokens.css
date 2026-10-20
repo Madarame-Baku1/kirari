@@ -43,6 +43,8 @@
 	--leading-code-relaxed: 1.8;
 	--duration-fast: 0.15s;
 	--duration-normal: 0.2s;
+	--ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+	--ease-in-out: cubic-bezier(0.645, 0.045, 0.355, 1);
 	--code-chrome: #8b91a2;
 	--bg: #fff;
 	--ink: #0f1115;
