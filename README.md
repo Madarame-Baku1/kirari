@@ -63,8 +63,9 @@ Language coverage varies; see the accuracy guide for supported cases and limits.
 
 ## Development
 
-Clone this repository and run these commands from its root, using the Bun version
-in `package.json`:
+Clone this repository and run these commands from its root, using Node.js 26
+(selected by `.nvmrc`) and the Bun version in `package.json`. CI also checks
+Node.js 24 compatibility:
 
 ```sh
 bun install

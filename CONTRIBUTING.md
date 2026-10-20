@@ -12,6 +12,7 @@ Thanks for helping with Kirari. This guide covers reporting issues, setting up t
 ## Setup
 
 Kirari is a [Bun](https://bun.sh) workspace. Use the version in the root `package.json` (`packageManager`).
+Use Node.js 26 for development; the root `.nvmrc` selects this version.
 
 ```sh
 bun install
@@ -66,9 +67,9 @@ Keep each commit focused on one change.
 
 ## Pull requests
 
-The [CI workflow](.github/workflows/ci.yml) runs on pull requests and pushes to branches other than `main`.
+The [CI workflow](.github/workflows/ci.yml) runs on pull requests and pushes to all branches, including `main`.
 It installs the frozen lockfile with the Bun version from `package.json`, uses
-Node.js 24 for consumer checks, and runs `bun run check`. This covers linting,
+Node.js 24 and 26 in a matrix, and runs `bun run check` on each. This covers linting,
 types, tests, package and docs builds, and installing packed packages outside the
 workspace. The separate browser harness still needs to be opened in a browser;
 CI does not execute it.

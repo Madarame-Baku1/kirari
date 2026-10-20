@@ -2,7 +2,10 @@ import { site } from '../../site'
 import type { Name } from '../Icon/Icon.types'
 import type { Page } from '../../shared.types'
 
-export const pageLinks: readonly { target: Page; label: string }[] = [
+export const pageLinks: readonly {
+	target: Page
+	label: string
+}[] = [
 	{
 		target: 'docs',
 		label: 'Docs',
@@ -17,14 +20,21 @@ export const pageLinks: readonly { target: Page; label: string }[] = [
 	},
 ]
 
-export const externalLinks: readonly { href: string; label: string }[] = [
+export const externalLinks: readonly {
+	href: string
+	label: string
+}[] = [
 	{
 		href: site.npm,
 		label: 'npm',
 	},
 ]
 
-export const iconLinks: readonly { href: string; label: string; icon: Name }[] = [
+export const iconLinks: readonly {
+	href: string
+	label: string
+	icon: Name
+}[] = [
 	{
 		href: site.github,
 		label: 'Kirari on GitHub',

@@ -23,7 +23,8 @@ bun run --cwd sites/docs start    # Serve the production site locally
 bun run --cwd sites/docs check    # Types, tests, production build, and SEO checks
 ```
 
-Use Node.js 22 or 24 and the Bun version pinned in the root `package.json`.
+Use Node.js 26 (selected by the root `.nvmrc`) and the Bun version pinned in the
+root `package.json`. CI runs the same checks on Node.js 24 and 26.
 
 ## Writing documentation
 
@@ -127,6 +128,10 @@ In the existing Vercel project, set **Root Directory** to `sites/docs` and enabl
 access to files outside that directory. The local `vercel.json` selects Next.js,
 installs from the workspace root, builds all packages, and uses `.next` output.
 Remove any old project-level `sites/docs/dist` output override.
+
+Use Node.js 24 for Vercel deployments until Node.js 26 is available in its
+[supported runtimes](https://vercel.com/docs/functions/runtimes/node-js/node-js-versions).
+The development `.nvmrc` does not change the Vercel runtime setting.
 
 The Vercel dashboard settings and live deployment are not changed by editing
 this repository. For other hosts, build from the workspace root, then run the

@@ -1,6 +1,9 @@
 import type { Page } from '../../shared.types'
 
-export const pageLinks: readonly { target: Page; label: string }[] = [
+export const pageLinks: readonly {
+	target: Page
+	label: string
+}[] = [
 	{
 		target: 'home',
 		label: 'Home',

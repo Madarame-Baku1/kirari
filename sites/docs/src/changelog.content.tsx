@@ -15,13 +15,21 @@ import type * as Types from './changelog.types'
 
 type Root = ReturnType<typeof markdownProcessor.parse>
 type Node = Root['children'][number]
-type Heading = Extract<Node, { type: 'heading' }>
+type Heading = Extract<
+	Node,
+	{
+		type: 'heading'
+	}
+>
 
 export type ParsedRelease = z.infer<typeof frontmatterSchema> & {
 	sections: Record<Types.Category, Node[]>
 }
 
-type TextNode = { value?: string; children?: readonly TextNode[] }
+type TextNode = {
+	value?: string
+	children?: readonly TextNode[]
+}
 
 const text = (node: TextNode): string => node.value ?? node.children?.map(text).join('') ?? ''
 
@@ -44,7 +52,12 @@ export const compareVersions = (left: string, right: string) => {
 }
 
 const frontmatterSchema = z.strictObject({
-	package: z.enum(packages.map(item => item.id) as [Types.PackageId, ...Types.PackageId[]]),
+	package: z.enum(
+		packages.map(item => item.id) as [
+			Types.PackageId,
+			...Types.PackageId[],
+		],
+	),
 	version: z.string().regex(versionPattern, 'use a full version such as 1.2.3'),
 	date: z.iso.date('use a real date as YYYY-MM-DD'),
 })
@@ -84,29 +97,46 @@ export const parseRelease = (source: string, path: string): ParsedRelease => {
 		return fail(undefined, `frontmatter ${issue.path.join('.') || 'block'}: ${issue.message}`)
 	}
 	const { package: id, version } = frontmatter.data
-	if (path !== `${id}/${version}.md`) fail(undefined, `frontmatter says ${id}/${version}.md; move the file or fix the frontmatter`)
+	if (path !== `${id}/${version}.md`)
+		fail(
+			undefined,
+			`frontmatter says ${id}/${version}.md; move the file or fix the frontmatter`,
+		)
 
 	const offset = block[0].split('\n').length - 1
 	const nodes = markdownProcessor.parse(source.slice(block[0].length)).children
-	const line = (node: Node | undefined) => (node?.position ? node.position.start.line + offset : undefined)
-	const sections: ParsedRelease['sections'] = { breaking: [], improvements: [], fixes: [] }
+	const line = (node: Node | undefined) =>
+		node?.position ? node.position.start.line + offset : undefined
+	const sections: ParsedRelease['sections'] = {
+		breaking: [],
+		improvements: [],
+		fixes: [],
+	}
 	const expected = categories.map(category => `"### ${category.label}"`).join(', ')
 	if (!nodes.length) fail(undefined, `add at least one section: ${expected}`)
 	let index = 0
 	let previous = -1
 	while (index < nodes.length) {
 		const title = nodes[index]
-		const position = isHeading(title, 3) ? categories.findIndex(item => item.label === text(title)) : -1
+		const position = isHeading(title, 3)
+			? categories.findIndex(item => item.label === text(title))
+			: -1
 		if (position < 0) fail(line(title), `expected one of the sections ${expected}`)
 		const category = categories[position]!
 		if (position === previous) fail(line(title), `"### ${category.label}" appears twice`)
 		if (position < previous) {
-			fail(line(title), `"### ${category.label}" must come before "### ${categories[previous]!.label}"`)
+			fail(
+				line(title),
+				`"### ${category.label}" must come before "### ${categories[previous]!.label}"`,
+			)
 		}
 		previous = position
 		index++
 		const body: Node[] = []
-		while (index < nodes.length && !(nodes[index]!.type === 'heading' && (nodes[index] as Heading).depth <= 3)) {
+		while (
+			index < nodes.length &&
+			!(nodes[index]!.type === 'heading' && (nodes[index] as Heading).depth <= 3)
+		) {
 			body.push(nodes[index++]!)
 		}
 		const where = category.label
@@ -119,26 +149,52 @@ export const parseRelease = (source: string, path: string): ParsedRelease => {
 				fail(line(body[0]), `${where}: use one bullet list`)
 			}
 		} else {
-			if (!isHeading(body[0], 4)) fail(line(body[0]), `${where}: start each change with a "####" title`)
-			const starts = body.flatMap((node, start) => (isHeading(node, 4) ? [start] : []))
+			if (!isHeading(body[0], 4))
+				fail(line(body[0]), `${where}: start each change with a "####" title`)
+			const starts = body.flatMap((node, start) =>
+				isHeading(node, 4)
+					? [
+							start,
+						]
+					: [],
+			)
 			for (const [n, start] of starts.entries()) {
 				const change = body.slice(start, starts[n + 1])
 				const label = change.findIndex(isMigrateLabel)
 				const steps = change[label + 1]
-				if (label < 0) fail(line(change[0]), `${where}: add "**How to migrate**" followed by numbered steps`)
+				if (label < 0)
+					fail(
+						line(change[0]),
+						`${where}: add "**How to migrate**" followed by numbered steps`,
+					)
 				if (label < 2 || change.slice(1, label).some(node => node.type !== 'paragraph')) {
-					fail(line(change[0]), `${where}: explain the change in a paragraph before "**How to migrate**"`)
+					fail(
+						line(change[0]),
+						`${where}: explain the change in a paragraph before "**How to migrate**"`,
+					)
 				}
 				if (steps?.type !== 'list' || !steps.ordered) {
-					fail(line(change[label]), `${where}: follow "**How to migrate**" with numbered steps`)
+					fail(
+						line(change[label]),
+						`${where}: follow "**How to migrate**" with numbered steps`,
+					)
 				}
-				const extra = change.slice(label + 2).find(node => node.type !== 'paragraph' && node.type !== 'code')
-				if (extra) fail(line(extra), `${where}: only paragraphs and code blocks may follow the steps`)
+				const extra = change
+					.slice(label + 2)
+					.find(node => node.type !== 'paragraph' && node.type !== 'code')
+				if (extra)
+					fail(
+						line(extra),
+						`${where}: only paragraphs and code blocks may follow the steps`,
+					)
 			}
 		}
 		sections[category.id] = body
 	}
-	return { ...frontmatter.data, sections }
+	return {
+		...frontmatter.data,
+		sections,
+	}
 }
 
 const snippetLabel = (code: Element | undefined) => {
@@ -149,7 +205,10 @@ const snippetLabel = (code: Element | undefined) => {
 }
 
 const renderSection = (nodes: Node[], id: string) => {
-	const tree = markdownProcessor.runSync({ type: 'root', children: nodes })
+	const tree = markdownProcessor.runSync({
+		type: 'root',
+		children: nodes,
+	})
 	return markdownProcessor()
 		.use(rehypeReact, {
 			Fragment,
@@ -163,9 +222,12 @@ const renderSection = (nodes: Node[], id: string) => {
 					</Link>
 				),
 				p: (props: { node?: Element; children?: ReactNode }) => {
-					const only = props.node?.children.length === 1 ? props.node.children[0] : undefined
+					const only =
+						props.node?.children.length === 1 ? props.node.children[0] : undefined
 					const migrate =
-						only?.type === 'element' && only.tagName === 'strong' && text(only) === 'How to migrate'
+						only?.type === 'element' &&
+						only.tagName === 'strong' &&
+						text(only) === 'How to migrate'
 					return <p data-migrate={migrate || undefined}>{props.children}</p>
 				},
 				pre: (props: { node?: Element; className?: string; children?: ReactNode }) => {
@@ -179,10 +241,14 @@ const renderSection = (nodes: Node[], id: string) => {
 							label={label}
 							text={code ? text(code) : ''}
 							preClassName={props.className}
-							codeClassName={code?.properties.className?.toString().replaceAll(',', ' ')}
+							codeClassName={code?.properties.className
+								?.toString()
+								.replaceAll(',', ' ')}
 							copyLabel={`Copy ${label.toLowerCase()} snippet`}
 						>
-							{isValidElement<{ children?: ReactNode }>(props.children)
+							{isValidElement<{
+								children?: ReactNode
+							}>(props.children)
 								? props.children.props.children
 								: props.children}
 						</CodeBlock>
@@ -194,12 +260,17 @@ const renderSection = (nodes: Node[], id: string) => {
 }
 
 /** Validated releases of one package, newest first, including versions not yet published. */
-export const readPackageReleases = async (id: Types.PackageId, root = join(process.cwd(), 'changelog')) => {
+export const readPackageReleases = async (
+	id: Types.PackageId,
+	root = join(process.cwd(), 'changelog'),
+) => {
 	const files = await readdir(join(root, id))
 	const releases = await Promise.all(
 		files.map(async file => {
 			if (!versionPattern.test(file.replace(/\.md$/, '')) || !file.endsWith('.md')) {
-				throw new Error(`changelog/${id}/${file}: name release files <version>.md, such as 1.2.3.md`)
+				throw new Error(
+					`changelog/${id}/${file}: name release files <version>.md, such as 1.2.3.md`,
+				)
 			}
 			return parseRelease(await readFile(join(root, id, file), 'utf8'), `${id}/${file}`)
 		}),
@@ -208,7 +279,9 @@ export const readPackageReleases = async (id: Types.PackageId, root = join(proce
 	for (const [index, release] of releases.entries()) {
 		const older = releases[index + 1]
 		if (older && older.date > release.date) {
-			throw new Error(`changelog/${id}/${release.version}.md: dated ${release.date}, before ${older.version} on ${older.date}`)
+			throw new Error(
+				`changelog/${id}/${release.version}.md: dated ${release.date}, before ${older.version} on ${older.date}`,
+			)
 		}
 	}
 	return releases
@@ -226,12 +299,16 @@ export const readReleases = async (
 	const folders = (await readdir(root)).sort()
 	const expected = packages.map(item => item.id).sort()
 	if (folders.join() !== expected.join()) {
-		throw new Error(`changelog/ must contain exactly the folders ${expected.join(', ')}; found ${folders.join(', ')}`)
+		throw new Error(
+			`changelog/ must contain exactly the folders ${expected.join(', ')}; found ${folders.join(', ')}`,
+		)
 	}
 	const releases = await Promise.all(
 		packages.map(async item => {
 			const manifest = join(packagesRoot, item.directory, 'package.json')
-			const { version: published } = JSON.parse(await readFile(manifest, 'utf8')) as { version: string }
+			const { version: published } = JSON.parse(await readFile(manifest, 'utf8')) as {
+				version: string
+			}
 			return (await readPackageReleases(item.id, root))
 				.filter(release => compareVersions(release.version, published) <= 0)
 				.map(release => {
@@ -244,7 +321,10 @@ export const readReleases = async (
 							.filter(category => release.sections[category.id].length)
 							.map(category => ({
 								category: category.id,
-								content: renderSection(release.sections[category.id], `${id}-${category.id}`),
+								content: renderSection(
+									release.sections[category.id],
+									`${id}-${category.id}`,
+								),
 							})),
 					}
 				})

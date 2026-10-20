@@ -2,7 +2,11 @@ import { routes } from '../../navigation'
 import { site } from '../../site'
 import type { Name } from '../Icon/Icon.types'
 
-export const links: readonly { href: string; label: string; prefetch?: boolean }[] = [
+export const links: readonly {
+	href: string
+	label: string
+	prefetch?: boolean
+}[] = [
 	{
 		href: routes.docs,
 		label: 'Docs',
@@ -22,7 +26,11 @@ export const links: readonly { href: string; label: string; prefetch?: boolean }
 	},
 ]
 
-export const iconLinks: readonly { href: string; label: string; icon: Name }[] = [
+export const iconLinks: readonly {
+	href: string
+	label: string
+	icon: Name
+}[] = [
 	{
 		href: site.github,
 		label: 'Kirari on GitHub',
