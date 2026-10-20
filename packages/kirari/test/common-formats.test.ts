@@ -37,6 +37,14 @@ test('YAML mappings, sequences, anchors, and scalar values', () => {
     ['string', '"quoted"'], ['comment', '# comment']]) expect(result).toContainEqual(pair)
 })
 
+test('YAML scalars only end before a comment that follows whitespace', () => {
+  expect(pairs('a: 3#x\nb: ~#y\nc: true # z\n', yaml)).toEqual([
+    ['property', 'a'], ['punctuation', ':'], ['string', '3#x'],
+    ['property', 'b'], ['punctuation', ':'], ['string', '~#y'],
+    ['property', 'c'], ['punctuation', ':'], ['boolean', 'true'], ['comment', '# z'],
+  ])
+})
+
 test('YAML block scalars stop at inferred and explicit indentation', () => {
   const result = pairs('script: |-\n\n  echo true\n  # literal\nnext: false\n- text: >2\n    literal: true\n  after: 3\n', yaml)
   expect(result).toContainEqual(['string', '  echo true\n'])

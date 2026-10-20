@@ -18,7 +18,7 @@ export const createMarkdown = (registry: LanguageRegistry): Language => {
     tokenize(source, language) {
       const tokens: Token[] = []
       for (const token of markdown.tokenize!(source, language)) {
-        const open = token.type === 'string' && /^ {0,3}(`{3,}|~{3,})([^\r\n]*)(?:\r\n?|\n)/.exec(token.value)
+        const open = token.type === 'string' && /^ {0,3}(?=(`{3,}|~{3,}))\1([^\r\n]*)(?:\r\n?|\n)/.exec(token.value)
         const embedded = open && registry.resolve(open[2]!.trim().split(/\s+/, 1)[0]!)
         if (!open || !embedded) {
           tokens.push(token)

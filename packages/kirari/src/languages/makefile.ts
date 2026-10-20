@@ -13,7 +13,7 @@ export const makefile: Language = {
     { type: 'keyword', pattern: /(?:include|-include|sinclude|define|endef|undefine|ifdef|ifndef|ifeq|ifneq|else|endif|override|export|unexport|private|vpath)\b/ },
     { type: 'variable', pattern: /[\w.-]+(?=[\t ]*(?:::{0,2}|[?+!])?=)/ },
     { type: 'operator', pattern: /(?<=^\t)[@+-]+/m },
-    { type: 'function', pattern: /[^\s:#=;$(){}"'\\]+(?=[\t ]*:(?!=))/ },
+    { type: 'function', pattern: /(?!\|)[^\s:#=;$(){}"'\\]+(?=[\t ]*:(?!=))/ },
     { type: 'operator', pattern: /:::=|::=|:=|[?+!]=|::|[=:;|]/ },
     { type: 'text', pattern: /[^\s:#=;$(){}"'\\]+/ },
     { type: 'punctuation', pattern: /[(){}]/ },

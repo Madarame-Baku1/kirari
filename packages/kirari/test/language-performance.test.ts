@@ -3,6 +3,13 @@ import { tokenize } from '../src/core.js'
 import { swift } from '../src/languages/swift.js'
 import { csharp } from '../src/languages/csharp.js'
 import { php } from '../src/languages/php.js'
+import { css } from '../src/languages/css.js'
+import { javascript } from '../src/languages/javascript.js'
+import { makefile } from '../src/languages/makefile.js'
+import { toml } from '../src/languages/toml.js'
+import { yaml } from '../src/languages/yaml.js'
+import { createMarkdown } from '../src/markdown.js'
+import { createRegistry } from '../src/registry.js'
 
 test('unfinished raw string prefixes do not repeatedly scan the entire prefix run', () => {
   const start = performance.now()
@@ -18,4 +25,14 @@ test('C# checks closing raw-string quote runs without overlapping comparisons', 
   const start = performance.now()
   expect(tokenize(source, csharp)).toEqual([{ type: 'string', value: source, start: 0, end: source.length }])
   expect(performance.now() - start).toBeLessThan(1000)
+}, 5000)
+
+test('short tokens inside long name runs do not rescan the run for lookahead rules', () => {
+  const markdown = createMarkdown(createRegistry([javascript]))
+  const start = performance.now()
+  for (const [language, unit] of [[css, '-0'], [makefile, '|'], [toml, '-0'], [yaml, '0#'], [markdown, '`']] as const) {
+    const source = unit.repeat(40_000 / unit.length)
+    expect(tokenize(source, language).map(t => t.value).join('')).toBe(source)
+  }
+  expect(performance.now() - start).toBeLessThan(1500)
 }, 5000)

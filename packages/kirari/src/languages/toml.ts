@@ -11,7 +11,7 @@ export const toml: Language = {
     { type: 'string', pattern: /"(?:\\(?:[^]|$)|[^"\\\r\n])*(?:"|(?=[\r\n])|$)|'[^'\r\n]*(?:'|(?=[\r\n])|$)/ },
     { type: 'number', pattern: /\d{4}-\d\d-\d\d(?:[Tt ]\d\d:\d\d:\d\d(?:\.\d+)?(?:[Zz]|[+-]\d\d:\d\d)?)?|\d\d:\d\d:\d\d(?:\.\d+)?/ },
     { type: 'boolean', pattern: /\b(?:true|false)\b/ },
-    { type: 'number', pattern: /[+-]?(?:inf|nan)\b|0[xob][\da-fA-F_]+|[+-]?\d[\d_]*(?:\.\d[\d_]*)?(?:[eE][+-]?\d[\d_]*)?/ },
+    { type: 'number', pattern: /(?:[+-]?(?:inf|nan)\b|0[xob][\da-fA-F_]+|[+-]?\d[\d_]*(?:\.\d[\d_]*)?(?:[eE][+-]?\d[\d_]*)?)(?![\w-])/ },
     { type: 'text', pattern: /[\w-]+/ },
     { type: 'operator', pattern: /=/ },
     { type: 'punctuation', pattern: /[{}[\],.]/ },
