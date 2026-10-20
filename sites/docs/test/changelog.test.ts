@@ -4,10 +4,10 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { createElement } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
-import { packages } from '../src/changelog'
-import { parseRelease, readPackageReleases, readReleases, releaseTemplate } from '../src/changelog.content'
-import { Changelog } from '../src/components/Changelog'
-import { ClipboardProvider } from '../src/components/ClipboardProvider'
+import { packages } from '@/changelog'
+import { parseRelease, readPackageReleases, readReleases, releaseTemplate } from '@/changelog.content'
+import { Changelog } from '@/features/changelog/Changelog'
+import { ClipboardProvider } from '@/components/ui/ClipboardProvider'
 
 const releases = await readReleases()
 const scratch = await mkdtemp(join(tmpdir(), 'kirari-changelog-test-'))

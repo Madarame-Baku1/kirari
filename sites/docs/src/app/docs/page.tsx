@@ -1,5 +1,5 @@
-import { DocsPage } from '../../components/DocsPage'
-import { pageMetadata } from '../../seo'
+import { DocsPage } from '@/features/docs/DocsPage'
+import { pageMetadata } from '@/seo'
 
 export const metadata = pageMetadata(
 	'Syntax highlighting documentation',

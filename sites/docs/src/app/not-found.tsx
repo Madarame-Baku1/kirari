@@ -1,4 +1,4 @@
-import { ErrorPage } from '../components/ErrorPage'
+import { ErrorPage } from '@/features/error/ErrorPage'
 
 export const metadata = {
 	title: 'Page not found',

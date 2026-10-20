@@ -1,5 +1,5 @@
 import { expect, test } from 'bun:test'
-import { usageCode } from '../src/components/Playground/Playground.utilities'
+import { usageCode } from '@/features/playground/Playground/Playground.utilities'
 
 test('exported examples preserve backticks, substitutions, and backslashes', () => {
   const source = 'const value = `hello ${1 + 1}\\world`'

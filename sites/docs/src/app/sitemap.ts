@@ -1,6 +1,6 @@
 import type { MetadataRoute } from 'next'
-import { indexablePaths } from '../seo'
-import { site } from '../site'
+import { indexablePaths } from '@/seo'
+import { site } from '@/site'
 
 const sitemap = (): MetadataRoute.Sitemap =>
 	indexablePaths.map(path => ({

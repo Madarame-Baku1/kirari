@@ -1,0 +1,26 @@
+'use client'
+
+import { Button } from '@/components/ui/Button'
+import { useCopy } from '@/components/ui/ClipboardProvider'
+import { CopyGlyph } from '@/components/ui/CopyGlyph'
+import type * as Types from './CopyButton.types'
+
+export const CopyButton = (props: Types.Props) => {
+	const { text, message, onCopied, variant = 'tertiary', size = 'sm', ...buttonProps } = props
+	const { copied, copy } = useCopy({
+		text,
+		message,
+		onCopied,
+	})
+
+	return (
+		<Button
+			{...buttonProps}
+			variant={variant}
+			size={size}
+			startIcon={<CopyGlyph size={14} />}
+			data-copied={copied ? '' : undefined}
+			onClick={copy}
+		/>
+	)
+}

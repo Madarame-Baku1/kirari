@@ -9,8 +9,8 @@ import { parse as parseYaml } from 'yaml'
 import { z } from 'zod'
 import { categories, packages } from './changelog'
 import { markdownProcessor } from './content'
-import { CodeBlock } from './components/CodeBlock'
-import { Link } from './components/Link'
+import { CodeBlock } from '@/components/code/CodeBlock'
+import { Link } from '@/components/ui/Link'
 import type * as Types from './changelog.types'
 
 type Root = ReturnType<typeof markdownProcessor.parse>

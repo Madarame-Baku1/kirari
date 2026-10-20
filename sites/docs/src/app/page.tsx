@@ -1,5 +1,5 @@
-import { LandingPage } from '../components/LandingPage'
-import { description, pageMetadata, serializeJsonLd, softwareSchema } from '../seo'
+import { LandingPage } from '@/features/landing/LandingPage'
+import { description, pageMetadata, serializeJsonLd, softwareSchema } from '@/seo'
 
 export const metadata = pageMetadata(
 	'Lightweight syntax highlighting for the web',

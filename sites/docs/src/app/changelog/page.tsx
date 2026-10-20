@@ -1,10 +1,10 @@
 import { Suspense } from 'react'
-import { readReleases } from '../../changelog.content'
-import { Changelog as ChangelogTimeline } from '../../components/Changelog'
-import { ChangelogQuery } from '../../components/ChangelogQuery'
-import { Footer } from '../../components/Footer'
-import { SiteLayout } from '../../components/SiteLayout'
-import { pageMetadata } from '../../seo'
+import { readReleases } from '@/changelog.content'
+import { Changelog as ChangelogTimeline } from '@/features/changelog/Changelog'
+import { ChangelogQuery } from '@/features/changelog/ChangelogQuery'
+import { Footer } from '@/components/layout/Footer'
+import { SiteLayout } from '@/components/layout/SiteLayout'
+import { pageMetadata } from '@/seo'
 
 export const metadata = pageMetadata(
 	'Changelog',

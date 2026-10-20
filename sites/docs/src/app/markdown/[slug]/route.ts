@@ -1,6 +1,6 @@
-import { readMarkdown } from '../../../content'
-import { docsPath, sections } from '../../../navigation'
-import { site } from '../../../site'
+import { readMarkdown } from '@/content'
+import { docsPath, sections } from '@/navigation'
+import { site } from '@/site'
 import type * as Types from './route.types'
 
 export const dynamic = 'force-static'

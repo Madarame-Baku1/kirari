@@ -1,7 +1,7 @@
 import { expect, test } from 'bun:test'
 import { readdirSync } from 'node:fs'
 import { highlight, tokenize } from '@vortexlabs/kirari'
-import { languageEntries } from '../src/languages.js'
+import { languageEntries } from '@/languages.js'
 
 test('the playground covers every public language exactly once', () => {
   const modules = readdirSync(new URL('../../../packages/kirari/src/languages', import.meta.url))

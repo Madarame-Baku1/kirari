@@ -1,12 +1,12 @@
 import type { Metadata, Viewport } from 'next'
 import Script from 'next/script'
-import { ClipboardProvider } from '../components/ClipboardProvider'
+import { ClipboardProvider } from '@/components/ui/ClipboardProvider'
 import type * as Types from './layout.types'
-import { description } from '../seo'
-import { site } from '../site'
-import { paletteCSS } from '../themes'
+import { description } from '@/seo'
+import { site } from '@/site'
+import { paletteCSS } from '@/themes'
 import '@vortexlabs/kirari/theme.css'
-import '../style.css'
+import '@/style.css'
 
 export const metadata: Metadata = {
 	metadataBase: new URL(site.url),
