@@ -13,6 +13,7 @@ import { GET as llmsFull } from '../src/app/llms-full.txt/route'
 import { createElement } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { MarkdownContent } from '../src/components/MarkdownContent'
+import { DocsNavigation } from '../src/components/DocsNavigation'
 import { ClipboardProvider } from '../src/components/ClipboardProvider'
 
 const renderGuide = async (id: typeof sections[number]['id'] = 'overview') => renderToStaticMarkup(createElement(ClipboardProvider, null, await MarkdownContent({ id, title: sections.find(section => section.id === id)!.title, source: await readMarkdown(id) })))
@@ -52,7 +53,12 @@ test('introduction and installation share one page and sidebar entry', async () 
   expect(html).toContain('<h2 id="installation">Installation</h2>')
   expect(html).toContain('class="intro-cards"')
   expect(html).toMatch(/href="\/docs\/?#installation"/)
-  expect(html).not.toContain('data-nav="installation"')
+  const sidebar = renderToStaticMarkup(createElement(DocsNavigation, { active: 'overview' }))
+  const introduction = sidebar.match(/<a [^>]*>Introduction<\/a>/)?.[0]
+  expect(introduction).toMatch(/href="\/docs\/?"/)
+  expect(introduction).toContain('aria-current="page"')
+  expect(sidebar).not.toContain('Installation')
+  expect(sidebar).not.toContain('installation')
 })
 
 test('unknown Markdown routes do not read arbitrary files', async () => {
