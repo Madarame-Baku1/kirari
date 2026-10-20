@@ -9,4 +9,7 @@ export type Props = {
 	preClassName?: string
 	codeClassName?: string
 	copyLabel?: string
+	/** Borderless with a drop shadow, for code shown on a tinted surface. */
+	elevated?: boolean
+	className?: string
 }

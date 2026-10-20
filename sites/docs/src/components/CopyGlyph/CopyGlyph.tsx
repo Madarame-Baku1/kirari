@@ -6,8 +6,8 @@ export const CopyGlyph = (props: Types.Props) => {
 	const { size = 15, hash = false } = props
 
 	return (
-		<span className={`${styles.root} copy-glyph`} aria-hidden="true">
-			{hash ? <span className="hash">#</span> : <Icon name="copy" size={size} />}
+		<span className={styles.root} aria-hidden="true">
+			{hash ? <span className={styles.hash}>#</span> : <Icon name="copy" size={size} />}
 			<svg
 				aria-hidden="true"
 				className={styles.copyCheck}

@@ -1,7 +1,7 @@
 import styles from './GuideLink.module.css'
-import Link from 'next/link'
 import { docsPath } from '../../navigation'
 import { Icon } from '../Icon'
+import { Link } from '../Link'
 import type * as Types from './GuideLink.types'
 
 export const GuideLink = (props: Types.Props) => {

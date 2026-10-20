@@ -1,12 +1,12 @@
-.root .codeMeta .iconButton[data-copied] {
-	opacity: 1;
-}
 .root {
 	position: relative;
-	margin: var(--size-20) 0;
 	border-radius: var(--size-12);
 	background: var(--kirari-background);
 	border: var(--hairline) solid var(--line);
+}
+.elevated {
+	border: 0;
+	box-shadow: var(--shadow);
 }
 .root .codeMeta {
 	display: flex;
@@ -17,13 +17,12 @@
 	font-size: var(--code-meta-font-size, var(--size-12));
 	color: var(--faint);
 }
-.root .codeMeta .iconButton {
-	width: var(--size-30);
-	height: var(--size-30);
+.root .codeMeta .copyButton {
 	opacity: 0.55;
 }
-.root:hover .codeMeta .iconButton,
-.root .codeMeta .iconButton:focus-visible {
+.root:hover .codeMeta .copyButton,
+.root .codeMeta .copyButton:focus-visible,
+.root .codeMeta .copyButton[data-copied] {
 	opacity: 1;
 }
 .root pre {
@@ -38,7 +37,7 @@
 	font: inherit;
 }
 @media (hover: none) {
-	.root .codeMeta .iconButton {
+	.root .codeMeta .copyButton {
 		opacity: 1;
 	}
 }

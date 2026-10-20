@@ -1,13 +1,14 @@
-import Link from 'next/link'
 import { routes } from '../../navigation'
+import { Link } from '../Link'
 import type * as Types from './PageLink.types'
 
 export const PageLink = (props: Types.Props) => {
-	const { target, label, current, onNavigate } = props
+	const { target, label, current, variant, onNavigate } = props
 
 	return (
 		<Link
 			href={routes[target]}
+			variant={variant}
 			aria-current={current === target ? 'page' : undefined}
 			onNavigate={onNavigate}
 		>

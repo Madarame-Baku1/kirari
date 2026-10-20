@@ -35,7 +35,7 @@ export const LandingMotion = (props: Types.Props) => {
 					0.15,
 				)
 				.from(
-					select('.demo-window'),
+					select('[data-demo-window]'),
 					{
 						y: 28,
 						opacity: 0,

@@ -1,4 +1,5 @@
 .root {
+	--divider-color: var(--line-strong);
 	display: inline-flex;
 	flex: none;
 	margin-left: auto;
@@ -6,48 +7,42 @@
 	border-radius: var(--size-7);
 	background: var(--bg);
 }
-.root > button {
+.copy,
+.menu > summary {
 	display: inline-flex;
 	align-items: center;
-	gap: var(--size-6);
 	height: var(--size-28);
-	padding: 0 var(--size-9);
 	border: 0;
-	border-radius: var(--size-6) 0 0 var(--size-6);
 	background: transparent;
 	color: var(--muted);
+}
+.copy:hover,
+.menu > summary:hover,
+.menu[open] > summary {
+	background: var(--soft);
+	color: var(--ink);
+}
+.copy {
+	gap: var(--size-6);
+	padding: 0 var(--size-9);
+	border-radius: var(--size-6) 0 0 var(--size-6);
 	font-size: var(--size-12);
 	font-weight: var(--weight-medium);
 }
-.root > button:hover {
-	background: var(--soft);
-	color: var(--ink);
-}
-.root .pageActions,
-.root .pageActions:first-child {
+.menu {
 	position: relative;
-	border: 0;
 }
-.root .pageActions > summary {
-	display: flex;
+.menu > summary {
 	justify-content: center;
-	height: var(--size-28);
 	width: var(--size-28);
-	padding: 0;
-	border-left: var(--hairline) solid var(--line-strong);
 	border-radius: 0 var(--size-6) var(--size-6) 0;
-	background: transparent;
-	color: var(--muted);
+	list-style: none;
+	cursor: pointer;
 }
-.root .pageActions > summary::after {
-	content: none;
+.menu > summary::-webkit-details-marker {
+	display: none;
 }
-.root .pageActions > summary:hover,
-.root .pageActions[open] > summary {
-	background: var(--soft);
-	color: var(--ink);
-}
-.root .pageActionMenu {
+.menuPanel {
 	position: absolute;
 	top: calc(100% + var(--size-6));
 	right: 0;
@@ -59,7 +54,7 @@
 	background: var(--bg);
 	box-shadow: var(--shadow);
 }
-.root .pageActionMenu > a {
+.menuItem {
 	display: flex;
 	align-items: center;
 	gap: var(--size-10);
@@ -68,24 +63,23 @@
 	border-radius: var(--size-6);
 	color: var(--ink);
 	text-align: left;
-	text-decoration: none;
 }
-.root .pageActionMenu > a:hover {
+.menuItem:hover {
 	background: var(--soft);
 }
-.root .pageActionMenu svg {
+.menuItem svg {
 	flex: none;
 	color: var(--muted);
 }
-.root .pageActionMenu strong,
-.root .pageActionMenu small {
+.menuItem strong,
+.menuItem small {
 	display: block;
 }
-.root .pageActionMenu strong {
+.menuItem strong {
 	font-size: var(--size-13);
 	font-weight: var(--weight-medium);
 }
-.root .pageActionMenu small {
+.menuItem small {
 	color: var(--muted);
 	font-size: var(--size-12);
 }

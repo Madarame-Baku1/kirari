@@ -4,11 +4,12 @@ import { typescript } from '@vortexlabs/kirari/languages/typescript'
 import { languageEntries } from '../../languages'
 import { docsPath, routes } from '../../navigation'
 import { theme, themes } from '../../themes'
-import { ButtonLink } from '../ButtonLink'
+import { Button } from '../Button'
 import { CodeBlock } from '../CodeBlock'
 import { FeatureIntro } from '../FeatureIntro'
 import { Footer } from '../Footer'
 import { HighlightDemo } from '../HighlightDemo'
+import { Icon } from '../Icon'
 import { InstallCommand } from '../InstallCommand'
 import { LandingMotion } from '../LandingMotion'
 import { MagneticLink } from '../MagneticLink'
@@ -82,7 +83,13 @@ export const LandingPage = () => {
 					</p>
 					<div className="hero-cta">
 						<InstallCommand id="hero-install" />
-						<ButtonLink href={routes.docs} label="Get started" />
+						<Button
+							href={routes.docs}
+							size="large"
+							endIcon={<Icon name="arrow" size={16} />}
+						>
+							Get started
+						</Button>
 					</div>
 				</section>
 				<HighlightDemo demos={demos} palettes={palettes} />
@@ -157,19 +164,20 @@ export const LandingPage = () => {
 						<h2 id="closing-title">Three lines to start</h2>
 						<p>Install, import a theme, and highlight.</p>
 						<div className="closing-actions">
-							<ButtonLink
+							<Button
 								href={`${routes.docs}#installation`}
-								label="Installation guide"
-							/>
-							<ButtonLink
-								href={routes.playground}
-								label="Open playground"
-								variant="ghost"
-							/>
+								endIcon={<Icon name="arrow" size={16} />}
+							>
+								Installation guide
+							</Button>
+							<Button href={routes.playground} variant="secondary">
+								Open playground
+							</Button>
 						</div>
 					</div>
 					<div className="closing-code" data-palette="dusk">
 						<CodeBlock
+							elevated
 							id="quick-start"
 							label="TypeScript"
 							text={quickStart}

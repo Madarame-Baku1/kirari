@@ -1,70 +1,64 @@
 'use client'
 
 import styles from './MobileMenu.module.css'
-import { useEffect, useRef } from 'react'
+import { routes } from '../../navigation'
 import { Brand } from '../Brand'
-import { Icon } from '../Icon'
+import { Dialog } from '../Dialog'
+import { Divider } from '../Divider'
 import { DocsNavigation } from '../DocsNavigation'
-import { PageLink } from '../PageLink'
+import { NavList } from '../NavList'
 import type * as Types from './MobileMenu.types'
+
+const pages = [
+	{
+		target: 'home',
+		label: 'Home',
+	},
+	{
+		target: 'docs',
+		label: 'Docs',
+	},
+	{
+		target: 'playground',
+		label: 'Playground',
+	},
+] as const
 
 export const MobileMenu = (props: Types.Props) => {
 	const { open, onClose, page, activeSection } = props
-	const dialog = useRef<HTMLDialogElement>(null)
-	useEffect(() => {
-		if (open) dialog.current?.showModal()
-		else dialog.current?.close()
-	}, [
-		open,
-	])
 
 	return (
-		<dialog
+		<Dialog
 			className={styles.root}
-			ref={dialog}
 			id="mobile-menu"
 			aria-labelledby="mobile-menu-title"
-			onCancel={onClose}
+			open={open}
 			onClose={onClose}
-			onPointerDown={event => {
-				const bounds = event.currentTarget.getBoundingClientRect()
-				if (
-					event.target === event.currentTarget &&
-					(event.clientX < bounds.left ||
-						event.clientX > bounds.right ||
-						event.clientY < bounds.top ||
-						event.clientY > bounds.bottom)
-				)
-					onClose()
-			}}
 		>
-			<div className={styles.mobileMenuHeader}>
-				<h2 className="brand" id="mobile-menu-title">
+			<div className={styles.header}>
+				<h2 id="mobile-menu-title">
 					<Brand />
 				</h2>
-				<button
-					type="button"
-					className="icon-button"
-					id="close-menu"
-					aria-label="Close navigation"
-					onClick={onClose}
-				>
-					<Icon name="close" />
-				</button>
+				<Dialog.Close label="Close navigation" />
 			</div>
-			<nav className={styles.mobileLinks} aria-label="Pages">
-				<PageLink target="home" label="Home" current={page} onNavigate={onClose} />
-				<PageLink target="docs" label="Docs" current={page} onNavigate={onClose} />
-				<PageLink
-					target="playground"
-					label="Playground"
-					current={page}
-					onNavigate={onClose}
-				/>
+			<nav aria-label="Pages">
+				<NavList variant="menu">
+					{pages.map(item => (
+						<NavList.Item
+							key={item.target}
+							href={routes[item.target]}
+							current={item.target === page}
+							onNavigate={onClose}
+						>
+							{item.label}
+						</NavList.Item>
+					))}
+				</NavList>
 			</nav>
+			<Divider className={styles.divider} />
 			<nav aria-label="Documentation sections">
 				<DocsNavigation active={activeSection} onNavigate={onClose} />
 			</nav>
-		</dialog>
+		</Dialog>
 	)
 }

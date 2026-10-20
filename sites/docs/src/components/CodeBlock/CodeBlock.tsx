@@ -1,6 +1,7 @@
 import styles from './CodeBlock.module.css'
+import classNames from 'classnames'
 import { HighlightedCode } from '../HighlightedCode'
-import { CopyButton } from '../CopyButton'
+import { CopyIconButton } from '../CopyIconButton'
 import type * as Types from './CodeBlock.types'
 
 export const CodeBlock = (props: Types.Props) => {
@@ -13,17 +14,19 @@ export const CodeBlock = (props: Types.Props) => {
 		preClassName = 'kirari',
 		codeClassName,
 		copyLabel = `Copy ${label} example`,
+		elevated = false,
+		className,
 	} = props
 
 	return (
-		<div className={`${styles.root} code-block`}>
-			<div className={`code-meta ${styles.codeMeta}`}>
+		<div className={classNames(styles.root, elevated && styles.elevated, className)}>
+			<div className={styles.codeMeta}>
 				<span>{label}</span>
-				<CopyButton
-					className={`icon-button ${styles.iconButton}`}
-					target={id}
+				<CopyIconButton
+					className={styles.copyButton}
 					text={text}
 					label={copyLabel}
+					size="small"
 				/>
 			</div>
 			<pre className={preClassName}>

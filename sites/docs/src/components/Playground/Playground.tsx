@@ -1,7 +1,6 @@
 'use client'
 
 import styles from './Playground.module.css'
-import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { tokenize, render, tokenTypes, type Token } from '@vortexlabs/kirari/core'
@@ -12,11 +11,13 @@ import { languageEntries } from '../../languages'
 import { animateIn } from '../../client/motion'
 import { usageCode } from './Playground.utilities'
 import { groups, outputs } from './Playground.data'
+import { Button } from '../Button'
 import { CopyButton } from '../CopyButton'
 import { Icon } from '../Icon'
-import { OutputTab } from '../OutputTab'
+import { Link } from '../Link'
 import { PlaygroundQuery } from '../PlaygroundQuery'
 import { PreviewOutput } from '../PreviewOutput'
+import { SegmentedControl } from '../SegmentedControl'
 import { SelectGroup } from '../SelectGroup'
 import type * as Types from './Playground.types'
 
@@ -97,7 +98,7 @@ export const Playground = (props: Types.Props) => {
 	}
 
 	return (
-		<main id="main" tabIndex={-1} className={`${styles.root} playground-page`}>
+		<main id="main" tabIndex={-1} className={styles.root}>
 			<Suspense fallback={null}>
 				<PlaygroundQuery onLanguage={applyLanguage} />
 			</Suspense>
@@ -160,34 +161,17 @@ export const Playground = (props: Types.Props) => {
 						</select>
 					</div>
 					<div className={styles.editorActions}>
-						<button
-							type="button"
-							className="quiet-button"
-							id="reset-source"
+						<Button
+							variant="ghost"
+							size="small"
+							startIcon={<Icon name="reset" size={14} />}
 							title="Restore the example code"
 							onClick={() => applyLanguage(language)}
 						>
-							<Icon name="reset" size={14} />
-							<span>Reset</span>
-						</button>
-						<CopyButton
-							className="quiet-button"
-							id="copy-theme"
-							text={themeCSS}
-							label="Copy CSS"
-							size={14}
-						>
-							<span>Copy CSS</span>
-						</CopyButton>
-						<CopyButton
-							className="quiet-button"
-							id="copy-js"
-							text={usageSource}
-							label="Copy code"
-							size={14}
-						>
-							<span>Copy code</span>
-						</CopyButton>
+							Reset
+						</Button>
+						<CopyButton text={themeCSS}>Copy CSS</CopyButton>
+						<CopyButton text={usageSource}>Copy code</CopyButton>
 					</div>
 				</div>
 				<div className={styles.editorPanes}>
@@ -227,24 +211,22 @@ export const Playground = (props: Types.Props) => {
 						)}
 					>
 						<div className={styles.paneLabel}>
-							<fieldset className={styles.outputSwitch} aria-label="Output view">
+							<SegmentedControl
+								className={styles.outputSwitch}
+								label="Output view"
+								value={output}
+								onChange={value => {
+									setOutput(value)
+									if (value === 'js' || value === 'react' || value === 'markdown')
+										setUsage(value)
+								}}
+							>
 								{outputs.map(item => (
-									<OutputTab
-										key={item.value}
-										{...item}
-										selected={output === item.value}
-										onClick={() => {
-											setOutput(item.value)
-											if (
-												item.value === 'js' ||
-												item.value === 'react' ||
-												item.value === 'markdown'
-											)
-												setUsage(item.value)
-										}}
-									/>
+									<SegmentedControl.Item key={item.value} value={item.value}>
+										{item.label}
+									</SegmentedControl.Item>
 								))}
-							</fieldset>
+							</SegmentedControl>
 							<span id="token-count" className={styles.tokenCount}>
 								{tokens.length} tokens
 							</span>
@@ -346,7 +328,10 @@ export const Playground = (props: Types.Props) => {
 			</div>
 			<p className={styles.editorHelp} id="editor-help">
 				Edit the code, click a token, then recolor its type. Everything runs in your
-				browser. <Link href="/docs/theming/">How theming works</Link>
+				browser.{' '}
+				<Link href="/docs/theming/" variant="strong">
+					How theming works
+				</Link>
 			</p>
 			<p id="playground-status" className="sr-only" role="status" aria-live="polite">
 				{status}

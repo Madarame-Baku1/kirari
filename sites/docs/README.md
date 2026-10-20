@@ -56,10 +56,10 @@ literal `rem` values because CSS variables cannot be used in media queries.
 Reusable UI lives in dedicated folders under `src/components/`, following Vortex:
 
 ```text
-ButtonLink/
-  ButtonLink.tsx
-  ButtonLink.types.ts
-  ButtonLink.module.css
+Button/
+  Button.tsx
+  Button.types.ts
+  Button.module.css
   index.ts
 ```
 
@@ -67,7 +67,26 @@ Extract a shared component when the same UI pattern is used twice. Use `type`
 for props unless an interface needs to extend another interface. Import types
 as `Types` and destructure `props` inside the component.
 
-Use Next.js `Link` for navigation, including external URLs, hash links, and links
+Build features from the shared primitives instead of styling raw elements:
+
+- `Button`: `variant` (`primary`, `secondary`, `ghost`), `size`, `startIcon`, and `endIcon`.
+  Pass `href` to render a link with button styling.
+- `IconButton`: icon-only control with a required `label` for its accessible name.
+- `Link`: `variant` (`plain`, `subtle`, `strong`), `arrow`, and `external` for new-tab links.
+- `Divider`: horizontal or vertical separator.
+- `Dialog` with `Dialog.Close`, `Tabs` with `Tabs.List`, `Tabs.Tab`, and `Tabs.Panel`,
+  `SegmentedControl` with `SegmentedControl.Item`, and `NavList` with `NavList.Group`
+  and `NavList.Item` are compound components: the root owns state and its parts read it
+  from context.
+- `useCopy` copies text and reports a short-lived `copied` flag; `CopyButton` and
+  `CopyIconButton` wrap it.
+
+Primitives expose CSS custom properties such as `--icon-button-color` or
+`--button-ghost-color` for contextual theming, so callers never override their classes.
+Primitives own no outer margin; the parent decides spacing. Combine classes with the
+[`classnames`](https://www.npmjs.com/package/classnames) package.
+
+Use the shared `Link` for navigation, including external URLs, hash links, and links
 rendered from Markdown. Disable prefetching for raw Markdown and text files.
 Keep the skip-to-content link native so hash navigation transfers keyboard focus
 to the main content. React owns

@@ -36,7 +36,7 @@ export const Stat = (props: Types.Props) => {
 	])
 
 	return (
-		<div ref={root} className={`${styles.root} stat`} data-reveal>
+		<div ref={root} className={styles.root} data-reveal>
 			<p className={styles.statValue}>
 				<span data-count={value}>{display}</span>
 				{unit && <small>{unit}</small>}

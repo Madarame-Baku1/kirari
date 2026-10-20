@@ -1,15 +1,16 @@
-import Link from 'next/link'
 import styles from './Footer.module.css'
 import { routes } from '../../navigation'
 import { site } from '../../site'
 import { Brand } from '../Brand'
 import { Icon } from '../Icon'
+import { IconButton } from '../IconButton'
+import { Link } from '../Link'
 
 export const Footer = () => (
 	<footer className="site-footer">
 		<div className="footer-inner">
-			<Link className="brand" href={routes.home}>
-				<Brand />
+			<Link href={routes.home}>
+				<Brand size="small" />
 			</Link>
 			<p>A little light for your code.</p>
 			<nav aria-label="Footer">
@@ -20,26 +21,17 @@ export const Footer = () => (
 				</Link>
 			</nav>
 			<div className={styles.socials}>
-				<Link
-					className="icon-button"
+				<IconButton
 					href={site.github}
-					target="_blank"
-					rel="noopener noreferrer"
-					aria-label="Kirari on GitHub"
+					external
+					label="Kirari on GitHub"
 					title="Kirari on GitHub"
 				>
 					<Icon name="github" />
-				</Link>
-				<Link
-					className="icon-button"
-					href={site.x}
-					target="_blank"
-					rel="noopener noreferrer"
-					aria-label="Follow Ugi on X"
-					title="Follow Ugi on X"
-				>
+				</IconButton>
+				<IconButton href={site.x} external label="Follow Ugi on X" title="Follow Ugi on X">
 					<Icon name="x" />
-				</Link>
+				</IconButton>
 			</div>
 		</div>
 	</footer>

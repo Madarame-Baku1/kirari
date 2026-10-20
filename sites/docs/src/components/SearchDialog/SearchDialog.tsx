@@ -1,14 +1,14 @@
 'use client'
 
 import styles from './SearchDialog.module.css'
-import Link from 'next/link'
 import { useEffect, useRef, useState } from 'react'
-import { Icon } from '../Icon'
+import { Dialog } from '../Dialog'
+import { Link } from '../Link'
+import { SearchField } from '../SearchField'
 import type * as Types from './SearchDialog.types'
 
 export const SearchDialog = (props: Types.Props) => {
 	const { open, onClose, entries } = props
-	const dialog = useRef<HTMLDialogElement>(null)
 	const input = useRef<HTMLInputElement>(null)
 	const links = useRef<(HTMLAnchorElement | null)[]>([])
 	const [query, setQuery] = useState('')
@@ -24,33 +24,18 @@ export const SearchDialog = (props: Types.Props) => {
 		.slice(0, 12)
 
 	useEffect(() => {
-		if (open) {
-			dialog.current?.showModal()
-			input.current?.focus()
-		} else dialog.current?.close()
+		if (open) input.current?.focus()
 	}, [
 		open,
 	])
 
 	return (
-		<dialog
+		<Dialog
 			className={styles.root}
-			ref={dialog}
 			id="search-dialog"
 			aria-labelledby="search-title"
-			onCancel={onClose}
+			open={open}
 			onClose={onClose}
-			onClick={event => {
-				const bounds = event.currentTarget.getBoundingClientRect()
-				if (
-					event.target === event.currentTarget &&
-					(event.clientX < bounds.left ||
-						event.clientX > bounds.right ||
-						event.clientY < bounds.top ||
-						event.clientY > bounds.bottom)
-				)
-					onClose()
-			}}
 			onKeyDown={event => {
 				if (event.key !== 'ArrowDown' && event.key !== 'ArrowUp') return
 				if (!matches.length) return
@@ -76,19 +61,15 @@ export const SearchDialog = (props: Types.Props) => {
 				<h2 id="search-title" className="sr-only">
 					Search documentation
 				</h2>
-				<Icon name="search" />
-				<label className="sr-only" htmlFor="doc-search">
-					Search docs and languages
-				</label>
-				<input
+				<SearchField
 					ref={input}
 					id="doc-search"
-					className={styles.docSearch}
-					type="search"
+					className={styles.searchField}
+					variant="bare"
+					label="Search docs and languages"
 					placeholder="Search docs and languages…"
-					autoComplete="off"
 					value={query}
-					onChange={event => setQuery(event.target.value)}
+					onChange={setQuery}
 				/>
 				<button
 					type="button"
@@ -132,6 +113,6 @@ export const SearchDialog = (props: Types.Props) => {
 					<kbd>↵</kbd> to open
 				</span>
 			</div>
-		</dialog>
+		</Dialog>
 	)
 }

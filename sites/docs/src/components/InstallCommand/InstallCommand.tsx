@@ -1,6 +1,6 @@
 import styles from './InstallCommand.module.css'
 import { site } from '../../site'
-import { CopyButton } from '../CopyButton'
+import { CopyIconButton } from '../CopyIconButton'
 import type * as Types from './InstallCommand.types'
 
 export const InstallCommand = (props: Types.Props) => {
@@ -12,7 +12,7 @@ export const InstallCommand = (props: Types.Props) => {
 				$
 			</span>
 			<code id={id}>{command}</code>
-			<CopyButton text={command} target={id} label="Copy install command" />
+			<CopyIconButton text={command} label="Copy install command" />
 		</div>
 	)
 }

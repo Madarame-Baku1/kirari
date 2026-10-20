@@ -3,20 +3,14 @@
 	color: var(--muted);
 	font-size: var(--size-17);
 }
-.root .textLink {
-	display: inline-flex;
-	align-items: center;
-	gap: var(--size-6);
-	color: var(--ink);
+.root h2 {
+	margin: 0;
+	font-size: clamp(var(--size-28), 3.4vw, 2.375rem);
+	font-weight: var(--weight-heading);
+	line-height: 1.15;
 }
-.root .textLink:hover {
-	color: var(--muted);
-}
-.root .textLink svg {
-	transition: transform var(--duration-normal);
-}
-.root .textLink:hover svg {
-	transform: translateX(var(--size-3));
+.link {
+	font-size: var(--size-15);
 }
 .eyebrow {
 	display: inline-flex;

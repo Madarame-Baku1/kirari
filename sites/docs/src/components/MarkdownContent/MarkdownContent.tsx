@@ -1,4 +1,4 @@
-import Link from 'next/link'
+import styles from './MarkdownContent.module.css'
 import { Children, Fragment, isValidElement } from 'react'
 import { jsx, jsxs } from 'react/jsx-runtime'
 import rehypeReact from 'rehype-react'
@@ -7,6 +7,7 @@ import { AnchorCopy } from '../AnchorCopy'
 import { CodeBlock } from '../CodeBlock'
 import { InstallCommand } from '../InstallCommand'
 import { LanguageTable } from '../LanguageTable'
+import { Link } from '../Link'
 import type * as Types from './MarkdownContent.types'
 
 const text = (node: Types.Node): string =>
@@ -37,7 +38,7 @@ export const MarkdownContent = async (props: Types.Props) => {
 			a: (props: Types.ElementProps<'a'>) => {
 				const { node: _node, href = '', children, ...rest } = props
 				return (
-					<Link {...rest} href={href}>
+					<Link {...rest} href={href} variant="subtle">
 						{children}
 					</Link>
 				)
@@ -85,6 +86,7 @@ export const MarkdownContent = async (props: Types.Props) => {
 				const codeNode = node && elements(node)[0]
 				return (
 					<CodeBlock
+						className={styles.codeBlock}
 						id={`${id}-code-${node?.position?.start.line ?? 0}`}
 						label="Example"
 						text={codeNode ? text(codeNode) : ''}

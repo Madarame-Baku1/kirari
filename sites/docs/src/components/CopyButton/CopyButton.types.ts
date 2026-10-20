@@ -1,11 +1,11 @@
-import type { ComponentProps } from 'react'
+import type { ReactNode } from 'react'
+import type { CopyOptions } from '../ClipboardProvider/ClipboardProvider.types'
+import type { Size, Variant } from '../Button/Button.types'
 
-export type Props = Omit<ComponentProps<'button'>, 'onClick'> & {
-	text: string | (() => string)
-	label: string
-	target?: string
-	message?: string
-	size?: number
-	hash?: boolean
-	onCopied?: () => void
+export type Props = CopyOptions & {
+	id?: string
+	variant?: Variant
+	size?: Size
+	className?: string
+	children: ReactNode
 }

@@ -12,7 +12,7 @@ export const ThemeCard = (props: Types.Props) => {
 	const { theme } = props
 
 	return (
-		<figure className={`${styles.root} theme-card`} data-palette={theme.id}>
+		<figure className={styles.root} data-palette={theme.id}>
 			<pre className="kirari">
 				<HighlightedCode
 					html={highlight(sample, {

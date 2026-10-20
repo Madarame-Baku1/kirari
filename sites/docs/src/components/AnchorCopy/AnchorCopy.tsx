@@ -1,14 +1,15 @@
 'use client'
 
-import { CopyButton } from '../CopyButton'
+import styles from './AnchorCopy.module.css'
+import { CopyIconButton } from '../CopyIconButton'
 import type * as Types from './AnchorCopy.types'
 
 export const AnchorCopy = (props: Types.Props) => {
 	const { id, title } = props
 
 	return (
-		<CopyButton
-			className="anchor-copy"
+		<CopyIconButton
+			className={styles.root}
 			data-anchor={id}
 			text={() => {
 				const url = new URL(location.href)
@@ -17,8 +18,9 @@ export const AnchorCopy = (props: Types.Props) => {
 			}}
 			label={`Copy link to ${title}`}
 			message="Link copied"
+			size="xsmall"
+			glyphSize={18}
 			hash
-			size={18}
 		/>
 	)
 }

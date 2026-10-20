@@ -1,13 +1,34 @@
 .root {
+	display: inline-flex;
+	align-items: center;
+	gap: var(--size-9);
+	color: var(--ink);
+	font-weight: var(--weight-heading);
+	letter-spacing: -0.02em;
+}
+.mark {
 	display: grid;
 	place-items: center;
-	width: var(--size-26);
-	height: var(--size-26);
 	border-radius: var(--size-8);
 	background: #111318;
 	color: #ffcf4a;
 }
-.root svg {
+.mark svg {
 	fill: currentColor;
 	stroke: none;
+}
+.medium {
+	font-size: var(--size-17);
+}
+.medium .mark {
+	width: var(--size-26);
+	height: var(--size-26);
+}
+.small {
+	font-size: var(--size-15);
+}
+.small .mark {
+	width: var(--size-22);
+	height: var(--size-22);
+	border-radius: var(--size-7);
 }

@@ -11,6 +11,7 @@ import { createTokenStream } from '@vortexlabs/kirari/stream'
 import { streamSample } from './StreamDemo.constants'
 import { reducedMotion } from '../../client/motion'
 import { HighlightedCode } from '../HighlightedCode'
+import { Button } from '../Button'
 import { Icon } from '../Icon'
 
 export const StreamDemo = () => {
@@ -79,7 +80,7 @@ export const StreamDemo = () => {
 	return (
 		<div
 			ref={frame}
-			className={`${styles.root} stream-window`}
+			className={styles.root}
 			data-palette="dusk"
 			data-reveal
 			data-streaming={streaming ? '' : undefined}
@@ -87,14 +88,15 @@ export const StreamDemo = () => {
 			<div className={styles.streamBar}>
 				<span className={styles.streamDot} aria-hidden="true" />
 				<span id="stream-status">{status}</span>
-				<button
-					type="button"
+				<Button
+					variant="ghost"
+					size="xsmall"
 					className={styles.streamReplay}
-					id="stream-replay"
+					startIcon={<Icon name="reset" size={14} />}
 					onClick={play}
 				>
-					<Icon name="reset" size={14} /> Replay
-				</button>
+					Replay
+				</Button>
 			</div>
 			<pre
 				role="region"

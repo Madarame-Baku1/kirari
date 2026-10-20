@@ -1,8 +1,7 @@
 'use client'
 
 import { pageSearchEntries, routes } from '../../navigation'
-import { ButtonLink } from '../ButtonLink'
-import buttonStyles from '../ButtonLink/ButtonLink.module.css'
+import { Button } from '../Button'
 import { Footer } from '../Footer'
 import { Header } from '../Header'
 import { Icon } from '../Icon'
@@ -49,21 +48,15 @@ export const ErrorPage = (props: Types.Props) => {
 					<p className={styles.description}>{description}</p>
 					<div className={styles.actions}>
 						{onRetry ? (
-							<button
-								type="button"
-								className={`${buttonStyles.root} ${buttonStyles.primary}`}
-								onClick={onRetry}
-							>
-								Try again
-							</button>
+							<Button onClick={onRetry}>Try again</Button>
 						) : (
-							<ButtonLink href={routes.home} label="Back to home" />
+							<Button href={routes.home} endIcon={<Icon name="arrow" size={16} />}>
+								Back to home
+							</Button>
 						)}
-						<ButtonLink
-							href={onRetry ? routes.home : routes.docs}
-							label={onRetry ? 'Back to home' : 'Read the docs'}
-							variant="ghost"
-						/>
+						<Button href={onRetry ? routes.home : routes.docs} variant="secondary">
+							{onRetry ? 'Back to home' : 'Read the docs'}
+						</Button>
 					</div>
 				</div>
 			</main>

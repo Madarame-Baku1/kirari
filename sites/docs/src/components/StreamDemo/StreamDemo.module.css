@@ -30,24 +30,11 @@
 	box-shadow: 0 0 var(--size-10) var(--gold);
 }
 .streamReplay {
-	display: inline-flex;
-	align-items: center;
-	gap: var(--size-6);
+	--button-ghost-color: var(--code-chrome);
+	--button-ghost-hover-background: #ffffff12;
+	--button-ghost-hover-color: #fff;
 	margin-left: auto;
-	height: var(--size-28);
-	padding: 0 var(--size-10);
-	border: 0;
-	border-radius: var(--size-7);
-	background: transparent;
-	color: var(--code-chrome);
-	font: var(--size-12-5) var(--sans);
-	transition:
-		background var(--duration-fast),
-		color var(--duration-fast);
-}
-.streamReplay:hover {
-	background: #ffffff12;
-	color: #fff;
+	font-family: var(--sans);
 }
 .streamCode {
 	margin: 0;

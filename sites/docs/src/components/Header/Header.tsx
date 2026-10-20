@@ -1,12 +1,13 @@
 'use client'
 
 import styles from './Header.module.css'
-import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { routes } from '../../navigation'
 import { site } from '../../site'
 import { Brand } from '../Brand'
 import { Icon } from '../Icon'
+import { IconButton } from '../IconButton'
+import { Link } from '../Link'
 import { PageLink } from '../PageLink'
 import { SearchDialog } from '../SearchDialog'
 import { MobileMenu } from '../MobileMenu'
@@ -46,15 +47,20 @@ export const Header = (props: Types.Props) => {
 
 	return (
 		<>
-			<header className={`${styles.root} topbar`} data-scrolled={scrolled ? '' : undefined}>
+			<header className={styles.root} data-scrolled={scrolled ? '' : undefined}>
 				<div className={styles.topbarInner}>
-					<Link className="brand" href={routes.home} aria-label="Kirari home">
+					<Link href={routes.home} aria-label="Kirari home">
 						<Brand />
 					</Link>
 					<nav className={styles.topLinks} aria-label="Primary">
-						<PageLink target="docs" label="Docs" current={page} />
-						<PageLink target="playground" label="Playground" current={page} />
-						<Link href={site.npm} target="_blank" rel="noopener noreferrer">
+						<PageLink target="docs" label="Docs" current={page} variant="subtle" />
+						<PageLink
+							target="playground"
+							label="Playground"
+							current={page}
+							variant="subtle"
+						/>
+						<Link href={site.npm} variant="subtle" external>
 							npm
 						</Link>
 					</nav>
@@ -62,7 +68,6 @@ export const Header = (props: Types.Props) => {
 						<button
 							type="button"
 							className={styles.searchButton}
-							id="open-search"
 							aria-label="Search documentation"
 							onClick={openSearch}
 						>
@@ -70,25 +75,21 @@ export const Header = (props: Types.Props) => {
 							<span>Search</span>
 							<kbd>⌘K</kbd>
 						</button>
-						<Link
-							className="icon-button"
+						<IconButton
 							href={site.github}
-							target="_blank"
-							rel="noopener noreferrer"
-							aria-label="Kirari on GitHub"
+							external
+							label="Kirari on GitHub"
 							title="Kirari on GitHub"
 						>
 							<Icon name="github" />
-						</Link>
-						<button
-							type="button"
-							className={`icon-button ${styles.mobileNavButton}`}
-							id="open-menu"
-							aria-label="Open navigation"
+						</IconButton>
+						<IconButton
+							className={styles.mobileNavButton}
+							label="Open navigation"
 							onClick={() => setMenuOpen(true)}
 						>
 							<Icon name="menu" />
-						</button>
+						</IconButton>
 					</div>
 				</div>
 			</header>

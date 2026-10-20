@@ -1,4 +1,4 @@
-.demoTabs button:focus-visible,
+.demoTab:focus-visible,
 .demoCode:focus-visible {
 	outline-offset: calc(-1 * var(--size-2));
 }
@@ -38,7 +38,7 @@
 	scrollbar-width: none;
 	min-width: 0;
 }
-.demoTabs button {
+.demoTab {
 	height: var(--size-30);
 	padding: 0 var(--size-12);
 	border: 0;
@@ -51,11 +51,11 @@
 		background var(--duration-fast),
 		color var(--duration-fast);
 }
-.demoTabs button[aria-selected="true"] {
+.demoTab[aria-selected="true"] {
 	background: var(--bar-line);
 	color: var(--kirari-text);
 }
-.demoTabs button:hover {
+.demoTab:hover {
 	background: color-mix(in srgb, var(--kirari-text) 18%, transparent);
 	color: var(--kirari-text);
 }
@@ -112,12 +112,6 @@
 	font-size: var(--size-14);
 	color: var(--faint);
 }
-.demoCaption a {
-	color: var(--muted);
-}
-.demoCaption a:hover {
-	color: var(--ink);
-}
 @media (max-width: 35rem) {
 	.demoBar {
 		padding: 0 var(--size-6);
@@ -125,7 +119,7 @@
 	}
 }
 @media (max-width: 35rem) {
-	.demoTabs button {
+	.demoTab {
 		padding: 0 var(--size-6);
 		font-size: var(--size-12);
 	}

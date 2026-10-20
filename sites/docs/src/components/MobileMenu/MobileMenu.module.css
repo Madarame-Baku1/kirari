@@ -4,35 +4,17 @@
 	margin: var(--size-12) var(--size-12) var(--size-12) auto;
 	padding: var(--size-18);
 }
-.root .mobileMenuHeader {
+.header {
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
 	margin-bottom: var(--size-16);
 }
-.root .mobileMenuHeader h2 {
+.header h2 {
 	margin: 0;
-	font-size: var(--size-17);
+	font-size: inherit;
+	letter-spacing: normal;
 }
-.root .mobileLinks {
-	display: flex;
-	flex-direction: column;
-	gap: var(--size-2);
-	padding-bottom: var(--size-16);
-	margin-bottom: var(--size-18);
-	border-bottom: var(--hairline) solid var(--line);
-}
-.root .mobileLinks a {
-	padding: var(--size-8) var(--size-12);
-	border-radius: var(--size-8);
-	font-weight: var(--weight-emphasis);
-}
-.root .mobileLinks a[aria-current="page"] {
-	background: var(--soft-2);
-}
-.root .mobileLinks a:hover {
-	background: var(--soft);
-}
-.root .mobileLinks a[aria-current="page"]:hover {
-	background: var(--line);
+.divider {
+	margin: var(--size-16) 0 var(--size-18);
 }

@@ -26,17 +26,6 @@
 	gap: var(--size-24);
 	font-size: var(--size-14);
 }
-.root .topLinks a {
-	color: var(--muted);
-	transition: color var(--duration-fast);
-}
-.root .topLinks a:hover,
-.root .topLinks a[aria-current="page"] {
-	color: var(--ink);
-}
-.root .topLinks a[aria-current="page"]:hover {
-	color: var(--muted);
-}
 .root .topActions {
 	margin-left: auto;
 	display: flex;

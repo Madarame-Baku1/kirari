@@ -1,0 +1,26 @@
+.header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	gap: var(--size-16);
+	margin: var(--size-28) 0 var(--size-14);
+}
+.filter {
+	flex: 0 1 18.75rem;
+}
+.count {
+	font-size: var(--size-14);
+	color: var(--faint);
+	white-space: nowrap;
+}
+.empty {
+	color: var(--muted);
+}
+@media (max-width: 35rem) {
+	.header {
+		flex-wrap: wrap;
+	}
+	.filter {
+		flex: 1 1 100%;
+	}
+}

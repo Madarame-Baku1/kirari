@@ -1,17 +1,26 @@
 'use client'
 
-import Link from 'next/link'
-
 import styles from './PageActions.module.css'
 import { useEffect, useRef } from 'react'
-import { CopyButton } from '../CopyButton'
+import { useCopy } from '../ClipboardProvider'
+import { CopyGlyph } from '../CopyGlyph'
+import { Divider } from '../Divider'
 import { Icon } from '../Icon'
+import { Link } from '../Link'
 import type * as Types from './PageActions.types'
 
 export const PageActions = (props: Types.Props) => {
 	const { id, markdown } = props
 	const details = useRef<HTMLDetailsElement>(null)
 	const trigger = useRef<HTMLElement>(null)
+	const closeMenu = () => {
+		if (details.current) details.current.open = false
+	}
+	const { copied, copy } = useCopy({
+		text: markdown,
+		message: 'Page copied',
+		onCopied: closeMenu,
+	})
 	useEffect(() => {
 		const closeOutside = (event: MouseEvent) => {
 			if (
@@ -26,27 +35,25 @@ export const PageActions = (props: Types.Props) => {
 	}, [])
 
 	return (
-		<fieldset className={`${styles.root} page-actions-control`} aria-label="Page actions">
-			<CopyButton
+		<fieldset className={styles.root} aria-label="Page actions">
+			<button
+				type="button"
 				id="copy-page"
-				text={markdown}
-				label="Copy page"
-				message="Page copied"
-				className=""
-				size={14}
-				onCopied={() => {
-					if (details.current) details.current.open = false
-				}}
+				className={styles.copy}
+				data-copied={copied ? '' : undefined}
+				onClick={copy}
 			>
-				<span>Copy page</span>
-			</CopyButton>
+				<CopyGlyph size={14} />
+				Copy page
+			</button>
+			<Divider orientation="vertical" />
 			<details
 				ref={details}
-				className={styles.pageActions}
+				className={styles.menu}
 				onKeyDown={event => {
 					if (event.key === 'Escape') {
 						event.preventDefault()
-						event.currentTarget.open = false
+						closeMenu()
 						trigger.current?.focus()
 					}
 				}}
@@ -54,20 +61,18 @@ export const PageActions = (props: Types.Props) => {
 				<summary ref={trigger} aria-label="Open page actions">
 					<Icon name="chevron" size={12} />
 				</summary>
-				<div className={styles.pageActionMenu}>
+				<div className={styles.menuPanel}>
 					<Link
-						className="page-action-link"
+						className={styles.menuItem}
 						href={`/docs/${id}.md`}
 						prefetch={false}
-						target="_blank"
-						rel="noopener noreferrer"
+						external
 					>
 						<Icon name="code" size={16} />
 						<span>
 							<strong>View as Markdown</strong>
 							<small>Open this page as plain text</small>
 						</span>
-						<span className="sr-only">(opens in a new tab)</span>
 					</Link>
 				</div>
 			</details>

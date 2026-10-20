@@ -1,5 +1,3 @@
-import type { Mode } from '../OutputTab/OutputTab.types'
-
 export type Usage = 'js' | 'react' | 'markdown'
 export type UsageOptions = {
 	name: string
@@ -7,7 +5,7 @@ export type UsageOptions = {
 	source: string
 	usage: Usage
 }
-export type Output = Mode
+export type Output = 'preview' | Usage | 'css'
 export type Props = {
 	themes: {
 		id: string

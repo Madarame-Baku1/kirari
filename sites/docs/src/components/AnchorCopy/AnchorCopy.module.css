@@ -1,0 +1,16 @@
+.root {
+	--icon-button-color: var(--faint);
+	margin-left: var(--size-6);
+	vertical-align: middle;
+	opacity: 0;
+}
+:is(h1, h2):hover .root,
+.root:focus-visible,
+.root[data-copied] {
+	opacity: 1;
+}
+@media (hover: none) {
+	.root {
+		opacity: 1;
+	}
+}

@@ -1,4 +1,3 @@
-import Link from 'next/link'
 import { readMarkdown } from '../../content'
 import { sections } from '../../navigation'
 import { themes } from '../../themes'
@@ -6,6 +5,7 @@ import { DocsNavigation } from '../DocsNavigation'
 import { Footer } from '../Footer'
 import { GuideLink } from '../GuideLink'
 import { LegacyDocsRedirect } from '../LegacyDocsRedirect'
+import { Link } from '../Link'
 import { MarkdownContent } from '../MarkdownContent'
 import { PageActions } from '../PageActions'
 import { SiteLayout } from '../SiteLayout'
@@ -31,7 +31,10 @@ export const DocsPage = async (props: Types.Props) => {
 					<div className="docs-toolbar">
 						{id !== 'overview' && (
 							<nav className="breadcrumbs" aria-label="Breadcrumb">
-								<Link href="/docs/">Docs</Link> /{' '}
+								<Link href="/docs/" variant="subtle">
+									Docs
+								</Link>
+								{' / '}
 								<span aria-current="page">{section.title}</span>
 							</nav>
 						)}

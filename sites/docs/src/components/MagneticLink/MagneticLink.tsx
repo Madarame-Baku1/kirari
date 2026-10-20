@@ -1,10 +1,10 @@
 'use client'
 
 import styles from './MagneticLink.module.css'
-import Link from 'next/link'
 import { useEffect, useRef } from 'react'
 import { gsap } from 'gsap'
 import { reducedMotion } from '../../client/motion'
+import { Link } from '../Link'
 import type * as Types from './MagneticLink.types'
 
 export const MagneticLink = (props: Types.Props) => {
