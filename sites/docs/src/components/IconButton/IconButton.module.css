@@ -17,15 +17,15 @@
 	background: var(--icon-button-hover-background, var(--soft-2));
 	color: var(--icon-button-hover-color, var(--ink));
 }
-.xsmall {
+.xs {
 	width: var(--size-28);
 	height: var(--size-28);
 }
-.small {
+.sm {
 	width: var(--size-30);
 	height: var(--size-30);
 }
-.medium {
+.md {
 	width: var(--size-34);
 	height: var(--size-34);
 }

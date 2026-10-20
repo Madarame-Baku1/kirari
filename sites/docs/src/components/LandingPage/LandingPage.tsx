@@ -84,7 +84,7 @@ export const LandingPage = () => {
 						<InstallCommand id="hero-install" />
 						<Button
 							href={routes.docs}
-							size="large"
+							size="lg"
 							endIcon={<Icon name="arrow" size={16} />}
 						>
 							Get started

@@ -76,7 +76,7 @@ as `Types` and destructure `props` inside the component.
 
 Build features from the shared primitives instead of styling raw elements:
 
-- `Button`: `variant` (`primary`, `secondary`, `ghost`), `size`, `startIcon`, and `endIcon`.
+- `Button`: `variant` (`primary`, `secondary`, `tertiary`), `size` (`xs`, `sm`, `md`, `lg`), `startIcon`, and `endIcon`.
   Pass `href` to render a link with button styling.
 - `IconButton`: icon-only control with a required `label` for its accessible name.
 - `Link`: `variant` (`plain`, `subtle`, `strong`), `arrow`, and `external` for new-tab links.
@@ -89,7 +89,7 @@ Build features from the shared primitives instead of styling raw elements:
   `CopyIconButton` wrap it.
 
 Primitives expose CSS custom properties such as `--icon-button-color` or
-`--button-ghost-color` for contextual theming, so callers never override their classes.
+`--button-tertiary-color` for contextual theming, so callers never override their classes.
 Primitives own no outer margin; the parent decides spacing. Combine classes with the
 [`classnames`](https://www.npmjs.com/package/classnames) package.
 

@@ -88,8 +88,8 @@ export const StreamDemo = () => {
 				<span className={styles.streamDot} aria-hidden="true" />
 				<span id="stream-status">{status}</span>
 				<Button
-					variant="ghost"
-					size="xsmall"
+					variant="tertiary"
+					size="xs"
 					className={styles.streamReplay}
 					startIcon={<Icon name="reset" size={14} />}
 					onClick={play}

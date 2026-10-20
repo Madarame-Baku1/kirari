@@ -18,7 +18,7 @@ export const AnchorCopy = (props: Types.Props) => {
 			}}
 			label={`Copy link to ${title}`}
 			message="Link copied"
-			size="xsmall"
+			size="xs"
 			glyphSize={18}
 			hash
 		/>

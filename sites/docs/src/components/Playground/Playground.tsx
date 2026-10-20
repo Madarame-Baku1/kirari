@@ -162,8 +162,8 @@ export const Playground = (props: Types.Props) => {
 					</div>
 					<div className={styles.editorActions}>
 						<Button
-							variant="ghost"
-							size="small"
+							variant="tertiary"
+							size="sm"
 							startIcon={<Icon name="reset" size={14} />}
 							title="Restore the example code"
 							onClick={() => applyLanguage(language)}

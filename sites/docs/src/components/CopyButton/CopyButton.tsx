@@ -6,7 +6,7 @@ import { CopyGlyph } from '../CopyGlyph'
 import type * as Types from './CopyButton.types'
 
 export const CopyButton = (props: Types.Props) => {
-	const { text, message, onCopied, variant = 'ghost', size = 'small', ...buttonProps } = props
+	const { text, message, onCopied, variant = 'tertiary', size = 'sm', ...buttonProps } = props
 	const { copied, copy } = useCopy({
 		text,
 		message,

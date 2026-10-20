@@ -30,9 +30,9 @@
 	box-shadow: 0 0 var(--size-10) var(--gold);
 }
 .streamReplay {
-	--button-ghost-color: var(--code-chrome);
-	--button-ghost-hover-background: #ffffff12;
-	--button-ghost-hover-color: #fff;
+	--button-tertiary-color: var(--code-chrome);
+	--button-tertiary-hover-background: #ffffff12;
+	--button-tertiary-hover-color: #fff;
 	margin-left: auto;
 	font-family: var(--sans);
 }

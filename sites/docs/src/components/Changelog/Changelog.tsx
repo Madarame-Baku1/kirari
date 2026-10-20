@@ -46,7 +46,7 @@ export const Changelog = (props: Types.Props) => {
 						<Button
 							key={filter.label}
 							href={filter.href}
-							size="small"
+							size="sm"
 							variant={current ? 'primary' : 'secondary'}
 							aria-current={current ? 'page' : undefined}
 							scroll={false}

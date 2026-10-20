@@ -13,31 +13,31 @@
 .root:active {
 	transform: translateY(var(--hairline));
 }
-.xsmall {
+.xs {
 	gap: var(--size-6);
 	height: var(--size-28);
 	padding: 0 var(--size-10);
 	border-radius: var(--size-7);
 	font-size: var(--size-12-5);
 }
-.small {
+.sm {
 	gap: var(--size-6);
 	height: var(--size-32);
 	padding: 0 var(--size-10);
 	border-radius: var(--size-8);
 	font-size: var(--size-13);
 }
-.medium,
-.large {
+.md,
+.lg {
 	gap: var(--size-8);
 	padding: 0 var(--size-20);
 	border-radius: var(--size-10);
 	font-size: var(--size-15);
 }
-.medium {
+.md {
 	height: 2.75rem;
 }
-.large {
+.lg {
 	height: 2.875rem;
 }
 .primary {
@@ -56,14 +56,14 @@
 .secondary:hover {
 	background: var(--button-secondary-hover-background, var(--soft));
 }
-.ghost {
+.tertiary {
 	border: 0;
 	background: transparent;
-	color: var(--button-ghost-color, var(--muted));
+	color: var(--button-tertiary-color, var(--muted));
 }
-.ghost:hover {
-	background: var(--button-ghost-hover-background, var(--soft-2));
-	color: var(--button-ghost-hover-color, var(--ink));
+.tertiary:hover {
+	background: var(--button-tertiary-hover-background, var(--soft-2));
+	color: var(--button-tertiary-hover-color, var(--ink));
 }
 .endIcon {
 	display: inline-flex;

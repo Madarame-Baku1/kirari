@@ -26,7 +26,7 @@ export const CodeBlock = (props: Types.Props) => {
 					className={styles.copyButton}
 					text={text}
 					label={copyLabel}
-					size="small"
+					size="sm"
 				/>
 			</div>
 			<pre className={preClassName}>
