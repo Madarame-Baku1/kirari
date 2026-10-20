@@ -255,9 +255,14 @@ kbd {
 	margin: 0;
 }
 .footer-inner nav {
+	margin-left: auto;
+}
+.footer-inner nav ul {
 	display: flex;
 	gap: var(--size-20);
-	margin-left: auto;
+	margin: 0;
+	padding: 0;
+	list-style: none;
 }
 .footer-inner nav a:hover {
 	color: var(--ink);
@@ -572,6 +577,18 @@ tr:last-child td {
 .breadcrumbs {
 	font-size: var(--size-14);
 	color: var(--muted);
+}
+.breadcrumbs ol {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--size-6);
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+.breadcrumbs li + li::before {
+	content: "/" / "";
+	margin-right: var(--size-6);
 }
 .breadcrumbs [aria-current="page"] {
 	color: var(--ink);

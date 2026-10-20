@@ -31,11 +31,14 @@ export const DocsPage = async (props: Types.Props) => {
 					<div className="docs-toolbar">
 						{id !== 'overview' && (
 							<nav className="breadcrumbs" aria-label="Breadcrumb">
-								<Link href="/docs/" variant="subtle">
-									Docs
-								</Link>
-								{' / '}
-								<span aria-current="page">{section.title}</span>
+								<ol>
+									<li>
+										<Link href="/docs/" variant="subtle">
+											Docs
+										</Link>
+									</li>
+									<li aria-current="page">{section.title}</li>
+								</ol>
 							</nav>
 						)}
 						<PageActions id={id} markdown={markdown} />

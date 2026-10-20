@@ -14,11 +14,15 @@ export const Footer = () => (
 			</Link>
 			<p>A little light for your code.</p>
 			<nav aria-label="Footer">
-				{links.map(link => (
-					<Link key={link.href} href={link.href} prefetch={link.prefetch}>
-						{link.label}
-					</Link>
-				))}
+				<ul>
+					{links.map(link => (
+						<li key={link.href}>
+							<Link href={link.href} prefetch={link.prefetch}>
+								{link.label}
+							</Link>
+						</li>
+					))}
+				</ul>
 			</nav>
 			<div className={styles.socials}>
 				{iconLinks.map(link => (

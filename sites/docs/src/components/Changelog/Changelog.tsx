@@ -24,7 +24,12 @@ const filters = [
 	})),
 ]
 
-const labels = Object.fromEntries(categories.map(category => [category.id, category.label]))
+const labels = Object.fromEntries(
+	categories.map(category => [
+		category.id,
+		category.label,
+	]),
+)
 
 export const Changelog = (props: Types.Props) => {
 	const { releases, active } = props
@@ -37,31 +42,37 @@ export const Changelog = (props: Types.Props) => {
 				<p>New releases, improvements, and fixes across Kirari and its integrations.</p>
 			</header>
 			<nav className={styles.filters} aria-label="Packages">
-				{filters.map(filter => {
-					const current = filter.id === active
-					const count = filter.id
-						? releases.filter(release => release.package === filter.id).length
-						: releases.length
-					return (
-						<Button
-							key={filter.label}
-							href={filter.href}
-							size="sm"
-							variant={current ? 'primary' : 'secondary'}
-							aria-current={current ? 'page' : undefined}
-							scroll={false}
-						>
-							{filter.label}
-							<span className={styles.count}>{count}</span>
-						</Button>
-					)
-				})}
+				<ul className={styles.filterList}>
+					{filters.map(filter => {
+						const current = filter.id === active
+						const count = filter.id
+							? releases.filter(release => release.package === filter.id).length
+							: releases.length
+						return (
+							<li key={filter.label}>
+								<Button
+									href={filter.href}
+									size="sm"
+									variant={current ? 'primary' : 'secondary'}
+									aria-current={current ? 'page' : undefined}
+									scroll={false}
+								>
+									{filter.label}
+									<span className={styles.count}>{count}</span>
+								</Button>
+							</li>
+						)
+					})}
+				</ul>
 			</nav>
 			<ol className={styles.timeline}>
 				{shown.map(release => (
 					<li key={`${release.package}@${release.version}`} className={styles.release}>
 						<div className={styles.meta}>
-							<h2 id={`${release.package}-${release.version}`} className={styles.version}>
+							<h2
+								id={`${release.package}-${release.version}`}
+								className={styles.version}
+							>
 								{active ? release.version : `${release.package} ${release.version}`}
 							</h2>
 							<time className={styles.date} dateTime={release.date}>

@@ -2,11 +2,21 @@
 	display: flex;
 	flex-direction: column;
 	gap: var(--size-2);
+	margin: 0;
+	padding: 0;
+	list-style: none;
 }
 .group {
 	display: flex;
 	flex-direction: column;
 	margin-bottom: var(--size-26);
+}
+.groupList {
+	display: flex;
+	flex-direction: column;
+	margin: 0;
+	padding: 0;
+	list-style: none;
 }
 .groupTitle {
 	margin: 0 0 var(--size-8) var(--size-12);

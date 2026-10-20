@@ -20,13 +20,18 @@
 	position: sticky;
 	top: var(--top);
 	z-index: 20;
-	display: flex;
-	flex-wrap: wrap;
-	gap: var(--size-8);
 	margin: var(--size-16) calc(var(--bleed) * -1) 0;
 	padding: var(--size-12) var(--bleed);
 	border-bottom: var(--hairline) solid var(--line);
 	background: var(--bg);
+}
+.filterList {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--size-8);
+	margin: 0;
+	padding: 0;
+	list-style: none;
 }
 .count {
 	min-width: var(--size-20);
@@ -173,9 +178,12 @@
 	}
 	.filters {
 		--bleed: var(--size-16);
-		flex-wrap: nowrap;
 		overflow-x: auto;
 		scrollbar-width: none;
+	}
+	.filterList {
+		flex-wrap: nowrap;
+		width: max-content;
 	}
 	.timeline {
 		margin-top: var(--size-16);

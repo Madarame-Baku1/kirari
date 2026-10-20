@@ -52,21 +52,26 @@ export const Header = (props: Types.Props) => {
 					<Link href={routes.home} aria-label="Kirari home">
 						<Logo />
 					</Link>
-					<nav className={styles.topLinks} aria-label="Primary">
-						{pageLinks.map(link => (
-							<PageLink
-								key={link.target}
-								target={link.target}
-								label={link.label}
-								current={page}
-								variant="subtle"
-							/>
-						))}
-						{externalLinks.map(link => (
-							<Link key={link.href} href={link.href} variant="subtle" external>
-								{link.label}
-							</Link>
-						))}
+					<nav aria-label="Primary">
+						<ul className={styles.topLinks}>
+							{pageLinks.map(link => (
+								<li key={link.target}>
+									<PageLink
+										target={link.target}
+										label={link.label}
+										current={page}
+										variant="subtle"
+									/>
+								</li>
+							))}
+							{externalLinks.map(link => (
+								<li key={link.href}>
+									<Link href={link.href} variant="subtle" external>
+										{link.label}
+									</Link>
+								</li>
+							))}
+						</ul>
 					</nav>
 					<div className={styles.topActions}>
 						<button

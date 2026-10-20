@@ -24,6 +24,9 @@
 .root .topLinks {
 	display: flex;
 	gap: var(--size-24);
+	margin: 0;
+	padding: 0;
+	list-style: none;
 	font-size: var(--size-14);
 }
 .root .topActions {

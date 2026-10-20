@@ -6,17 +6,17 @@ import type * as Types from './NavList.types'
 const Root = (props: Types.Props) => {
 	const { variant = 'sidebar', className, children } = props
 
-	return <div className={classNames(styles.root, styles[variant], className)}>{children}</div>
+	return <ul className={classNames(styles.root, styles[variant], className)}>{children}</ul>
 }
 
 const Group = (props: Types.GroupProps) => {
 	const { title, children } = props
 
 	return (
-		<div className={styles.group}>
+		<li className={styles.group}>
 			<p className={styles.groupTitle}>{title}</p>
-			{children}
-		</div>
+			<ul className={styles.groupList}>{children}</ul>
+		</li>
 	)
 }
 
@@ -24,14 +24,16 @@ const Item = (props: Types.ItemProps) => {
 	const { href, current = false, onNavigate, children } = props
 
 	return (
-		<Link
-			className={styles.item}
-			href={href}
-			aria-current={current ? 'page' : undefined}
-			onNavigate={onNavigate}
-		>
-			{children}
-		</Link>
+		<li>
+			<Link
+				className={styles.item}
+				href={href}
+				aria-current={current ? 'page' : undefined}
+				onNavigate={onNavigate}
+			>
+				{children}
+			</Link>
+		</li>
 	)
 }
 
