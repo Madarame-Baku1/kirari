@@ -1,0 +1,199 @@
+.root {
+	max-width: var(--page-width);
+	margin: 0 auto;
+	padding: var(--size-64) var(--size-24) var(--size-80);
+}
+.header h1 {
+	margin: 0;
+	font-size: clamp(var(--size-40), 6vw, var(--size-56));
+	font-weight: var(--weight-heading);
+	line-height: 1.1;
+}
+.header p {
+	max-width: 36rem;
+	margin: var(--size-12) 0 0;
+	color: var(--muted);
+	font-size: var(--size-17);
+}
+.filters {
+	--bleed: var(--size-24);
+	position: sticky;
+	top: var(--top);
+	z-index: 20;
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--size-8);
+	margin: var(--size-16) calc(var(--bleed) * -1) 0;
+	padding: var(--size-12) var(--bleed);
+	border-bottom: var(--hairline) solid var(--line);
+	background: var(--bg);
+}
+.count {
+	min-width: var(--size-20);
+	padding: 0 var(--size-5);
+	border-radius: var(--size-10);
+	background: color-mix(in srgb, currentColor 10%, transparent);
+	font: var(--weight-medium) var(--size-11) / var(--size-18) var(--mono);
+	text-align: center;
+}
+.timeline {
+	margin: var(--size-24) 0 0;
+	padding: 0;
+	list-style: none;
+}
+.release {
+	position: relative;
+	display: grid;
+	grid-template-columns: 12rem minmax(0, 1fr);
+	gap: var(--size-40);
+	padding-left: var(--size-24);
+}
+.release::before {
+	content: "";
+	position: absolute;
+	inset: 0 auto 0 0;
+	border-left: var(--hairline) solid var(--line-strong);
+}
+.release::after {
+	content: "";
+	position: absolute;
+	top: calc(var(--size-32) + var(--size-8));
+	left: calc(var(--size-4) * -1 + var(--hairline) / 2);
+	width: var(--size-8);
+	height: var(--size-8);
+	border: var(--hairline) solid var(--ink);
+	background: var(--bg);
+}
+.release:first-child::after {
+	background: var(--ink);
+}
+.meta {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: var(--size-6);
+	padding-top: var(--size-32);
+}
+.version {
+	scroll-margin-top: var(--size-64);
+	margin: 0;
+	padding: var(--size-2) var(--size-8);
+	border-radius: var(--size-4);
+	background: var(--soft-2);
+	font: var(--weight-medium) var(--size-14) / 1.6 var(--mono);
+	letter-spacing: 0;
+}
+.date {
+	color: var(--faint);
+	font-family: var(--mono);
+	font-size: var(--size-13);
+}
+.body {
+	min-width: 0;
+	max-width: 46rem;
+	padding: var(--size-32) 0;
+}
+.release + .release .body {
+	border-top: var(--hairline) solid var(--line);
+}
+.category + .category {
+	margin-top: var(--size-24);
+}
+.category h3 {
+	display: flex;
+	align-items: center;
+	gap: var(--size-8);
+	margin: 0 0 var(--size-8);
+	color: var(--muted);
+	font: var(--weight-semibold) var(--size-12) / 1.6 var(--mono);
+	letter-spacing: 0.06em;
+	text-transform: uppercase;
+}
+.category h3::before {
+	content: "";
+	width: var(--size-8);
+	height: var(--size-8);
+	border-radius: var(--size-2);
+	background: var(--marker);
+}
+.category[data-category="breaking"] {
+	--marker: var(--kirari-deleted);
+}
+.category[data-category="improvements"] {
+	--marker: var(--gold);
+}
+.category[data-category="fixes"] {
+	--marker: var(--kirari-string);
+}
+.category h4 {
+	margin: 0;
+	font-size: var(--size-16);
+	font-weight: var(--weight-semibold);
+	line-height: 1.5;
+}
+.category h4 ~ h4 {
+	margin-top: var(--size-28);
+}
+.category p {
+	margin: var(--size-6) 0 0;
+}
+.category [data-migrate] {
+	margin-top: var(--size-14);
+	color: var(--muted);
+	font-size: var(--size-14);
+}
+.category :is(ul, ol) {
+	margin: var(--size-4) 0 0;
+	padding-left: var(--size-20);
+}
+.category li {
+	margin: var(--size-6) 0;
+}
+.category li::marker {
+	color: var(--faint);
+}
+.category ol li::marker {
+	font: var(--weight-medium) var(--size-13) var(--mono);
+}
+.category div:has(> pre) {
+	margin-top: var(--size-12);
+}
+.category pre code {
+	padding: 0;
+	border-radius: 0;
+	background: none;
+	color: inherit;
+	font-size: inherit;
+	overflow-wrap: normal;
+}
+
+@media (max-width: 47.99rem) {
+	.root {
+		padding: var(--size-40) var(--size-16) var(--size-64);
+	}
+	.filters {
+		--bleed: var(--size-16);
+		flex-wrap: nowrap;
+		overflow-x: auto;
+		scrollbar-width: none;
+	}
+	.timeline {
+		margin-top: var(--size-16);
+	}
+	.release {
+		grid-template-columns: minmax(0, 1fr);
+		gap: 0;
+		padding-left: var(--size-20);
+	}
+	.meta {
+		flex-flow: row wrap;
+		align-items: center;
+		gap: var(--size-6) var(--size-12);
+	}
+	.body {
+		padding-top: var(--size-16);
+	}
+	.release + .release .body {
+		border-top: 0;
+	}
+}

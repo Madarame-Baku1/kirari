@@ -11,6 +11,10 @@ export const pageLinks: readonly { target: Page; label: string }[] = [
 		target: 'playground',
 		label: 'Playground',
 	},
+	{
+		target: 'changelog',
+		label: 'Changelog',
+	},
 ]
 
 export const externalLinks: readonly { href: string; label: string }[] = [

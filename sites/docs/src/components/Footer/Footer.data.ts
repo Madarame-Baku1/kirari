@@ -12,6 +12,10 @@ export const links: readonly { href: string; label: string; prefetch?: boolean }
 		label: 'Playground',
 	},
 	{
+		href: routes.changelog,
+		label: 'Changelog',
+	},
+	{
 		href: '/llms.txt',
 		label: 'llms.txt',
 		prefetch: false,

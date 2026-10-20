@@ -59,3 +59,43 @@ alone is not treated as success: the version must be readable from the registry.
 Run `bun run test:release` to test package selection, delayed registry visibility, release recovery, and failures without publishing or pushing. These tests also run in `bun run test` and `bun run check`.
 
 To inspect the tarballs without publishing, run `bun run pack:preview`; archives land in `.packs/`.
+
+## Site changelog
+
+The docs site shows a categorized changelog at `/changelog/`, built from one Markdown file per release in `sites/docs/changelog/<package>/<version>.md`. The generated `CHANGELOG.md` files stay what npm and GitHub show.
+
+Write the release file before running the release command, because the release runs `bun run check`, and the check fails when a version in a package's `CHANGELOG.md` has no release file. Commit the file with the changeset. Until the package's `package.json` reaches that version, the site keeps the entry hidden, so it can be merged before the release. If the release ships on a later day, update `date`.
+
+Every release file has the same shape. Frontmatter holds exactly `package`, `version`, and `date`, and must match the file's path. The body lists only the sections with changes, in this order: `### Breaking changes`, `### Improvements`, `### Bug fixes`. Leave out a section that has nothing in it rather than writing `None.`:
+
+````md
+---
+package: kirari-react
+version: 1.1.0
+date: 2026-10-21
+---
+
+### Breaking changes
+
+#### Renamed `highlightLines` to `highlighted`
+
+`<Code>` no longer accepts `highlightLines`.
+
+**How to migrate**
+
+1. Rename the prop wherever you render `<Code>`.
+
+```tsx before
+<Code highlightLines={[2]}>{source}</Code>
+```
+
+```tsx after
+<Code highlighted={[2]}>{source}</Code>
+```
+
+### Improvements
+
+- One bullet per improvement.
+````
+
+Each breaking change needs a `####` title, at least one paragraph explaining it, and `**How to migrate**` followed by numbered steps. Code blocks after the steps are optional; mark them `before` or `after` to label them, otherwise shell commands are labeled "Run". `bun run --cwd sites/docs check` validates the frontmatter with Zod and the body against these rules, and reports the file and line of the first problem.

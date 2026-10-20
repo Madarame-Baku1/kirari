@@ -1,0 +1,28 @@
+import { Suspense } from 'react'
+import { readReleases } from '../../changelog.content'
+import { Changelog as ChangelogTimeline } from '../../components/Changelog'
+import { ChangelogQuery } from '../../components/ChangelogQuery'
+import { Footer } from '../../components/Footer'
+import { SiteLayout } from '../../components/SiteLayout'
+import { pageMetadata } from '../../seo'
+
+export const metadata = pageMetadata(
+	'Changelog',
+	'Every Kirari release with its breaking changes, improvements, and bug fixes across the core library, React, and Rehype packages.',
+	'/changelog/',
+)
+
+const Changelog = async () => {
+	const releases = await readReleases()
+
+	return (
+		<SiteLayout page="changelog">
+			<Suspense fallback={<ChangelogTimeline releases={releases} />}>
+				<ChangelogQuery releases={releases} />
+			</Suspense>
+			<Footer />
+		</SiteLayout>
+	)
+}
+
+export default Changelog

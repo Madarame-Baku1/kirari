@@ -92,6 +92,7 @@ export const routes = {
 	home: '/',
 	docs: '/docs/',
 	playground: '/playground/',
+	changelog: '/changelog/',
 } as const
 
 export const docsPath = (id: Types.SectionId) =>
@@ -103,6 +104,12 @@ export const pageSearchEntries = [
 		description: 'Edit code, inspect tokens, and try themes.',
 		category: 'Page',
 		href: routes.playground,
+	},
+	{
+		title: 'Changelog',
+		description: 'Breaking changes, improvements, and bug fixes in every release.',
+		category: 'Page',
+		href: routes.changelog,
 	},
 	...sections.map(section => ({
 		title: section.title,
