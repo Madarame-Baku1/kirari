@@ -44,8 +44,9 @@ export const markup = (source: string, code?: Language, embedded?: Readonly<Reco
   const typed = code?.name === 'tsx'
   // Expression scanners use the same source offsets; failed lookahead remains reusable.
   const failedRegexStates = new Set<number>()
+  const lookupCache = {}
   const failedSiblingStarts = new Set<number>()
-  const createCode = (container: boolean, previous?: Token, frames?: Frame[], context?: ScanContext): Code => ({ kind: 'code', scanner: scan(source, expressionLanguage!, position, previous, failedRegexStates, frames, context), container, braces: 0, resume: undefined, previous })
+  const createCode = (container: boolean, previous?: Token, frames?: Frame[], context?: ScanContext): Code => ({ kind: 'code', scanner: scan(source, expressionLanguage!, position, previous, failedRegexStates, frames, context, true, lookupCache), container, braces: 0, resume: undefined, previous })
   // Root script state, read at newlines outside elements to report resume points.
   const rootFrames: Frame[] = []
   const rootContext = resume?.from?.context ? cloneContext(resume.from.context) : { parentheses: [] }
@@ -126,7 +127,7 @@ export const markup = (source: string, code?: Language, embedded?: Readonly<Reco
   const typeArguments = (): void => {
     let depth = 1
     emit('operator', position + 1)
-    for (const token of scan(source, code!, position, undefined, undefined, undefined, { parentheses: [], annotation: true })) {
+    for (const token of scan(source, code!, position, undefined, undefined, undefined, { parentheses: [], annotation: true }, true, lookupCache)) {
       if (token.type === 'operator' && token.value === '<') depth++
       const closing = token.type === 'operator' && /^>+/.exec(token.value)
       if (closing) {

@@ -20,6 +20,13 @@ test('JSX expression lookups do not repeatedly search the full source for absent
   expect(performance.now() - start).toBeLessThan(5000)
 }, 10_000)
 
+test('JSX division lookups share the last-line search across expression scanners', () => {
+  const source = '<div>' + '{x / 2}\n'.repeat(16_000) + 'a'.repeat(256_000) + '</div>'
+  const start = performance.now()
+  expect(tokenize(source, jsx).map(token => token.value).join('')).toBe(source)
+  expect(performance.now() - start).toBeLessThan(5000)
+}, 10_000)
+
 test('unfinished raw string prefixes do not repeatedly scan the entire prefix run', () => {
   const start = performance.now()
   for (const [language, prefix] of [[swift, '#'], [csharp, '$'], [php, '$']] as const) {
