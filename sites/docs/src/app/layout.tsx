@@ -6,7 +6,7 @@ import { description } from '@/seo'
 import { site } from '@/site'
 import { paletteCSS } from '@/themes'
 import '@vortexlabs/kirari/theme.css'
-import '@/style.css'
+import '@/styles/style.css'
 
 export const metadata: Metadata = {
 	metadataBase: new URL(site.url),

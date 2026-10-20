@@ -1,7 +1,7 @@
 'use client'
 
 import Error from './error'
-import '@/style.css'
+import '@/styles/style.css'
 
 const GlobalError = () => (
 	<html lang="en">
