@@ -133,7 +133,7 @@ test('Python line checkpoints bound rescanning', () => {
 
 test('JSX, TSX, and JSONC streams checkpoint at root lines and copies use full mode', () => {
   const component = 'export function Item({ name }: { name: string }) {\n  return (\n    <li className="item" onClick={() => open(name)}>\n      {name}\n    </li>\n  )\n}\n'
-  for (const [language, block] of [[jsx, component.replace(': { name: string }', '')], [tsx, component], [jsonc, '{\n  // note\n  "key": [1, 2],\n}\n']] as const) {
+  for (const [language, block] of [[jsx, component.replace(': { name: string }', '')], [tsx, component], [tsx, 'const identity = <T\nextends Value>(value: T) => value;\n'], [jsonc, '{\n  // note\n  "key": [1, 2],\n}\n']] as const) {
     const source = block.repeat(100)
     const stream = createTokenStream(language)
     expect(stream.mode).toBe('checkpoint')
@@ -146,6 +146,28 @@ test('JSX, TSX, and JSONC streams checkpoint at root lines and copies use full m
     expect(work).toBeLessThan(source.length * 60)
   }
 })
+
+for (const language of [jsx, tsx]) {
+  test(`${language.name} streams keep provisional extends tag rejections revisable`, () => {
+    for (const newline of ['\n', '\r\n', '\r', '\u2028', '\u2029']) {
+      for (const prefix of ['', 'const before = 1;\nconst view = ', '<span />\n']) {
+        const source = `${prefix}<div${newline}extendsValue="x" />;\nnext()\n`
+        for (let split = 1; split < source.length; split++) {
+          const stream = createTokenStream(language)
+          const tokens: Token[] = []
+          apply(tokens, stream.write(source.slice(0, split)))
+          expect(tokens).toEqual(tokenize(source.slice(0, split), language))
+          for (let index = split; index < source.length; index++) {
+            apply(tokens, stream.write(source[index]!))
+            expect(tokens).toEqual(tokenize(source.slice(0, index + 1), language))
+          }
+          apply(tokens, stream.end())
+          expect(tokens.filter(token => token.type === 'attribute').map(token => token.value)).toEqual(['extendsValue'])
+        }
+      }
+    }
+  })
+}
 
 test('script lookahead stays revisable while a slash on the last line may become a regex', () => {
   for (const language of [typescript, tsx]) {

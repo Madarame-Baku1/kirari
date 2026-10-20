@@ -50,7 +50,7 @@ export const markup = (source: string, code?: Language, embedded?: Readonly<Reco
   const rootFrames: Frame[] = []
   const rootContext = resume?.from?.context ? cloneContext(resume.from.context) : { parentheses: [] }
   const points: { point: ResumePoint; index: number }[] = []
-  // A rejected sibling may close once more source arrives, so later resume points are dropped.
+  // Rejected tags may become valid once more source arrives, so later resume points are dropped.
   let rewound = source.length
   const stack: (Code | Markup)[] = [code ? createCode(false, resume?.from?.previous, rootFrames, rootContext) : createMarkup(false)]
 
@@ -164,13 +164,17 @@ export const markup = (source: string, code?: Language, embedded?: Readonly<Reco
       points.push({ point: { offset: merged ? last.start : token.start, previous: context.previous, context: cloneContext(rootContext) }, index: merged ? tokens.length - 1 : tokens.length })
     }
     const sibling = context.previous?.type === 'tag' && !failedSiblingStarts.has(token.start)
-    if (!template && token.value === '<' && (canStartElement(context.previous) || sibling) && looksLikeTag(source, token.start, typed)) {
-      position = token.start
-      const element = createMarkup(true)
-      // Accept adjacent JSX snippets only when the element closes; otherwise keep comparison operators.
-      if (sibling) element.sibling = { start: position, tokens: tokens.length, openings: [] }
-      stack.push(element)
-      return true
+    if (!template && token.value === '<' && (canStartElement(context.previous) || sibling)) {
+      const tag = looksLikeTag(source, token.start, typed)
+      if (tag === undefined) rewound = Math.min(rewound, token.start)
+      if (tag) {
+        position = token.start
+        const element = createMarkup(true)
+        // Accept adjacent JSX snippets only when the element closes; otherwise keep comparison operators.
+        if (sibling) element.sibling = { start: position, tokens: tokens.length, openings: [] }
+        stack.push(element)
+        return true
+      }
     }
     if (context.container && token.type === 'punctuation') {
       if (token.value === '}' && context.braces === 0 && (template !== 'vue' || source[token.end] === '}')) {
@@ -288,12 +292,15 @@ export const markup = (source: string, code?: Language, embedded?: Readonly<Reco
   return tokens
 }
 
-const looksLikeTag = (source: string, start: number, typed = false): boolean => {
+const looksLikeTag = (source: string, start: number, typed = false): boolean | undefined => {
   if (source.startsWith('<>', start) || source.startsWith('</>', start)) return true
   const head = /^<\/?[$_\p{ID_Start}][\p{ID_Continue}.$:-]*/u.exec(source.slice(start))
   if (!head) return false
   const rest = source.slice(start + head[0].length)
-  return (/^[\s/>]|^$/.test(rest) || typed && rest.startsWith('<')) && !/^\s+extends\b/.test(rest)
+  const constraint = /^\s+extends\b/.exec(rest)
+  // An EOF word boundary can disappear when the next chunk extends the identifier.
+  if (constraint) return constraint[0].length === rest.length ? undefined : false
+  return /^[\s/>]|^$/.test(rest) || typed && rest.startsWith('<')
 }
 
 const canStartElement = (previous?: Token): boolean => {
