@@ -1,25 +1,48 @@
+import { isSignificant } from '../types.js'
 import type { Token } from '../types.js'
 
 type Result = { function: boolean; pending: boolean }
 type Group = { end: number; close: number; complete: boolean }
+export interface LookupOptions {
+  /** The name follows `const`, `let`, or `var` in TypeScript, so `:` starts a type annotation. */
+  readonly annotation: boolean
+  /** The name may take type parameters, as after `function` or in a method position. */
+  readonly generic: boolean
+  /** The name is an object or class member. */
+  readonly property: boolean
+  /** The name is a bare `async` that may be an arrow-function modifier. */
+  readonly asyncModifier: boolean
+}
 
+/**
+ * Creates a look-ahead that decides whether the name ending at `start` is a function:
+ * a call or method (`name(`), a generic call (`name<T>(`), or a binding to a function
+ * expression (`name = async (x) => …`, `name: function () {}`, `const name: T = x => …`).
+ *
+ * `pending` in the result means the look-ahead reached the end of the source, so a
+ * streaming caller must treat the answer as provisional.
+ */
 export const createFunctionLookup = (source: string, typed: boolean, scan: (start: number) => Generator<Token, void, number | undefined>) => {
   // Reuse nested groups, including unfinished ones, instead of rescanning each signature suffix.
   const groups = new Map<number, Group>()
-  return (start: number, annotation: boolean, generic: boolean, property: boolean, asyncModifier: boolean): Result => {
+  return (start: number, { annotation, generic, property, asyncModifier }: LookupOptions): Result => {
     let reader = scan(start)
     let token: Token | undefined
     let limit = source.length
     let pending = false
+    // Wraps an answer, marking it pending when it relied on reaching the end of the source.
     const result = (value: boolean): Result => ({ function: value, pending: pending || limit === source.length && (!token || token.end === limit && /^[=/]$/.test(token.value)) })
     const is = (value: string): boolean => token?.value === value
+    // Advances `token` to the next significant token before `limit`.
     const next = (): void => {
       do {
         const value = reader.next()
         token = value.done || value.value.start >= limit ? undefined : value.value
-      } while (token?.type === 'text' || token?.type === 'comment')
+      } while (token && !isSignificant(token.type))
     }
+    // Restarts scanning at `position`.
     const jump = (position: number): void => { reader = scan(position); next() }
+    // Consumes the bracket group opening at `token`, including `<…>` and `>>` splits; results are cached.
     const group = (): Group => {
       const opening = token!
       const cached = groups.get(opening.start)
@@ -51,6 +74,7 @@ export const createFunctionLookup = (source: string, typed: boolean, scan: (star
       for (const frame of stack) groups.set(frame.token.start, incomplete)
       return incomplete
     }
+    // Skips ahead to `value`, stepping over whole groups; false at a statement or block boundary.
     const until = (value: string): boolean => {
       while (token && token.value !== value) {
         if (/^[([{<]$/.test(token.value)) {
@@ -60,7 +84,9 @@ export const createFunctionLookup = (source: string, typed: boolean, scan: (star
       }
       return token?.value === value
     }
+    // Whether the current token ends the expression.
     const continuation = (): boolean => !token || /^[;,\]}]$/.test(token.value)
+    // Skips a return type annotation; true when it reaches the function body `{`.
     const body = (): boolean => {
       let operand = true
       while (token) {
@@ -78,7 +104,9 @@ export const createFunctionLookup = (source: string, typed: boolean, scan: (star
     }
 
     next()
+    // Optional or definite members: `name?()`, `name!: T`.
     if (typed && generic && token && /^[?!]$/.test(token.value)) next()
+    // `name(` is a call or definition; for `async (x) => …` the name is a modifier, not a function.
     if (is('(')) {
       if (!asyncModifier) return result(true)
       if (!group().complete) return result(false)
@@ -88,6 +116,7 @@ export const createFunctionLookup = (source: string, typed: boolean, scan: (star
       if (!group().complete) return result(false)
       return result(is('('))
     }
+    // Otherwise the name must be bound: `name = …`, or `name: …` for properties and annotations.
     if (!is('=') && !is(':')) return result(false)
     const colon = is(':')
     if (colon && !annotation && !property) return result(false)
@@ -97,6 +126,7 @@ export const createFunctionLookup = (source: string, typed: boolean, scan: (star
       next()
     }
 
+    // Inspect the bound value; parenthesized expressions are re-entered with a narrower limit.
     while (token) {
       if (is('async')) {
         next()

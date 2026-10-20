@@ -1,8 +1,9 @@
-import { scan, tokenize } from './tokenize.js'
+import { appendToken, scan, tokenize } from './tokenize.js'
 import type { Frame, ScanContext } from './tokenize.js'
 import { javascript } from './languages/javascript.js'
 import { typescript } from './languages/typescript.js'
 import { json } from './languages/json.js'
+import { isSignificant } from './types.js'
 import type { Language, Token } from './types.js'
 
 export interface TokenPatch {
@@ -17,6 +18,10 @@ export interface TokenStream {
   write(chunk: string): TokenPatch
   end(chunk?: string): TokenPatch
   reset(): void
+}
+
+const cloneContext = (context: ScanContext): ScanContext => {
+  return { ...context, parentheses: [...context.parentheses], scopes: [...context.scopes ?? []] }
 }
 
 export const createTokenStream = (language: Language): TokenStream => {
@@ -43,7 +48,7 @@ export const createTokenStream = (language: Language): TokenStream => {
     let nextOffset = offset
     let nextPrevious = previous
     let nextContext = context
-    const activeContext = { ...context, parentheses: [...context.parentheses], scopes: [...context.scopes ?? []] }
+    const activeContext = cloneContext(context)
     let significant = previous
     const tokens: Token[] = []
     const frames: Frame[] = []
@@ -53,12 +58,10 @@ export const createTokenStream = (language: Language): TokenStream => {
       if (token.type === 'text' && /[\r\n\u2028\u2029]/.test(token.value) && token.end < next.length && !frames.length && activeContext.functionPending === undefined) {
         nextOffset = last?.type === 'text' ? last.start : token.start
         nextPrevious = significant
-        nextContext = { ...activeContext, parentheses: [...activeContext.parentheses], scopes: [...activeContext.scopes] }
+        nextContext = cloneContext(activeContext)
       }
-      if (token.type === 'text' && last?.type === 'text') {
-        tokens[tokens.length - 1] = { ...last, value: last.value + token.value, end: token.end }
-      } else tokens.push(token)
-      if (token.type !== 'text' && token.type !== 'comment') significant = token
+      appendToken(tokens, token)
+      if (isSignificant(token.type)) significant = token
     }
     source = next
     offset = nextOffset

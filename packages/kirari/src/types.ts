@@ -6,6 +6,9 @@ export const tokenTypes = [
 
 export type TokenType = (typeof tokenTypes)[number]
 
+/** Whether a token type affects how later tokens read; whitespace and comments do not. */
+export const isSignificant = (type: string): boolean => type !== 'text' && type !== 'comment'
+
 export interface Token {
   readonly type: string
   readonly value: string

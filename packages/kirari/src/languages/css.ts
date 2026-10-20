@@ -1,4 +1,5 @@
 import { scan } from '../tokenize.js'
+import { isSignificant } from '../types.js'
 import type { Language, Token } from '../types.js'
 
 const cssTokens = (source: string, language: Language): Token[] => {
@@ -34,7 +35,7 @@ const cssTokens = (source: string, language: Language): Token[] => {
       if (token.value === ')' || token.value === ']') parentheses = Math.max(0, parentheses - 1)
       if (!parentheses) {
         if (token.value === '{') {
-          const first = statement.find(part => part.type !== 'text' && part.type !== 'comment')
+          const first = statement.find(part => isSignificant(part.type))
           if (first?.type === 'variable' && first.value.startsWith('--')) customBraces++
           else {
             flush(true)

@@ -1,4 +1,5 @@
 import { scan } from '../tokenize.js'
+import { isSignificant } from '../types.js'
 import type { Language, Token } from '../types.js'
 
 export const nginx: Language = {
@@ -18,7 +19,7 @@ export const nginx: Language = {
       // shortcut: directive positions are lexical and strings keep variables opaque, use module-aware parsing for validation and embedded syntax.
       if (directive && token.type === 'string') token = { ...token, type: 'keyword' }
       if (token.type === 'punctuation') directive = true
-      else if (token.type !== 'text' && token.type !== 'comment') directive = false
+      else if (isSignificant(token.type)) directive = false
       tokens.push(token)
     }
     return tokens
