@@ -64,7 +64,15 @@ To inspect the tarballs without publishing, run `bun run pack:preview`; archives
 
 The docs site shows a categorized changelog at `/changelog/`, built from one Markdown file per release in `sites/docs/changelog/<package>/<version>.md`. The generated `CHANGELOG.md` files stay what npm and GitHub show.
 
-Write the release file before running the release command, because the release runs `bun run check`, and the check fails when a version in a package's `CHANGELOG.md` has no release file. Commit the file with the changeset. Until the package's `package.json` reaches that version, the site keeps the entry hidden, so it can be merged before the release. If the release ships on a later day, update `date`.
+Write the release file before running the release command, because the release runs `bun run check`, and the check fails when a version in a package's `CHANGELOG.md` has no release file. After adding a changeset, create the file:
+
+```bash
+bun run changelog:new                    # one file per package with a pending changeset
+bun run changelog:new kirari-react       # only this package
+bun run changelog:new kirari 1.2.3       # an explicit version
+```
+
+The command reads the upcoming version from the pending changesets, uses today's date, and never overwrites an existing file. The new file has all three section headings and no changes; fill in the ones that apply and delete the rest, because an empty section fails the check. Commit the file with the changeset. Until the package's `package.json` reaches that version, the site keeps the entry hidden, so it can be merged before the release. If the release ships on a later day, update `date`.
 
 Every release file has the same shape. Frontmatter holds exactly `package`, `version`, and `date`, and must match the file's path. The body lists only the sections with changes, in this order: `### Breaking changes`, `### Improvements`, `### Bug fixes`. Leave out a section that has nothing in it rather than writing `None.`:
 

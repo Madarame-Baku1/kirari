@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start --port 4173",
     "typecheck": "next typegen && tsc --noEmit",
-    "check": "bun run typecheck && bun test ./test && bun run build && bun scripts/check-build.ts"
+    "check": "bun run typecheck && bun test ./test && bun run build && bun scripts/check-build.ts",
+    "changelog:new": "bun scripts/changelog-new.ts"
   },
   "dependencies": {
     "@vortexlabs/kirari": "workspace:*",

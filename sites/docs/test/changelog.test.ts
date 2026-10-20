@@ -5,7 +5,7 @@ import { join } from 'node:path'
 import { createElement } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { packages } from '../src/changelog'
-import { parseRelease, readPackageReleases, readReleases } from '../src/changelog.content'
+import { parseRelease, readPackageReleases, readReleases, releaseTemplate } from '../src/changelog.content'
 import { Changelog } from '../src/components/Changelog'
 import { ClipboardProvider } from '../src/components/ClipboardProvider'
 
@@ -50,6 +50,13 @@ test('a release file may leave out sections without changes', () => {
   expect(parsed.sections.breaking).toHaveLength(0)
   expect(parsed.sections.improvements).toHaveLength(1)
   expect(parsed.sections.fixes).toHaveLength(0)
+})
+
+test('the scaffold template fails until its sections are filled in or deleted', () => {
+  const template = releaseTemplate('kirari-react', '2.0.0', '2026-11-01')
+  expect(() => parse(template, 'kirari-react/2.0.0.md')).toThrow(/:7: Breaking changes: add changes, or delete the empty section/)
+  const filled = template.replace('### Breaking changes\n\n', '').replace('### Improvements\n\n', '').replace('### Bug fixes\n', '### Bug fixes\n\n- Fixed.\n')
+  expect(parse(filled, 'kirari-react/2.0.0.md').sections.fixes).toHaveLength(1)
 })
 
 const rejects: [string, string, RegExp][] = [

@@ -50,6 +50,15 @@ const frontmatterSchema = z.strictObject({
 })
 
 /**
+ * A new release file with every section heading and no changes. It fails validation until the
+ * relevant sections are filled in and the empty ones are deleted.
+ */
+export const releaseTemplate = (id: Types.PackageId, version: string, date: string) =>
+	`---\npackage: ${id}\nversion: ${version}\ndate: ${date}\n---\n\n${categories
+		.map(category => `### ${category.label}\n`)
+		.join('\n')}`
+
+/**
  * Parses one release file, `changelog/<package>/<version>.md`, and rejects anything that strays
  * from the template: frontmatter with exactly `package`, `version`, and `date` matching the path,
  * then at least one of `### Breaking changes`, `### Improvements`, and `### Bug fixes`, in that

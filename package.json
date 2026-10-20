@@ -25,6 +25,7 @@
     "check:browser": "bun run --cwd packages/kirari check:browser",
     "size": "bun run --cwd packages/kirari size",
     "changeset": "changeset",
+    "changelog:new": "bun run --cwd sites/docs changelog:new",
     "release:kirari": "bash ./bin/release.sh --filter kirari",
     "release:kirari-rehype": "bash ./bin/release.sh --filter rehype",
     "release:kirari-react": "bash ./bin/release.sh --filter react",
