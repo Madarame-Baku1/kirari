@@ -1,9 +1,12 @@
+import type { ScanContext } from './tokenize.js'
 import type { Language, Token } from './types.js'
 
 /** A root-level point where scanning can restart with the same results as a full scan. */
 export interface ResumePoint {
   readonly offset: number
   readonly previous: Token | undefined
+  /** Script scan state at the point, for grammars that embed JavaScript. */
+  readonly context?: ScanContext
 }
 
 /**

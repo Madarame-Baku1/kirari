@@ -54,15 +54,18 @@ rules; create a derived definition for custom behavior.
 ## Performance contract
 
 `stream.mode` is `checkpoint` for the exact built-in JavaScript, TypeScript,
-JSON, and Python definitions imported from the same package instance. It is
-`full` for all other definitions, including derived/custom grammars, JSX, TSX,
-and JSONC. Full mode deliberately re-tokenizes all source and returns a patch
+JSX, TSX, JSON, JSONC, and Python definitions imported from the same package
+instance. It is `full` for all other definitions, including derived/custom
+grammars. Full mode deliberately re-tokenizes all source and returns a patch
 from zero. It preserves the same caller API without making unsupported
 performance promises.
 
 Checkpoint mode reuses completed lexical context before a safe newline. It keeps
 enough trailing input to revise name/key lookahead, CRLF, and template state.
-Python checkpoints sit outside f-strings, and function names stay revisable
+JSX and TSX checkpoints sit outside elements, so a long element is rescanned
+from its opening line until it closes, and a sibling element that has not
+closed yet keeps the lines after it revisable. Python checkpoints sit outside
+f-strings, and function names stay revisable
 while later lines can still change them, such as inside an assigned
 parenthesis, inside a bracketed annotation, or when the next line starts with
 `=` or `:`. Each write still

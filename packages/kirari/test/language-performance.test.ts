@@ -5,11 +5,27 @@ import { csharp } from '../src/languages/csharp.js'
 import { php } from '../src/languages/php.js'
 import { css } from '../src/languages/css.js'
 import { javascript } from '../src/languages/javascript.js'
+import { jsx } from '../src/languages/jsx.js'
 import { makefile } from '../src/languages/makefile.js'
 import { toml } from '../src/languages/toml.js'
 import { yaml } from '../src/languages/yaml.js'
 import { createMarkdown } from '../src/markdown.js'
 import { createRegistry } from '../src/registry.js'
+
+test('JSX expression lookups do not repeatedly search the full source for absent line separators', () => {
+  const source = '<div>' + '{x}\n'.repeat(64_000) + '</div>'
+  const start = performance.now()
+  expect(tokenize(source, jsx).map(token => token.value).join('')).toBe(source)
+  // Leave room for shared CI runners while catching repeated whole-source searches.
+  expect(performance.now() - start).toBeLessThan(5000)
+}, 10_000)
+
+test('JSX division lookups share the last-line search across expression scanners', () => {
+  const source = '<div>' + '{x / 2}\n'.repeat(16_000) + 'a'.repeat(256_000) + '</div>'
+  const start = performance.now()
+  expect(tokenize(source, jsx).map(token => token.value).join('')).toBe(source)
+  expect(performance.now() - start).toBeLessThan(5000)
+}, 10_000)
 
 test('unfinished raw string prefixes do not repeatedly scan the entire prefix run', () => {
   const start = performance.now()

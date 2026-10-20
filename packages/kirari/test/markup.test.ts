@@ -5,6 +5,7 @@ import { tsx } from '../src/languages/tsx.js'
 import { html } from '../src/languages/html.js'
 import { xml } from '../src/languages/xml.js'
 import { createTokenStream } from '../src/stream.js'
+import type { Token } from '../src/types.js'
 
 const pairs = (source: string, language = jsx) => tokenize(source, language).map(t => [t.type, t.value])
 
@@ -60,10 +61,12 @@ for (const language of [jsx, tsx]) {
   test(`${language.name} updates sibling highlighting as streamed elements close`, () => {
     const source = '<First />\n<Second><Nested>{value}</Nested></Second>\n<Third />'
     const stream = createTokenStream(language)
+    let tokens: Token[] = []
     for (let end = 1; end <= source.length; end++) {
       const patch = stream.write(source[end - 1]!)
-      expect(patch.from).toBe(0)
-      expect(patch.tokens).toEqual(tokenize(source.slice(0, end), language))
+      expect(patch.from === 0 || tokens.some(token => token.end === patch.from)).toBe(true)
+      tokens = [...tokens.filter(token => token.start < patch.from), ...patch.tokens]
+      expect(tokens).toEqual(tokenize(source.slice(0, end), language))
     }
   })
 }

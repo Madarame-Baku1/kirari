@@ -17,6 +17,7 @@
 import { isSignificant } from './types.js'
 import type { Language, Token } from './types.js'
 import { createFunctionLookup } from './grammars/functions.js'
+import type { FunctionLookupCache } from './grammars/functions.js'
 import { classifyDefinitions } from './grammars/definitions.js'
 
 export type Frame = { kind: 'template'; opening: boolean } | { kind: 'expression'; depth: number }
@@ -33,6 +34,10 @@ export interface ScanContext {
   functionName?: boolean
   classBody?: boolean
   scopes?: boolean[]
+}
+
+export const cloneContext = (context: ScanContext): ScanContext => {
+  return { ...context, parentheses: [...context.parentheses], scopes: [...context.scopes ?? []] }
 }
 
 const sticky = (pattern: RegExp): RegExp => {
@@ -80,7 +85,7 @@ export const appendToken = (tokens: Token[], token: Token): void => {
  * and `functions` enables look-ahead function detection (disabled inside that look-ahead).
  */
 // biome-ignore lint/plugin: generators have no arrow form.
-export function* scan(source: string, language: Language, start = 0, previous?: Token, failedRegexStates = new Set<number>(), frames: Frame[] = [], context: ScanContext = { parentheses: [] }, functions = true): Generator<Token, void, number | undefined> {
+export function* scan(source: string, language: Language, start = 0, previous?: Token, failedRegexStates = new Set<number>(), frames: Frame[] = [], context: ScanContext = { parentheses: [] }, functions = true, lookupCache: FunctionLookupCache = {}): Generator<Token, void, number | undefined> {
   const rules = language.rules.map(rule => ({ type: rule.type, pattern: sticky(rule.pattern) }))
   const identifier = language.identifier && sticky(language.identifier)
   const keywords = new Set(language.keywords)
@@ -89,7 +94,7 @@ export function* scan(source: string, language: Language, start = 0, previous?: 
   const nulls = new Set(language.nulls)
   const script = language.regexLiterals && language.templates
   const typed = language.name === 'typescript' || language.name === 'tsx'
-  const lookup = functions && script ? createFunctionLookup(source, typed, offset => scan(source, language, offset, undefined, failedRegexStates, [], { parentheses: [] }, false)) : undefined
+  const lookup = functions && script ? createFunctionLookup(source, typed, offset => scan(source, language, offset, undefined, failedRegexStates, [], { parentheses: [] }, false), lookupCache) : undefined
   delete context.functionPending
   let pending: Token[] = []
   let position = start

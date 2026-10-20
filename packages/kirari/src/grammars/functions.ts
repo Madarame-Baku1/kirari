@@ -3,6 +3,10 @@ import type { Token } from '../types.js'
 
 type Result = { function: boolean; pending: boolean }
 type Group = { end: number; close: number; complete: boolean }
+/** Source-wide lookahead data; share only between scanners of the same immutable source. */
+export interface FunctionLookupCache {
+  lastLine?: number
+}
 export interface LookupOptions {
   /** The name follows `const`, `let`, or `var` in TypeScript, so `:` starts a type annotation. */
   readonly annotation: boolean
@@ -22,7 +26,7 @@ export interface LookupOptions {
  * `pending` in the result means the look-ahead reached the end of the source, so a
  * streaming caller must treat the answer as provisional.
  */
-export const createFunctionLookup = (source: string, typed: boolean, scan: (start: number) => Generator<Token, void, number | undefined>) => {
+export const createFunctionLookup = (source: string, typed: boolean, scan: (start: number) => Generator<Token, void, number | undefined>, cache: FunctionLookupCache = {}) => {
   // Reuse nested groups, including unfinished ones, instead of rescanning each signature suffix.
   const groups = new Map<number, Group>()
   return (start: number, { annotation, generic, property, asyncModifier }: LookupOptions): Result => {
@@ -38,6 +42,19 @@ export const createFunctionLookup = (source: string, typed: boolean, scan: (star
       do {
         const value = reader.next()
         token = value.done || value.value.start >= limit ? undefined : value.value
+        if (token?.type === 'operator' && /^\/=?$/.test(token.value)) {
+          if (cache.lastLine === undefined) {
+            let lastLine = source.length - 1
+            while (lastLine >= 0) {
+              const char = source.charCodeAt(lastLine)
+              if (char === 10 || char === 13 || char === 0x2028 || char === 0x2029) break
+              lastLine--
+            }
+            cache.lastLine = lastLine
+          }
+          // A slash on the last line may still become a regex once more source arrives.
+          if (token.start > cache.lastLine) pending = true
+        }
       } while (token && !isSignificant(token.type))
     }
     // Restarts scanning at `position`.

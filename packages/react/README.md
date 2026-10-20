@@ -84,7 +84,7 @@ export const StreamExample = () => {
 This example adds one chunk per click. In your app, call `write(chunk)` as text
 arrives. The hook also returns `end()`, which closes the stream when it is complete.
 
-- Built-in JavaScript, TypeScript, JSON, and Python reuse completed scanning work. Other languages rescan the full source. Long unfinished tokens can still be expensive; see [token streaming](https://github.com/vortexkit/kirari/blob/main/docs/streaming.md).
+- Built-in JavaScript, TypeScript, JSX, TSX, JSON, JSONC, and Python reuse completed scanning work. Other languages rescan the full source. Long unfinished tokens can still be expensive; see [token streaming](https://github.com/vortexkit/kirari/blob/main/docs/streaming.md).
 - Changing `language` starts a new, empty stream.
 - After `end()`, call `reset()` before writing again.
 - `/stream` is a client module; `<Code>` is not.
