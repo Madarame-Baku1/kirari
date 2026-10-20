@@ -155,6 +155,6 @@ test('a package filter shows only that package and marks its link current', () =
   const html = renderChangelog({ releases, active: 'kirari-rehype' })
   expect(html.match(/<h2 /g)).toHaveLength(releases.filter(entry => entry.package === 'kirari-rehype').length)
   expect(html).not.toContain('id="kirari-1.0.4"')
-  expect(html).toMatch(/aria-current="page" href="\/changelog\/?\?package=kirari-rehype"[^>]*>kirari-rehype<span[^>]*>2<\/span>/)
+  expect(html).toMatch(/aria-current="page" href="\/changelog\/?\?package=kirari-rehype"[^>]*>kirari-rehype<span[^>]*>3<\/span>/)
   expect(renderChangelog({ releases })).toMatch(/aria-current="page" href="\/changelog\/?"/)
 })
