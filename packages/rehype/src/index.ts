@@ -105,6 +105,7 @@ const tokenNodes = (source: string, tokens: readonly Token[], options: Options, 
     if (!match) break
     nodes.push({ type: 'text', value: match[0] })
     start = end + match[0].length
+    if (start === source.length) break
     number++
   } while (true)
   return nodes

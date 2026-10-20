@@ -52,3 +52,8 @@ test('rejects decorations outside the source', () => {
 test('empty source renders an empty block', () => {
   expect(renderToStaticMarkup(<Code />)).toBe('<pre class="kirari"><code></code></pre>')
 })
+
+test('a trailing newline does not add an empty line wrapper', () => {
+  const html = renderToStaticMarkup(<Code highlightLines={[2]}>{'a\nb\n'}</Code>)
+  expect(html.match(/data-line="\d+"/g)).toEqual(['data-line="1"', 'data-line="2"'])
+})

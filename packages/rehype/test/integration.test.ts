@@ -170,7 +170,7 @@ test('rejects custom tokenizer output that would lose, replace, or overlap sourc
   }
 })
 
-test('line wrappers preserve CRLF, CR, LF, Unicode, and the final empty line', async () => {
+test('line wrappers preserve CRLF, CR, LF, Unicode, and the trailing newline without an extra line', async () => {
   const source = 'const face = "🙂"\r\n\rnext()\n'
   const seen: { number: number; start: number; end: number }[] = []
   const tree = await transform(block(source, 'js'), {
@@ -182,16 +182,22 @@ test('line wrappers preserve CRLF, CR, LF, Unicode, and the final empty line', a
     { number: 1, start: 0, end: firstEnd },
     { number: 2, start: firstEnd + 2, end: firstEnd + 2 },
     { number: 3, start: firstEnd + 3, end: source.length - 1 },
-    { number: 4, start: source.length, end: source.length },
   ])
   const lines = elements(tree, 'span').filter(node => classes(node).includes('kirari-line'))
-  expect(lines).toHaveLength(4)
-  expect(lines.map(sourceText)).toEqual(['const face = "🙂"', '', 'next()', ''])
+  expect(lines).toHaveLength(3)
+  expect(lines.map(sourceText)).toEqual(['const face = "🙂"', '', 'next()'])
   expect(classes(lines[1]!)).toContain('empty')
   expect(sourceText(tree)).toBe(source)
   const html = unified().use(rehypeStringify).stringify(tree)
-  for (let number = 1; number <= 4; number++) expect(html).toContain(`data-line="${number}"`)
+  for (let number = 1; number <= 3; number++) expect(html).toContain(`data-line="${number}"`)
+  expect(html).not.toContain('data-line="4"')
   expect(elements(tree, 'code')[0]!.children.filter(node => node.type === 'text').map(node => node.value)).toEqual(['\r\n', '\r', '\n'])
+})
+
+test('Markdown fences get one wrapper per written line', async () => {
+  const html = String(await markdown({ languages: [javascript], lines: true }).process('```js {2}\nconst a = 1\nconst b = 2\n```'))
+  expect(html.match(/data-line="\d+"/g)).toEqual(['data-line="1"', 'data-line="2"'])
+  expect(html).toContain('</span></span>\n</code>')
 })
 
 test('empty blocks produce a single empty wrapper when lines are enabled', async () => {

@@ -127,6 +127,7 @@ const codeNodes = (tokens: readonly Token[], options: Omit<CodeProps, 'children'
     if (!match) break
     nodes.push(match[0])
     start = end + match[0].length
+    if (start === source.length) break
     number++
   } while (true)
   return nodes

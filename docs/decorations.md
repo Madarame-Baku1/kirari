@@ -52,7 +52,7 @@ With ranges or line wrappers enabled, tokens must cover the source contiguously 
 
 Set `lines: true` to wrap every line in `<span class="kirari-line" data-line="1">…</span>`. `lineClassName` adds escaped classes to those wrappers and is ignored unless `lines` is enabled. Line numbers start at one. Callback offsets exclude the newline and use the same UTF-16 source indices as decorations.
 
-LF, CRLF and standalone CR delimit lines. Their original bytes remain between wrappers. Empty lines get empty wrappers, including the final line after a trailing newline. An empty source has one empty line wrapper. Range classes apply to line content; newlines outside the wrappers receive no classes, so a range covering only a newline has no visible effect in line mode. Range boundaries within CRLF are accepted and do not split the emitted CRLF in line mode.
+LF, CRLF and standalone CR delimit lines. Their original bytes remain between wrappers. Empty lines get empty wrappers. A trailing newline ends the last line and stays after its wrapper without starting another one. An empty source has one empty line wrapper. Range classes apply to line content; newlines outside the wrappers receive no classes, so a range covering only a newline has no visible effect in line mode. Range boundaries within CRLF are accepted and do not split the emitted CRLF in line mode.
 
 Without line wrappers, ranges can style newline characters. A boundary inside CRLF can place markup between its two source characters; HTML parsers then normalize them separately, potentially displaying two line breaks. Keep range boundaries outside CRLF, or enable `lines: true`, when browser newline presentation matters.
 

@@ -132,8 +132,8 @@ const options = {
 } satisfies Options
 ```
 
-Line endings remain outside the wrappers. Empty and trailing lines are
-preserved. Callback offsets are UTF-16 code units into the code block's source;
+Line endings remain outside the wrappers. Empty lines are preserved; the
+fence's trailing newline does not add an extra line. Callback offsets are UTF-16 code units into the code block's source;
 `start` is inclusive and `end` is exclusive and excludes the line ending.
 Token class callbacks receive each original token once, even when a token spans
 multiple lines.

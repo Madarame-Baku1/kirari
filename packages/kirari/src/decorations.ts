@@ -106,6 +106,7 @@ export const renderDecorated = (tokens: readonly Token[], options: DecoratedRend
     if (!match) break
     parts.push(match[0])
     start = end + match[0].length
+    if (start === source.length) break
     number++
   } while (true)
   return parts.join('')

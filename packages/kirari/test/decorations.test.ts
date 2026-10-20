@@ -63,7 +63,7 @@ describe('renderDecorated', () => {
     })).toBe('a<span class="kirari-text selected">b</span>c')
   })
 
-  test('preserves CRLF, CR, LF and trailing empty lines outside wrappers', () => {
+  test('preserves CRLF, CR, LF and a trailing newline outside wrappers', () => {
     const seen: { number: number; start: number; end: number }[] = []
     expect(renderDecorated(text('a\r\nb\rc\n'), {
       lines: true,
@@ -71,12 +71,16 @@ describe('renderDecorated', () => {
       lineClassName: line => { seen.push(line); return line.number === 2 ? 'active' : undefined },
     })).toBe('<span class="kirari-line" data-line="1"><span class="kirari-text selected">a</span></span>\r\n'
       + '<span class="kirari-line active" data-line="2"><span class="kirari-text selected">b</span></span>\r'
-      + '<span class="kirari-line" data-line="3"><span class="kirari-text selected">c</span></span>\n'
-      + '<span class="kirari-line" data-line="4"></span>')
+      + '<span class="kirari-line" data-line="3"><span class="kirari-text selected">c</span></span>\n')
     expect(seen).toEqual([
       { number: 1, start: 0, end: 1 }, { number: 2, start: 3, end: 4 },
-      { number: 3, start: 5, end: 6 }, { number: 4, start: 7, end: 7 },
+      { number: 3, start: 5, end: 6 },
     ])
+  })
+
+  test('keeps empty lines before a trailing newline', () => {
+    expect(renderDecorated(text('a\n\n'), { lines: true })).toBe('<span class="kirari-line" data-line="1">a</span>\n'
+      + '<span class="kirari-line" data-line="2"></span>\n')
   })
 
   test('handles ranges ending or starting within a CRLF newline', () => {
@@ -116,8 +120,7 @@ describe('renderDecorated', () => {
   test('handles empty sources and requires lines explicitly', () => {
     expect(renderDecorated([])).toBe('')
     expect(renderDecorated([], { lines: true })).toBe('<span class="kirari-line" data-line="1"></span>')
-    expect(renderDecorated(text('\n'), { lines: true })).toBe('<span class="kirari-line" data-line="1"></span>\n'
-      + '<span class="kirari-line" data-line="2"></span>')
+    expect(renderDecorated(text('\n'), { lines: true })).toBe('<span class="kirari-line" data-line="1"></span>\n')
     expect(renderDecorated(text('a'), { lineClassName: () => { throw new Error('not called') } })).toBe('a')
   })
 
