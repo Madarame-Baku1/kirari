@@ -1,5 +1,8 @@
 import { scan } from '../tokenize.js'
+import { isSignificant } from '../types.js'
 import type { Language, Token } from '../types.js'
+import { resumableScan } from '../resumable.js'
+import type { ResumableScan } from '../resumable.js'
 
 const tripleString = { type: 'string', pattern: /[rRuUbBfF]{0,2}(?:"""(?:\\(?:[\s\S]|$)|(?!""")[^\\])*(?:"""|$)|'''(?:\\(?:[\s\S]|$)|(?!''')[^\\])*(?:'''|$))/ }
 const fstringOpening = { type: 'python-fstring', pattern: /(?:[fF][rR]?|[rR][fF])(?:"""|'''|"|')/ }
@@ -42,15 +45,28 @@ const literalChunk = (source: string, start: number, frame: Literal): { end: num
   return { end, closed: false }
 }
 
-const tokenizePython = (source: string, language: Language): Token[] => {
+const withFstrings = (language: Language): Language => {
+  return { ...language, rules: language.rules.flatMap(rule => rule.pattern === tripleString.pattern ? [fstringOpening, rule] : [rule]) }
+}
+
+// Built once for the built-in definition, which streams rescan on every write; copies may change their rules.
+let builtIn: Language | undefined
+const scanLanguage = (language: Language): Language => {
+  if (language !== python) return withFstrings(language)
+  builtIn ??= withFstrings(python)
+  return builtIn
+}
+
+// Resume points are whitespace tokens containing a newline, outside f-strings, with more source after them.
+const scanPython: ResumableScan = (source, language, from, checkpoint) => {
   const tokens: Token[] = []
   const frames: PythonFrame[] = [{ kind: 'expression', depth: 0, root: true }]
-  const scanner = scan(source, {
-    ...language,
-    rules: language.rules.flatMap(rule => rule.pattern === tripleString.pattern ? [fstringOpening, rule] : [rule]),
-  })
-  let position = 0
+  const scanner = scan(source, scanLanguage(language), from?.offset, from?.previous)
+  let position = from?.offset ?? 0
   let resume: number | undefined
+  // Mirrors the scanner's own `previous`, which resuming replaces with a placeholder element.
+  let previous = from?.previous
+  let yielded: Token | undefined
 
   const emit = (type: string, end: number, merge = false): void => {
     if (end <= position) return
@@ -78,10 +94,18 @@ const tokenizePython = (source: string, language: Language): Token[] => {
       continue
     }
 
+    if (resume !== undefined && yielded) previous = { type: 'tag', value: 'element', start: yielded.start, end: resume }
     const result = scanner.next(resume)
     resume = undefined
     if (result.done) break
     const token = result.value
+    yielded = token
+    if (isSignificant(token.type)) previous = token
+    if (checkpoint && frames.length === 1 && token.type === 'text' && /[\r\n]/.test(token.value) && token.end < source.length) {
+      const last = tokens[tokens.length - 1]
+      const merged = last?.type === 'text'
+      checkpoint({ offset: merged ? last.start : position, previous }, merged ? tokens.length - 1 : tokens.length)
+    }
     const opening = token.type === fstringOpening.type && /^(f|fr|rf)("""|'''|"|')$/i.exec(token.value)
     if (opening) {
       emit('string', token.end)
@@ -116,6 +140,8 @@ const tokenizePython = (source: string, language: Language): Token[] => {
   return tokens
 }
 
+const tokenizePython = (source: string, language: Language): Token[] => scanPython(source, language)
+
 export const python: Language = {
   name: 'python',
   tokenize: tokenizePython,
@@ -133,3 +159,5 @@ export const python: Language = {
     { type: 'punctuation', pattern: /[{}()[\],;:.]/ },
   ],
 }
+
+Object.defineProperty(python, resumableScan, { value: scanPython })

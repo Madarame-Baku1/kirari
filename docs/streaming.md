@@ -53,18 +53,24 @@ rules; create a derived definition for custom behavior.
 
 ## Performance contract
 
-`stream.mode` is `checkpoint` for the exact built-in JavaScript, TypeScript, and
-JSON definitions imported from the same package instance. It is `full` for all
-other definitions, including derived/custom grammars, JSX, TSX, and JSONC. Full
-mode deliberately re-tokenizes all source and returns a patch from zero. It
-preserves the same caller API without making unsupported performance promises.
+`stream.mode` is `checkpoint` for the exact built-in JavaScript, TypeScript,
+JSON, and Python definitions imported from the same package instance. It is
+`full` for all other definitions, including derived/custom grammars, JSX, TSX,
+and JSONC. Full mode deliberately re-tokenizes all source and returns a patch
+from zero. It preserves the same caller API without making unsupported
+performance promises.
 
 Checkpoint mode reuses completed lexical context before a safe newline. It keeps
 enough trailing input to revise name/key lookahead, CRLF, and template state.
-It still scans the revisable tail on each write. A long single line, unfinished
-multiline comment, string, or template can keep that tail large and produce
-quadratic total work across small chunks. The stream retains the entire source
-in memory, plus a checkpoint token; there is no bounded-memory guarantee.
+Python checkpoints sit outside f-strings, and function names stay revisable
+while later lines can still change them, such as inside an assigned
+parenthesis, inside a bracketed annotation, or when the next line starts with
+`=` or `:`. Each write still
+scans the revisable tail. A long single line, or an unfinished multiline
+comment, string, template, or Python triple-quoted string, can keep that tail
+large and produce quadratic total work across small chunks. The stream retains
+the entire source in memory, plus a checkpoint token; there is no bounded-memory
+guarantee.
 
 For live rendering, render only `patch.tokens` and replace the previously
 rendered suffix identified by its source offset. Keep source-offset metadata in

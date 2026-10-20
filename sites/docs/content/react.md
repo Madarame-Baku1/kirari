@@ -43,4 +43,4 @@ export const StreamedCode = () => {
 }
 ```
 
-`useTokenStream` returns `{ tokens, write, end, reset }` and applies token patches as text arrives. Built-in JavaScript, TypeScript, and JSON reuse completed scanning work; other languages rescan the full source. See [streaming limits](/docs/streaming/). It is client-only; `<Code>` is not.
+`useTokenStream` returns `{ tokens, write, end, reset }` and applies token patches as text arrives. Built-in JavaScript, TypeScript, JSON, and Python reuse completed scanning work; other languages rescan the full source. See [streaming limits](/docs/streaming/). It is client-only; `<Code>` is not.

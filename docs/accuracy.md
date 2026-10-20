@@ -70,5 +70,5 @@ not a language-wide accuracy score or superiority over another highlighter.
 
 Streaming patches must equal batch tokenization after every update, including
 its lexical limits. Checkpointing still optimizes only the exact built-in
-JavaScript, TypeScript, and JSON definitions. See [streaming](streaming.md) for
+JavaScript, TypeScript, JSON, and Python definitions. See [streaming](streaming.md) for
 open-tail and retained-memory limits.

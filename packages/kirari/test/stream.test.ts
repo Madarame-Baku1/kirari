@@ -62,6 +62,73 @@ test('checkpoint streams retain lexical context and revise lookahead across line
   }
 })
 
+test('Python streams keep definitions that later lines can still change revisable', () => {
+  const sources = [
+    'x = (\nlambda: 1)\n',
+    'x = ((\n1), 2)\ny = [\nlambda: 1]\n',
+    'name\nother\n(1)\nvalue\n:= 2\n',
+    'x = (lambda: 1)\n[0]\nz\n',
+    'name\n: T\n= lambda: 0\nz\n',
+    'name\n= (\nlambda: 1)\n(2)\nz\n',
+    'x = (lambda: 1)\n(2)\n',
+    'def < 1\n> name\n',
+    'def pass\n.x\n',
+    'def pass\n.x\nz\n',
+    'def stub(): ...\n@overload\ndef stub(x): ...\nz\n',
+    'def a.\n*\nb\nz\n',
+    'def a.\nb\nz\n',
+    'if ready:\n    handler = lambda: 0\nz\n',
+    '[\nx:\n=lambda: 0\n]\ny:\n= lambda: 0\nz\n',
+    'x: Callable[\n  [int], str] = lambda n: 1\nz\n',
+    'x: int \\\n    = lambda: 0\nz\n',
+    'x: int \\\r\n    = lambda: 0\nz\n',
+    'def\nname\n',
+    'def *\nname\n',
+    'x = (lambda: 1)\n.5\n',
+    'def a.b\n:\nc\n',
+    'name\n\n= lambda: 0\n',
+    'x: Dict[a, b]\n= lambda: 1\n',
+    'lambda x:\n\npass = lambda: 0\n',
+    'def a:\nb = lambda: 0\n',
+    'value = f"{a\n}" + f\'\'\'\n{b}\n\'\'\'\nnext()\r\n',
+    'x: int if a < b else str = lambda: 0\nif y > 2:\n    pass\n',
+    'e: T < 1\n= lambda: 0\nz > 2\n',
+  ]
+  for (const source of sources) {
+    for (let split = 1; split < source.length; split++) {
+      const stream = createTokenStream(python)
+      const tokens: Token[] = []
+      apply(tokens, stream.write(source.slice(0, split)))
+      expect(tokens).toEqual(tokenize(source.slice(0, split), python))
+      for (let index = split; index < source.length; index++) {
+        apply(tokens, stream.write(source[index]!))
+        expect(tokens).toEqual(tokenize(source.slice(0, index + 1), python))
+      }
+    }
+  }
+})
+
+test('Python line checkpoints bound rescanning', () => {
+  const blocks = [
+    'def greet(name: str) -> str:\n    return f"Hello, {name}!"  # note\n',
+    'if ready:\n    run()\n',
+    'for item in items:\n    print(item)\n',
+    'import os\nvalue = other\n',
+  ]
+  for (const block of blocks) {
+    const source = block.repeat(400)
+    const stream = createTokenStream(python)
+    expect(stream.mode).toBe('checkpoint')
+    let work = 0
+    for (let start = 0; start < source.length; start += 4) {
+      const patch = stream.write(source.slice(start, start + 4))
+      work += patch.length - patch.from
+    }
+    expect(work).toBeLessThan(source.length * 20)
+  }
+  expect(createTokenStream({ ...python }).mode).toBe('full')
+})
+
 test('line checkpoints bound rescanning for ordinary multiline code', () => {
   const source = 'const value = 42;\n'.repeat(1000)
   const stream = createTokenStream(javascript)

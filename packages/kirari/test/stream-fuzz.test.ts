@@ -4,6 +4,7 @@ import { tokenize } from '../src/tokenize.js'
 import { javascript } from '../src/languages/javascript.js'
 import { typescript } from '../src/languages/typescript.js'
 import { json } from '../src/languages/json.js'
+import { python } from '../src/languages/python.js'
 import type { Language, Token } from '../src/types.js'
 
 const random = (seed: number) => {
@@ -72,3 +73,31 @@ for (const language of [javascript, typescript, json]) {
     }
   })
 }
+
+const pythonFragments = [
+  'name', 'x', 'def', 'class', 'lambda', 'lambda x', 'if', 'in', 'pass', 'None', 'self', 'await',
+  'name: T', 'x: int', 'y: Callable[[int], str]', '= lambda: 0', 'x = (', 'lambda: 1)', 'def a.b',
+  ':', '=', ':=', '(', ')', '[', ']', '{', '}', ',', '.', '*', '**', '&', '<', '>', '>>', '->', '@dec',
+  '1', '.5', '"s"', '"""', "'''", 'f"', "f'", 'f"""', '{a}', 'rb"', '#c', '\\',
+  '\n', '\n', '\r\n', '\r', '    ',
+]
+
+const pythonSources = [
+  'handler: int if a < b else str = lambda: 0\nif x > 2:\n    pass\n',
+  'value = f"{a\n}" + f\'\'\'\n{b}\n\'\'\'\nnext()\r\n',
+]
+const pickPython = random(0x2468ace0)
+for (let index = 0; index < 400; index++) {
+  let source = ''
+  const count = 4 + pickPython() % 24
+  for (let part = 0; part < count; part++) source += pythonFragments[pickPython() % pythonFragments.length]! + (pickPython() % 3 ? ' ' : '')
+  pythonSources.push(source)
+}
+
+test('stream patches match batch tokens for generated prefixes and partitions: python', () => {
+  const partition = random(0x13579bdf)
+  for (const source of pythonSources) {
+    checkPartitions(source, python, () => 1)
+    checkPartitions(source, python, () => 1 + partition() % 6)
+  }
+})

@@ -39,6 +39,6 @@ For live output, render only `patch.tokens` and replace that tail of your view. 
 
 **Know the streaming limits**
 
-Only the unmodified built-in JavaScript, TypeScript, and JSON use `'checkpoint'` mode (`stream.mode`), which rescans less. Everything else, including copies or extensions of those, uses `'full'`: every write retokenizes all source so far.
+Only the unmodified built-in JavaScript, TypeScript, JSON, and Python use `'checkpoint'` mode (`stream.mode`), which rescans less. Everything else, including copies or extensions of those, uses `'full'`: every write retokenizes all source so far.
 
 Even in checkpoint mode, a long line or unclosed multiline token can trigger repeated rescans. Both modes keep the full source in memory. Don’t mutate built-in definitions; copy them.
