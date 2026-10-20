@@ -1,7 +1,7 @@
 import styles from './Footer.module.css'
 import { routes } from '../../navigation'
 import { site } from '../../site'
-import { Brand } from '../Brand'
+import { Logo } from '../Logo'
 import { Icon } from '../Icon'
 import { IconButton } from '../IconButton'
 import { Link } from '../Link'
@@ -10,7 +10,7 @@ export const Footer = () => (
 	<footer className="site-footer">
 		<div className="footer-inner">
 			<Link href={routes.home}>
-				<Brand size="small" />
+				<Logo size="small" />
 			</Link>
 			<p>A little light for your code.</p>
 			<nav aria-label="Footer">

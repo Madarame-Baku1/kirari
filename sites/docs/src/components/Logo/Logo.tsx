@@ -1,9 +1,9 @@
-import styles from './Brand.module.css'
+import styles from './Logo.module.css'
 import classNames from 'classnames'
 import { Icon } from '../Icon'
-import type * as Types from './Brand.types'
+import type * as Types from './Logo.types'
 
-export const Brand = (props: Types.Props) => {
+export const Logo = (props: Types.Props) => {
 	const { size = 'medium' } = props
 
 	return (

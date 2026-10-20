@@ -4,7 +4,7 @@ import styles from './Header.module.css'
 import { useEffect, useState } from 'react'
 import { routes } from '../../navigation'
 import { site } from '../../site'
-import { Brand } from '../Brand'
+import { Logo } from '../Logo'
 import { Icon } from '../Icon'
 import { IconButton } from '../IconButton'
 import { Link } from '../Link'
@@ -50,7 +50,7 @@ export const Header = (props: Types.Props) => {
 			<header className={styles.root} data-scrolled={scrolled ? '' : undefined}>
 				<div className={styles.topbarInner}>
 					<Link href={routes.home} aria-label="Kirari home">
-						<Brand />
+						<Logo />
 					</Link>
 					<nav className={styles.topLinks} aria-label="Primary">
 						<PageLink target="docs" label="Docs" current={page} variant="subtle" />

@@ -2,7 +2,7 @@
 
 import styles from './MobileMenu.module.css'
 import { routes } from '../../navigation'
-import { Brand } from '../Brand'
+import { Logo } from '../Logo'
 import { Dialog } from '../Dialog'
 import { Divider } from '../Divider'
 import { DocsNavigation } from '../DocsNavigation'
@@ -37,7 +37,7 @@ export const MobileMenu = (props: Types.Props) => {
 		>
 			<div className={styles.header}>
 				<h2 id="mobile-menu-title">
-					<Brand />
+					<Logo />
 				</h2>
 				<Dialog.Close label="Close navigation" />
 			</div>
