@@ -4,8 +4,43 @@ import type { Language, Token } from '../types.js'
 const tripleString = { type: 'string', pattern: /[rRuUbBfF]{0,2}(?:"""(?:\\(?:[\s\S]|$)|(?!""")[^\\])*(?:"""|$)|'''(?:\\(?:[\s\S]|$)|(?!''')[^\\])*(?:'''|$))/ }
 const fstringOpening = { type: 'python-fstring', pattern: /(?:[fF][rR]?|[rR][fF])(?:"""|'''|"|')/ }
 
-type PythonFrame = { kind: 'expression'; depth: number; root?: true }
-  | { kind: 'literal'; quote: string; raw: boolean; format: boolean }
+type Literal = { kind: 'literal'; quote: string; raw: boolean; format: boolean }
+type PythonFrame = { kind: 'expression'; depth: number; root?: true } | Literal
+
+// Scans literal text in an f-string, stopping at a replacement field or the closing quote.
+const literalChunk = (source: string, start: number, frame: Literal): { end: number; closed: boolean } => {
+  let end = start
+  while (end < source.length) {
+    const char = source[end]
+    if (frame.format && char === '}') break
+    if (!frame.format && source.startsWith(frame.quote, end)) {
+      return { end: end + frame.quote.length, closed: true }
+    }
+    if (!frame.format && frame.quote.length === 1 && (char === '\r' || char === '\n')) {
+      return { end, closed: true }
+    }
+    if (char === '{' || char === '}') {
+      if (!frame.format && source[end + 1] === char) end += 2
+      else if (char === '{') break
+      else end++
+    } else if (char === '\\') {
+      if (!frame.raw && source.startsWith('\\N{', end)) {
+        end += 3
+        while (end < source.length && source[end] !== '}' && !source.startsWith(frame.quote, end)
+          && (frame.quote.length > 1 || (source[end] !== '\r' && source[end] !== '\n'))) end++
+        if (source[end] === '}') end++
+      } else {
+        end++
+        // Backslashes escape quotes, but cannot escape replacement-field braces.
+        if (source[end] !== '{' && source[end] !== '}') {
+          if (source.startsWith('\r\n', end)) end++
+          if (end < source.length) end++
+        }
+      }
+    } else end++
+  }
+  return { end, closed: false }
+}
 
 const tokenizePython = (source: string, language: Language): Token[] => {
   const tokens: Token[] = []
@@ -29,40 +64,7 @@ const tokenizePython = (source: string, language: Language): Token[] => {
   while (position < source.length) {
     const frame = frames[frames.length - 1]!
     if (frame.kind === 'literal') {
-      let end = position
-      let closed = false
-      while (end < source.length) {
-        const char = source[end]
-        if (frame.format && char === '}') break
-        if (!frame.format && source.startsWith(frame.quote, end)) {
-          end += frame.quote.length
-          closed = true
-          break
-        }
-        if (!frame.format && frame.quote.length === 1 && (char === '\r' || char === '\n')) {
-          closed = true
-          break
-        }
-        if (char === '{' || char === '}') {
-          if (!frame.format && source[end + 1] === char) end += 2
-          else if (char === '{') break
-          else end++
-        } else if (char === '\\') {
-          if (!frame.raw && source.startsWith('\\N{', end)) {
-            end += 3
-            while (end < source.length && source[end] !== '}' && !source.startsWith(frame.quote, end)
-              && (frame.quote.length > 1 || (source[end] !== '\r' && source[end] !== '\n'))) end++
-            if (source[end] === '}') end++
-          } else {
-            end++
-            // Backslashes escape quotes, but cannot escape replacement-field braces.
-            if (source[end] !== '{' && source[end] !== '}') {
-              if (source.startsWith('\r\n', end)) end++
-              if (end < source.length) end++
-            }
-          }
-        } else end++
-      }
+      const { end, closed } = literalChunk(source, position, frame)
       emit('string', end, true)
       if (closed) frames.pop()
       else if (source[position] === '{') {
