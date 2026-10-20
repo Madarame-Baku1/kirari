@@ -1,4 +1,5 @@
-import { scan, tokenize } from '../tokenize.js'
+import { appendToken, scan, tokenize } from '../tokenize.js'
+import { isSignificant } from '../types.js'
 import type { Language, Token } from '../types.js'
 
 type Code = {
@@ -51,10 +52,7 @@ export const markup = (source: string, code?: Language, embedded?: Readonly<Reco
   }
 
   const append = (token: Token): void => {
-    const last = tokens[tokens.length - 1]
-    if (token.type === 'text' && last?.type === 'text') {
-      tokens[tokens.length - 1] = { ...last, value: last.value + token.value, end: token.end }
-    } else tokens.push(token)
+    appendToken(tokens, token)
     position = token.end
   }
   const emit = (type: string, end: number): void => {
@@ -109,78 +107,104 @@ export const markup = (source: string, code?: Language, embedded?: Readonly<Reco
     }
   }
 
-  while (stack.length) {
-    if (position >= source.length) {
-      const pending = [...stack].reverse().find((context): context is Markup => context.kind === 'markup' && !!context.sibling)
-      if (!pending) break
-      rejectSibling(pending)
+  // Scans TSX type arguments such as `<Select<Item>`, splitting `>>` where the generic closes.
+  const typeArguments = (): void => {
+    let depth = 1
+    emit('operator', position + 1)
+    for (const token of scan(source, code!, position, undefined, undefined, undefined, { parentheses: [], annotation: true })) {
+      if (token.type === 'operator' && token.value === '<') depth++
+      const closing = token.type === 'operator' && /^>+/.exec(token.value)
+      if (closing) {
+        const count = Math.min(depth, closing[0].length)
+        append({ ...token, value: token.value.slice(0, count), end: token.start + count })
+        depth -= count
+        if (depth === 0) break
+        if (count < token.value.length) append({ ...token, value: token.value.slice(count), start: token.start + count })
+      } else append(token)
     }
-    const context = stack[stack.length - 1]!
-    if (context.kind === 'code') {
-      const next = context.scanner.next(context.resume)
-      context.resume = undefined
-      if (next.done) break
-      const token = next.value
-      const sibling = context.previous?.type === 'tag' && !failedSiblingStarts.has(token.start)
-      if (!template && token.value === '<' && (canStartElement(context.previous) || sibling) && looksLikeTag(source, token.start, typed)) {
-        position = token.start
-        const element = createMarkup(true)
-        // Accept adjacent JSX snippets only when the element closes; otherwise keep comparison operators.
-        if (sibling) element.sibling = { start: position, tokens: tokens.length, openings: [] }
-        stack.push(element)
-        continue
-      }
-      if (context.container && token.type === 'punctuation') {
-        if (token.value === '}' && context.braces === 0 && (template !== 'vue' || source[token.end] === '}')) {
-          append(token)
-          if (template === 'vue') emit('punctuation', position + 1)
-          stack.pop()
-          continue
-        }
-        if (token.value === '{' || token.value === '${') context.braces++
-        if (token.value === '}') context.braces--
-      }
-      append(token)
-      if (token.type !== 'text' && token.type !== 'comment') context.previous = token
-      continue
+  }
+  // End of a `<!…>` declaration, skipping quoted strings and an internal `[…]` subset.
+  const declarationEnd = (): number => {
+    let end = position + 2
+    let brackets = 0
+    while (end < source.length) {
+      const char = source[end++]
+      if (char === '"' || char === "'") end = until(char, end)
+      else if (char === '[') brackets++
+      else if (char === ']') brackets--
+      else if (char === '>' && brackets <= 0) break
     }
+    return end
+  }
 
-    if (context.phase === 'tag') {
-      const space = match(whitespace)
-      if (space) { emit('text', position + space.length); continue }
-      if (source.startsWith('/>', position) || source.startsWith('?>', position)) {
-        emit('punctuation', position + 2)
-        finishTag(context, true)
-      } else if (source[position] === '>') {
-        emit('punctuation', position + 1)
-        finishTag(context, false)
-      } else if (source[position] === '"' || source[position] === "'") {
-        const quote = source[position]!
-        const end = until(quote, position + 1)
-        const contentEnd = source[end - 1] === quote && end > position + 1 ? end - 1 : end
-        if (context.value && context.attribute.toLowerCase() === 'lang') context.language = source.slice(position + 1, contentEnd).toLowerCase()
-        if (template === 'vue' && context.value && /^(?:v-|[:@#])/.test(context.attribute)) {
-          emit('string', position + 1)
-          appendCode(contentEnd, expressionLanguage!)
-          emit('string', end)
-        } else emit('string', end)
-        context.value = false
-      } else if (source[position] === '=') {
-        emit('operator', position + 1)
-        context.value = true
-      } else if ((code || template === 'svelte') && source[position] === '{') {
-        context.value = false
-        expression()
-      } else {
-        const value = match(attribute)
-        if (value && context.value && context.attribute.toLowerCase() === 'lang') context.language = value.toLowerCase()
-        if (value && !context.value) context.attribute = value
-        emit(value ? (context.value ? 'string' : 'attribute') : 'text', position + (value?.length ?? 1))
-        context.value = false
-      }
-      continue
+  // Advances one token inside a script expression; returns false once the scanner is exhausted.
+  const stepCode = (context: Code): boolean => {
+    const next = context.scanner.next(context.resume)
+    context.resume = undefined
+    if (next.done) return false
+    const token = next.value
+    const sibling = context.previous?.type === 'tag' && !failedSiblingStarts.has(token.start)
+    if (!template && token.value === '<' && (canStartElement(context.previous) || sibling) && looksLikeTag(source, token.start, typed)) {
+      position = token.start
+      const element = createMarkup(true)
+      // Accept adjacent JSX snippets only when the element closes; otherwise keep comparison operators.
+      if (sibling) element.sibling = { start: position, tokens: tokens.length, openings: [] }
+      stack.push(element)
+      return true
     }
+    if (context.container && token.type === 'punctuation') {
+      if (token.value === '}' && context.braces === 0 && (template !== 'vue' || source[token.end] === '}')) {
+        append(token)
+        if (template === 'vue') emit('punctuation', position + 1)
+        stack.pop()
+        return true
+      }
+      if (token.value === '{' || token.value === '${') context.braces++
+      if (token.value === '}') context.braces--
+    }
+    append(token)
+    if (isSignificant(token.type)) context.previous = token
+    return true
+  }
 
+  // Advances inside an open tag: attributes, values, embedded expressions, and the closing `>`.
+  const stepTag = (context: Markup): void => {
+    const space = match(whitespace)
+    if (space) { emit('text', position + space.length); return }
+    if (source.startsWith('/>', position) || source.startsWith('?>', position)) {
+      emit('punctuation', position + 2)
+      finishTag(context, true)
+    } else if (source[position] === '>') {
+      emit('punctuation', position + 1)
+      finishTag(context, false)
+    } else if (source[position] === '"' || source[position] === "'") {
+      const quote = source[position]!
+      const end = until(quote, position + 1)
+      const contentEnd = source[end - 1] === quote && end > position + 1 ? end - 1 : end
+      if (context.value && context.attribute.toLowerCase() === 'lang') context.language = source.slice(position + 1, contentEnd).toLowerCase()
+      if (template === 'vue' && context.value && /^(?:v-|[:@#])/.test(context.attribute)) {
+        emit('string', position + 1)
+        appendCode(contentEnd, expressionLanguage!)
+        emit('string', end)
+      } else emit('string', end)
+      context.value = false
+    } else if (source[position] === '=') {
+      emit('operator', position + 1)
+      context.value = true
+    } else if ((code || template === 'svelte') && source[position] === '{') {
+      context.value = false
+      expression()
+    } else {
+      const value = match(attribute)
+      if (value && context.value && context.attribute.toLowerCase() === 'lang') context.language = value.toLowerCase()
+      if (value && !context.value) context.attribute = value
+      emit(value ? (context.value ? 'string' : 'attribute') : 'text', position + (value?.length ?? 1))
+      context.value = false
+    }
+  }
+
+  // Advances through element content: text, entities, comments, nested tags, and expressions.
+  const stepContent = (context: Markup): void => {
     if (context.rawEnd !== undefined && position > context.rawEnd) context.rawEnd = closingTagStart(context.name)
     if (position === context.rawEnd) context.rawEnd = undefined
     if (context.rawEnd !== undefined) {
@@ -197,16 +221,7 @@ export const markup = (source: string, code?: Language, embedded?: Readonly<Reco
     } else if (source.startsWith('<?', position)) {
       emit('keyword', until('?>', position + 2))
     } else if (source.startsWith('<!', position)) {
-      let end = position + 2
-      let brackets = 0
-      while (end < source.length) {
-        const char = source[end++]
-        if (char === '"' || char === "'") end = until(char, end)
-        else if (char === '[') brackets++
-        else if (char === ']') brackets--
-        else if (char === '>' && brackets <= 0) break
-      }
-      emit('keyword', end)
+      emit('keyword', declarationEnd())
     } else if (source[position] === '<' && looksLikeTag(source, position, typed)) {
       const start = position
       context.closing = source[position + 1] === '/'
@@ -215,28 +230,14 @@ export const markup = (source: string, code?: Language, embedded?: Readonly<Reco
       context.name = value ?? ''
       if (context.sibling) {
         if (context.closing) {
-          if (context.sibling.openings.at(-1)?.name !== context.name) { rejectSibling(context); continue }
+          if (context.sibling.openings.at(-1)?.name !== context.name) { rejectSibling(context); return }
           context.sibling.openings.pop()
         } else context.sibling.openings.push({ name: context.name, start })
       }
       context.attribute = ''
       context.language = ''
       if (value) emit('tag', position + value.length)
-      if (typed && !context.closing && source[position] === '<') {
-        let depth = 1
-        emit('operator', position + 1)
-        for (const token of scan(source, code!, position, undefined, undefined, undefined, { parentheses: [], annotation: true })) {
-          if (token.type === 'operator' && token.value === '<') depth++
-          const closing = token.type === 'operator' && /^>+/.exec(token.value)
-          if (closing) {
-            const count = Math.min(depth, closing[0].length)
-            append({ ...token, value: token.value.slice(0, count), end: token.start + count })
-            depth -= count
-            if (depth === 0) break
-            if (count < token.value.length) append({ ...token, value: token.value.slice(count), start: token.start + count })
-          } else append(token)
-        }
-      }
+      if (typed && !context.closing && source[position] === '<') typeArguments()
       context.phase = 'tag'
     } else if ((code || template === 'svelte') && source[position] === '{' || template === 'vue' && source.startsWith('{{', position)) {
       expression()
@@ -249,6 +250,19 @@ export const markup = (source: string, code?: Language, embedded?: Readonly<Reco
         emit('text', end)
       }
     }
+  }
+
+  while (stack.length) {
+    if (position >= source.length) {
+      const pending = [...stack].reverse().find((context): context is Markup => context.kind === 'markup' && !!context.sibling)
+      if (!pending) break
+      rejectSibling(pending)
+    }
+    const context = stack[stack.length - 1]!
+    if (context.kind === 'code') {
+      if (!stepCode(context)) break
+    } else if (context.phase === 'tag') stepTag(context)
+    else stepContent(context)
   }
   return tokens
 }
