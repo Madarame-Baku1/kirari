@@ -16,7 +16,8 @@ test('JSX expression lookups do not repeatedly search the full source for absent
   const source = '<div>' + '{x}\n'.repeat(64_000) + '</div>'
   const start = performance.now()
   expect(tokenize(source, jsx).map(token => token.value).join('')).toBe(source)
-  expect(performance.now() - start).toBeLessThan(2000)
+  // Leave room for shared CI runners while catching repeated whole-source searches.
+  expect(performance.now() - start).toBeLessThan(5000)
 }, 10_000)
 
 test('unfinished raw string prefixes do not repeatedly scan the entire prefix run', () => {

@@ -25,13 +25,8 @@ export interface LookupOptions {
 export const createFunctionLookup = (source: string, typed: boolean, scan: (start: number) => Generator<Token, void, number | undefined>) => {
   // Reuse nested groups, including unfinished ones, instead of rescanning each signature suffix.
   const groups = new Map<number, Group>()
-  // A slash after the last line break may still become a regex literal once more source arrives.
-  let lastLine = source.length - 1
-  while (lastLine >= 0) {
-    const char = source.charCodeAt(lastLine)
-    if (char === 10 || char === 13 || char === 0x2028 || char === 0x2029) break
-    lastLine--
-  }
+  // Only slash lookahead needs the last line break; most expression scanners never use it.
+  let lastLine: number | undefined
   return (start: number, { annotation, generic, property, asyncModifier }: LookupOptions): Result => {
     let reader = scan(start)
     let token: Token | undefined
@@ -45,7 +40,18 @@ export const createFunctionLookup = (source: string, typed: boolean, scan: (star
       do {
         const value = reader.next()
         token = value.done || value.value.start >= limit ? undefined : value.value
-        if (token?.type === 'operator' && /^\/=?$/.test(token.value) && token.start > lastLine) pending = true
+        if (token?.type === 'operator' && /^\/=?$/.test(token.value)) {
+          if (lastLine === undefined) {
+            lastLine = source.length - 1
+            while (lastLine >= 0) {
+              const char = source.charCodeAt(lastLine)
+              if (char === 10 || char === 13 || char === 0x2028 || char === 0x2029) break
+              lastLine--
+            }
+          }
+          // A slash on the last line may still become a regex once more source arrives.
+          if (token.start > lastLine) pending = true
+        }
       } while (token && !isSignificant(token.type))
     }
     // Restarts scanning at `position`.
