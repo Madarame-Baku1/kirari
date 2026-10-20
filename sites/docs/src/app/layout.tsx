@@ -35,11 +35,13 @@ const RootLayout = (props: Types.Props) => {
 			</head>
 			<body>
 				<ClipboardProvider>{children}</ClipboardProvider>
-				<Script
-					src="https://cdn.usefathom.com/script.js"
-					data-site="YGMATMZF"
-					strategy="afterInteractive"
-				/>
+				{process.env.NODE_ENV !== 'development' && (
+					<Script
+						src="https://cdn.usefathom.com/script.js"
+						data-site="YGMATMZF"
+						strategy="afterInteractive"
+					/>
+				)}
 			</body>
 		</html>
 	)
