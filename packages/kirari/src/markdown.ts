@@ -3,6 +3,15 @@ import { tokenize } from './tokenize.js'
 import type { LanguageRegistry } from './registry.js'
 import type { Language, Token } from './types.js'
 
+// Offset of the closing fence line in a fenced block, or the block length when it is unclosed.
+const closingFenceStart = (value: string, bodyStart: number, fence: string): number => {
+  const lastEnd = value.length - (value.endsWith('\r\n') ? 2 : /[\r\n]$/.test(value) ? 1 : 0)
+  const lastStart = Math.max(value.lastIndexOf('\n', lastEnd - 1), value.lastIndexOf('\r', lastEnd - 1)) + 1
+  const close = /^ {0,3}(`+|~+)[ \t]*$/.exec(value.slice(lastStart, lastEnd))
+  return close && lastStart >= bodyStart && close[1]![0] === fence[0]
+    && close[1]!.length >= fence.length ? lastStart : value.length
+}
+
 export const createMarkdown = (registry: LanguageRegistry): Language => {
   return {
     ...markdown,
@@ -17,11 +26,7 @@ export const createMarkdown = (registry: LanguageRegistry): Language => {
         }
 
         const value = token.value
-        const lastEnd = value.length - (value.endsWith('\r\n') ? 2 : /[\r\n]$/.test(value) ? 1 : 0)
-        const lastStart = Math.max(value.lastIndexOf('\n', lastEnd - 1), value.lastIndexOf('\r', lastEnd - 1)) + 1
-        const close = /^ {0,3}(`+|~+)[ \t]*$/.exec(value.slice(lastStart, lastEnd))
-        const end = close && lastStart >= open[0].length && close[1]![0] === open[1]![0]
-          && close[1]!.length >= open[1]!.length ? lastStart : value.length
+        const end = closingFenceStart(value, open[0].length, open[1]!)
         const start = token.start + open[0].length
         const body = value.slice(open[0].length, end)
         tokens.push({ ...token, value: open[0], end: start })

@@ -1,4 +1,4 @@
-import { render } from './render.js'
+import { escape, render, tokenClasses } from './render.js'
 import type { RenderOptions, Token } from './types.js'
 
 export interface Decoration {
@@ -19,10 +19,7 @@ const splitsSurrogate = (source: string, offset: number): boolean => {
   return before >= 0xd800 && before <= 0xdbff && after >= 0xdc00 && after <= 0xdfff
 }
 
-export const renderDecorated = (tokens: readonly Token[], options: DecoratedRenderOptions = {}): string => {
-  const decorations = options.decorations ?? []
-  if (!options.lines && decorations.length === 0) return render(tokens, options)
-
+const assertContiguous = (tokens: readonly Token[]): void => {
   let offset = 0
   for (const token of tokens) {
     if (token.start !== offset || token.end !== offset + token.value.length) {
@@ -30,8 +27,13 @@ export const renderDecorated = (tokens: readonly Token[], options: DecoratedRend
     }
     offset = token.end
   }
-  const source = tokens.map(token => token.value).join('')
-  const events: { offset: number; index: number; entering: boolean }[] = []
+}
+
+type DecorationEvent = { offset: number; index: number; entering: boolean }
+
+/** Validated enter/leave points for each decoration, in source order. */
+const decorationEvents = (decorations: readonly Decoration[], source: string): DecorationEvent[] => {
+  const events: DecorationEvent[] = []
   for (const [index, decoration] of decorations.entries()) {
     if (!Number.isInteger(decoration.start) || !Number.isInteger(decoration.end)
       || decoration.start < 0 || decoration.start >= decoration.end || decoration.end > source.length) {
@@ -45,13 +47,19 @@ export const renderDecorated = (tokens: readonly Token[], options: DecoratedRend
     }
     events.push({ offset: decoration.start, index, entering: true }, { offset: decoration.end, index, entering: false })
   }
-  events.sort((a, b) => a.offset - b.offset)
+  return events.sort((a, b) => a.offset - b.offset)
+}
+
+export const renderDecorated = (tokens: readonly Token[], options: DecoratedRenderOptions = {}): string => {
+  const decorations = options.decorations ?? []
+  if (!options.lines && decorations.length === 0) return render(tokens, options)
+
+  assertContiguous(tokens)
+  const source = tokens.map(token => token.value).join('')
+  const events = decorationEvents(decorations, source)
 
   // Resolve callbacks before splitting so they see each original token exactly once.
-  const tokenClasses = tokens.map(token => {
-    const mapped = options.classes && Object.hasOwn(options.classes, token.type) ? options.classes[token.type] : undefined
-    return [mapped, options.className?.(token)].filter(Boolean).join(' ')
-  })
+  const classesByToken = tokens.map(token => tokenClasses(token, options))
   const active = new Set<number>()
   let activeClasses = ''
   let eventIndex = 0
@@ -73,7 +81,7 @@ export const renderDecorated = (tokens: readonly Token[], options: DecoratedRend
       }
       const token = tokens[tokenIndex]!
       const stop = Math.min(end, token.end, events[eventIndex]?.offset ?? end)
-      const extra = [tokenClasses[tokenIndex], activeClasses].filter(Boolean).join(' ')
+      const extra = [classesByToken[tokenIndex], activeClasses].filter(Boolean).join(' ')
       parts.push(render([{ type: token.type, value: source.slice(start, stop), start, end: stop }], {
         className: () => extra,
       }))
@@ -93,7 +101,7 @@ export const renderDecorated = (tokens: readonly Token[], options: DecoratedRend
     const match = newline.exec(source)
     const end = match?.index ?? source.length
     const custom = options.lineClassName?.({ number, start, end })
-    const extra = custom ? ` ${render([{ type: 'text', value: custom, start: 0, end: custom.length }])}` : ''
+    const extra = custom ? ` ${escape(custom)}` : ''
     parts.push(`<span class="kirari-line${extra}" data-line="${number}">${renderRange(start, end)}</span>`)
     if (!match) break
     parts.push(match[0])
