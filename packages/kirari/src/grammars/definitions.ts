@@ -1,3 +1,4 @@
+import { isSignificant } from '../types.js'
 import type { Token } from '../types.js'
 
 const declarations: Record<string, RegExp | null> = {
@@ -16,22 +17,24 @@ const literals: Record<string, RegExp> = {
   python: /^lambda$/, r: /^(function|\\)$/, ruby: /^(lambda|proc)$/,
 }
 
-// Classify after grammar-specific lexing so quoted names work and opaque literals stay opaque.
-export const classifyDefinitions = (tokens: Token[], language: string): Token[] => {
-  if (!Object.hasOwn(declarations, language)) return tokens
-  const declaration = declarations[language]
-  const positions: number[] = []
-  const parts = tokens.filter((token, index) => {
-    if (token.type === 'text' || token.type === 'comment') return false
-    positions.push(index)
-    return true
-  })
+// Modifiers that may precede a function literal, such as `async move |x|` in Rust.
+const modifiers: Record<string, RegExp> = {
+  csharp: /^(async|static)$/, php: /^static$/i, rust: /^(async|move)$/,
+}
+
+const pairs: Record<string, string> = { '(': ')', '[': ']', '{': '}', '#(': ')', '@(': ')', '@{': '}' }
+
+/**
+ * Indexes bracket structure over significant tokens: `closes` maps an opening index to its
+ * closing index (including `<…>` generics), `opens` maps a closing `>` back, and `parents`
+ * maps each token to its innermost enclosing bracket.
+ */
+const matchBrackets = (parts: readonly Token[]) => {
   const closes = new Map<number, number>()
   const opens = new Map<number, number>()
   const parents = new Map<number, number>()
   const stack: { index: number; close: string }[] = []
   const angles: number[] = []
-  const pairs: Record<string, string> = { '(': ')', '[': ']', '{': '}', '#(': ')', '@(': ')', '@{': '}' }
   for (let index = 0; index < parts.length; index++) {
     const token = parts[index]!
     if (stack.length) parents.set(index, stack.at(-1)!.index)
@@ -48,6 +51,24 @@ export const classifyDefinitions = (tokens: Token[], language: string): Token[] 
       }
     } else if (/^[;{}]$/.test(token.value)) angles.length = 0
   }
+  return { closes, opens, parents }
+}
+
+// Classify after grammar-specific lexing so quoted names work and opaque literals stay opaque.
+//
+// Works on significant tokens only (`parts`) in two steps: index bracket structure, then visit
+// each name and mark it as a function when it is declared (`def name`), called (`name(`), or
+// bound to a function literal (`name = fn …`).
+export const classifyDefinitions = (tokens: Token[], language: string): Token[] => {
+  if (!Object.hasOwn(declarations, language)) return tokens
+  const declaration = declarations[language]
+  const positions: number[] = []
+  const parts = tokens.filter((token, index) => {
+    if (!isSignificant(token.type)) return false
+    positions.push(index)
+    return true
+  })
+  const { closes, opens, parents } = matchBrackets(parts)
   const value = (index: number): string => parts[index]?.value ?? ''
   const invoked = (end: number): boolean => /^(\(|\[|\.|\?\.|::)$/.test(value(end + 1))
   const block = (start: number): boolean => {
@@ -57,22 +78,23 @@ export const classifyDefinitions = (tokens: Token[], language: string): Token[] 
   const arrow = language === 'java' || language === 'julia' ? '->' : '=>'
   const arrows = /^(csharp|dart|java|julia|scala)$/.test(language)
 
-  const literal = (start: number, limit = parts.length): boolean => {
-    while (start < limit) {
-      const first = value(start)
-      if ((language === 'rust' && /^(async|move)$/.test(first))
-        || (language === 'csharp' && /^(async|static)$/.test(first))
-        || (language === 'php' && /^static$/i.test(first))) { start++; continue }
-      if (language === 'clojure') return first === '#(' || first === '(' && /^fn\*?$/.test(value(start + 1))
-      if (language === 'rust' && (first === '|' || first === '||')) return true
-      if (language === 'elixir' && first === '&') return true
-      if (language === 'ruby' && first === '->') {
+  // Language-specific function literal forms; undefined when `first` starts none of them.
+  const specialForm = (first: string, start: number, limit: number): boolean | undefined => {
+    switch (language) {
+      case 'clojure': return first === '#(' || first === '(' && /^fn\*?$/.test(value(start + 1))
+      case 'rust': return first === '|' || first === '||' ? true : undefined
+      case 'elixir': return first === '&' ? true : undefined
+      case 'ruby': {
+        if (first !== '->') return undefined
         let body = start + 1
         if (value(body) === '(') body = (closes.get(body) ?? limit) + 1
         return value(body) === 'do' || value(body) === '{' && block(body)
       }
-      if (first === '{' && /^(groovy|kotlin|powershell|swift)$/.test(language)) return block(start)
-      if (first === '{' && language === 'scala') {
+      case 'groovy': case 'kotlin': case 'powershell': case 'swift':
+        return first === '{' ? block(start) : undefined
+      case 'scala': {
+        // `{ case … => … }` and `{ x => … }`
+        if (first !== '{') return undefined
         for (let cursor = start + 1; cursor < (closes.get(start) ?? limit); cursor++) {
           if (value(cursor) === '=>') return block(start)
           if (pairs[value(cursor)] && !closes.has(cursor)) return false
@@ -80,7 +102,9 @@ export const classifyDefinitions = (tokens: Token[], language: string): Token[] 
         }
         return false
       }
-      if (first === '[' && language === 'cpp') {
+      case 'cpp': {
+        // `[captures](params) specifiers -> type { … }`
+        if (first !== '[') return undefined
         let cursor = (closes.get(start) ?? limit) + 1
         while (cursor < limit) {
           if (value(cursor) === '{') return block(cursor)
@@ -90,19 +114,34 @@ export const classifyDefinitions = (tokens: Token[], language: string): Token[] 
         }
         return false
       }
-      if (literals[language]?.test(first)) {
-        if (language === 'ruby' && !/^(\{|do|\()$/.test(value(start + 1))) return false
-        // shortcut: recognize explicit literals, not inferred aliases or results of arbitrary expressions.
-        if (/^(csharp|go|kotlin|php|ruby)$/.test(language)) {
-          for (let cursor = start + 1; cursor < limit; cursor++) {
-            if (value(cursor) === '{' && !(language === 'go' && /^(struct|interface)$/.test(value(cursor - 1)))) return block(cursor)
-            if (/^(;|=|:=|=>|do|end)$/.test(value(cursor))) break
-            if (pairs[value(cursor)] && !closes.has(cursor)) return true
-            cursor = closes.get(cursor) ?? cursor
-          }
-        }
-        return true
+    }
+    return undefined
+  }
+
+  // A literal introduced by a keyword such as `func`, `fun`, `lambda`, or `delegate`.
+  const keywordLiteral = (start: number, limit: number): boolean => {
+    if (language === 'ruby' && !/^(\{|do|\()$/.test(value(start + 1))) return false
+    // shortcut: recognize explicit literals, not inferred aliases or results of arbitrary expressions.
+    if (/^(csharp|go|kotlin|php|ruby)$/.test(language)) {
+      for (let cursor = start + 1; cursor < limit; cursor++) {
+        if (value(cursor) === '{' && !(language === 'go' && /^(struct|interface)$/.test(value(cursor - 1)))) return block(cursor)
+        if (/^(;|=|:=|=>|do|end)$/.test(value(cursor))) break
+        if (pairs[value(cursor)] && !closes.has(cursor)) return true
+        cursor = closes.get(cursor) ?? cursor
       }
+    }
+    return true
+  }
+
+  // Whether the expression starting at `start` is a function literal.
+  const literal = (start: number, limit = parts.length): boolean => {
+    while (start < limit) {
+      const first = value(start)
+      if (modifiers[language]?.test(first)) { start++; continue }
+      const special = specialForm(first, start, limit)
+      if (special !== undefined) return special
+      if (literals[language]?.test(first)) return keywordLiteral(start, limit)
+      // Type parameters: Dart `<T>(x) => …` continues; Scala `[T] => …` decides here.
       if ((first === '<' && language === 'dart') || (first === '[' && language === 'scala')) {
         const end = closes.get(start)
         if (end === undefined) return false
@@ -130,10 +169,13 @@ export const classifyDefinitions = (tokens: Token[], language: string): Token[] 
     return false
   }
 
+  // Qualified declarations such as `def self.name` or `function obj:name` record each
+  // qualifier so the final segment still counts as declared.
   const qualifiers = new Set<number>()
   for (let index = 0; index < parts.length; index++) {
     const token = parts[index]!
     if (!/^(variable|property|type|function|keyword)$/.test(token.type)) continue
+    // Find the token before the name, skipping a `*`/`&` marker and type parameters (`fun <T> name`).
     let before = index - 1
     if (value(before) === '*' || value(before) === '&') before--
     if (opens.has(before)) before = opens.get(before)! - 1
@@ -147,12 +189,14 @@ export const classifyDefinitions = (tokens: Token[], language: string): Token[] 
     const member = /^(\.|\?\.|->|\?->|::)$/.test(value(index - 1))
     let next = index + 1
     if (!declared && token.type !== 'variable' && token.type !== 'property') continue
+    // Calls: `name(` and generic `name<T>(`.
     if (!member && language !== 'clojure' && (!/^[$@]/.test(token.value) || language === 'csharp')) {
       if (value(next) === '(') isFunction = true
       if (value(next) === '<' && /^(cpp|csharp|dart|java|rust|swift)$/.test(language)
         && (parts[next]?.start === token.end || /^(type|variable)$/.test(parts[index - 1]?.type ?? ''))
         && value((closes.get(next) ?? parts.length) + 1) === '(') isFunction = true
     }
+    // Bindings to function literals, skipping a type annotation (`name: T = …`, Go `var name T = …`).
     if (!member) {
       if (value(next) === ':' && /^(python|kotlin|scala|swift|rust)$/.test(language)
         || language === 'go' && value(index - 1) === 'var' && value(next) !== '=') {
