@@ -43,7 +43,7 @@ const highlighted = (ranges: readonly LineRange[]): (line: number) => boolean =>
   return line => pairs.some(([first, last]) => first <= line && line <= last)
 }
 
-const codeNodes = (tokens: readonly Token[], options: Omit<CodeProps, 'children' | 'tokens' | 'language'> = {}): ReactNode[] => {
+const assertContiguous = (tokens: readonly Token[]): void => {
   let offset = 0
   for (const token of tokens) {
     if (token.start !== offset || token.end !== offset + token.value.length) {
@@ -51,9 +51,13 @@ const codeNodes = (tokens: readonly Token[], options: Omit<CodeProps, 'children'
     }
     offset = token.end
   }
-  const source = tokens.map(token => token.value).join('')
-  const decorations = options.decorations ?? []
-  const events: { offset: number; index: number; entering: boolean }[] = []
+}
+
+type DecorationEvent = { offset: number; index: number; entering: boolean }
+
+/** Validated enter/leave points for each decoration, in source order. */
+const decorationEvents = (decorations: readonly Decoration[], source: string): DecorationEvent[] => {
+  const events: DecorationEvent[] = []
   for (const [index, decoration] of decorations.entries()) {
     if (!Number.isInteger(decoration.start) || !Number.isInteger(decoration.end)
       || decoration.start < 0 || decoration.start >= decoration.end || decoration.end > source.length) {
@@ -64,7 +68,14 @@ const codeNodes = (tokens: readonly Token[], options: Omit<CodeProps, 'children'
     }
     events.push({ offset: decoration.start, index, entering: true }, { offset: decoration.end, index, entering: false })
   }
-  events.sort((a, b) => a.offset - b.offset)
+  return events.sort((a, b) => a.offset - b.offset)
+}
+
+const codeNodes = (tokens: readonly Token[], options: Omit<CodeProps, 'children' | 'tokens' | 'language'> = {}): ReactNode[] => {
+  assertContiguous(tokens)
+  const source = tokens.map(token => token.value).join('')
+  const decorations = options.decorations ?? []
+  const events = decorationEvents(decorations, source)
 
   // Resolve callbacks once so tokens split by lines or decorations see them a single time.
   const tokenClasses = tokens.map(token => join(
