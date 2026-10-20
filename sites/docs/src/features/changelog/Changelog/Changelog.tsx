@@ -1,6 +1,6 @@
 import styles from './Changelog.module.css'
 import { categories, packages } from '@/changelog'
-import { routes } from '@/navigation'
+import { routes } from '@/lib/navigation'
 import { Button } from '@/components/ui/Button'
 import type * as Types from './Changelog.types'
 

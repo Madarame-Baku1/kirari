@@ -8,7 +8,7 @@ test.each([
   ['production', '', '', '', 'https://kirari.sh'],
 ])('social images use the serving environment: %s %s %s %s', (mode, port, vercelEnv, vercelUrl, origin) => {
   const result = Bun.spawnSync([process.execPath, '--eval', `
-    import { pageMetadata } from './src/seo.ts'
+    import { pageMetadata } from './src/lib/seo.ts'
     console.log(JSON.stringify(pageMetadata('React', 'React integration', '/docs/react/')))
   `], {
     cwd: new URL('..', import.meta.url).pathname,

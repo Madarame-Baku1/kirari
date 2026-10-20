@@ -7,7 +7,7 @@ import { tokenize, render, tokenTypes, type Token } from '@vortexlabs/kirari/cor
 import { css } from '@vortexlabs/kirari/languages/css'
 import { javascript } from '@vortexlabs/kirari/languages/javascript'
 import { tsx } from '@vortexlabs/kirari/languages/tsx'
-import { languageEntries } from '@/languages'
+import { languageEntries } from '@/lib/languages'
 import { animateIn } from '@/client/motion'
 import { usageCode } from './Playground.utilities'
 import { groups, outputs } from './Playground.data'

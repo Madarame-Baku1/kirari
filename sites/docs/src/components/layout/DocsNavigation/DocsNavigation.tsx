@@ -1,4 +1,4 @@
-import { docsPath, sectionGroups, sections } from '@/navigation'
+import { docsPath, sectionGroups, sections } from '@/lib/navigation'
 import { NavList } from '@/components/layout/NavList'
 import type * as Types from './DocsNavigation.types'
 

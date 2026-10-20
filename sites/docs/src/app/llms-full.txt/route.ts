@@ -1,6 +1,6 @@
-import { readMarkdown } from '@/content'
-import { docsPath, sections } from '@/navigation'
-import { site } from '@/site'
+import { readMarkdown } from '@/lib/content'
+import { docsPath, sections } from '@/lib/navigation'
+import { site } from '@/lib/site'
 
 export const dynamic = 'force-static'
 

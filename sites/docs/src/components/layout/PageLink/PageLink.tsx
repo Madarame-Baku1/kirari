@@ -1,4 +1,4 @@
-import { routes } from '@/navigation'
+import { routes } from '@/lib/navigation'
 import { Link } from '@/components/ui/Link'
 import type * as Types from './PageLink.types'
 

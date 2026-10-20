@@ -1,5 +1,5 @@
-import { sectionGroups, sections } from '@/navigation'
-import { site } from '@/site'
+import { sectionGroups, sections } from '@/lib/navigation'
+import { site } from '@/lib/site'
 
 export const dynamic = 'force-static'
 

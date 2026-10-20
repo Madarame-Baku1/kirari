@@ -1,5 +1,5 @@
-import { languageEntries } from '@/languages'
-import { pageSearchEntries, routes } from '@/navigation'
+import { languageEntries } from '@/lib/languages'
+import { pageSearchEntries, routes } from '@/lib/navigation'
 import { Header } from '@/components/layout/Header'
 import type * as Types from './SiteLayout.types'
 

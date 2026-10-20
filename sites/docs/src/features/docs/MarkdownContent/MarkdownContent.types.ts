@@ -1,6 +1,6 @@
 import type { Element, Nodes, Root } from 'hast'
 import type { ReactNode, ComponentProps, JSX } from 'react'
-import type { SectionId } from '@/navigation.types'
+import type { SectionId } from '@/lib/navigation.types'
 
 export type { Element, ReactNode, Root }
 export type Node = Nodes

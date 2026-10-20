@@ -1,5 +1,5 @@
 import styles from './GuideLink.module.css'
-import { docsPath } from '@/navigation'
+import { docsPath } from '@/lib/navigation'
 import { Icon } from '@/components/ui/Icon'
 import { Link } from '@/components/ui/Link'
 import type * as Types from './GuideLink.types'

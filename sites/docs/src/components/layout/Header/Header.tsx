@@ -2,7 +2,7 @@
 
 import styles from './Header.module.css'
 import { useEffect, useState } from 'react'
-import { routes } from '@/navigation'
+import { routes } from '@/lib/navigation'
 import { Logo } from '@/components/layout/Logo'
 import { Icon } from '@/components/ui/Icon'
 import { IconButton } from '@/components/ui/IconButton'

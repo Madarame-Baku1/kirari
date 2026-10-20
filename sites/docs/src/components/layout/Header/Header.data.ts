@@ -1,6 +1,6 @@
-import { site } from '@/site'
+import { site } from '@/lib/site'
 import type { Name } from '@/components/ui/Icon/Icon.types'
-import type { Page } from '@/shared.types'
+import type { Page } from '@/lib/navigation.types'
 
 export const pageLinks: readonly {
 	target: Page

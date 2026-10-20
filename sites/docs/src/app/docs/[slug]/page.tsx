@@ -1,8 +1,8 @@
 import { notFound, permanentRedirect } from 'next/navigation'
 import { DocsPage } from '@/features/docs/DocsPage'
-import { docsPath, sections } from '@/navigation'
-import { pageMetadata, serializeJsonLd } from '@/seo'
-import { site } from '@/site'
+import { docsPath, sections } from '@/lib/navigation'
+import { pageMetadata, serializeJsonLd } from '@/lib/seo'
+import { site } from '@/lib/site'
 import type * as Types from './page.types'
 
 export const dynamicParams = false

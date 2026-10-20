@@ -1,4 +1,4 @@
-import type { Page } from '@/shared.types'
+import type { Page } from '@/lib/navigation.types'
 import type { Variant } from '@/components/ui/Link/Link.types'
 
 export type Props = {

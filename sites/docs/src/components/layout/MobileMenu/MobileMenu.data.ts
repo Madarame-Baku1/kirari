@@ -1,4 +1,4 @@
-import type { Page } from '@/shared.types'
+import type { Page } from '@/lib/navigation.types'
 
 export const pageLinks: readonly {
 	target: Page

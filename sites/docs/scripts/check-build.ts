@@ -1,9 +1,9 @@
 import assert from 'node:assert/strict'
 import { readFile } from 'node:fs/promises'
-import { indexablePaths } from '@/seo'
-import { sections } from '@/navigation'
-import { readMarkdown } from '@/content'
-import { site } from '@/site'
+import { indexablePaths } from '@/lib/seo'
+import { sections } from '@/lib/navigation'
+import { readMarkdown } from '@/lib/content'
+import { site } from '@/lib/site'
 
 const output = '.next/server/app'
 const titles = new Set<string>()

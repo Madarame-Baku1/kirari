@@ -1,5 +1,5 @@
 import styles from './InstallCommand.module.css'
-import { site } from '@/site'
+import { site } from '@/lib/site'
 import { CopyIconButton } from '@/components/ui/CopyIconButton'
 import type * as Types from './InstallCommand.types'
 

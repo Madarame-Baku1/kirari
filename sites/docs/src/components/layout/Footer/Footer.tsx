@@ -1,5 +1,5 @@
 import styles from './Footer.module.css'
-import { routes } from '@/navigation'
+import { routes } from '@/lib/navigation'
 import { Logo } from '@/components/layout/Logo'
 import { Icon } from '@/components/ui/Icon'
 import { IconButton } from '@/components/ui/IconButton'

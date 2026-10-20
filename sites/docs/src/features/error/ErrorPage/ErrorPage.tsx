@@ -1,6 +1,6 @@
 'use client'
 
-import { pageSearchEntries, routes } from '@/navigation'
+import { pageSearchEntries, routes } from '@/lib/navigation'
 import { Button } from '@/components/ui/Button'
 import { Footer } from '@/components/layout/Footer'
 import { Header } from '@/components/layout/Header'

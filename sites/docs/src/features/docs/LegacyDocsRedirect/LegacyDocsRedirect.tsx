@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { docsPath, sections } from '@/navigation'
+import { docsPath, sections } from '@/lib/navigation'
 
 export const LegacyDocsRedirect = () => {
 	const router = useRouter()

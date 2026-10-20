@@ -1,5 +1,5 @@
-import { routes } from '@/navigation'
-import { site } from '@/site'
+import { routes } from '@/lib/navigation'
+import { site } from '@/lib/site'
 import type { Name } from '@/components/ui/Icon/Icon.types'
 
 export const links: readonly {

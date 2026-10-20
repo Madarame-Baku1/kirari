@@ -1,4 +1,4 @@
-import kirariPackage from '../../../packages/kirari/package.json' with { type: 'json' }
+import kirariPackage from '../../../../packages/kirari/package.json' with { type: 'json' }
 
 export const site = {
 	name: 'Kirari',

@@ -1,5 +1,5 @@
 import type { MetadataRoute } from 'next'
-import { site } from '@/site'
+import { site } from '@/lib/site'
 
 const robots = (): MetadataRoute.Robots => ({
 	rules: {

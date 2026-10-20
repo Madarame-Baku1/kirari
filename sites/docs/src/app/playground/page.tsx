@@ -1,7 +1,7 @@
 import { Playground as PlaygroundEditor } from '@/features/playground/Playground'
 import { SiteLayout } from '@/components/layout/SiteLayout'
-import { themes } from '@/themes'
-import { pageMetadata } from '@/seo'
+import { themes } from '@/lib/themes'
+import { pageMetadata } from '@/lib/seo'
 
 export const metadata = pageMetadata(
 	'Syntax highlighting playground',

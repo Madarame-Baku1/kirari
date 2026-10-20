@@ -1,7 +1,7 @@
 'use client'
 
 import styles from './MobileMenu.module.css'
-import { routes } from '@/navigation'
+import { routes } from '@/lib/navigation'
 import { Logo } from '@/components/layout/Logo'
 import { Dialog } from '@/components/ui/Dialog'
 import { Divider } from '@/components/ui/Divider'
