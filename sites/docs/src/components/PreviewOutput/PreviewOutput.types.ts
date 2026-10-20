@@ -1,4 +1,4 @@
-import type { Ref } from 'react'
+import type { RefObject } from 'react'
 
 export type Props = {
 	className?: string
@@ -6,5 +6,5 @@ export type Props = {
 	label: string
 	html: string
 	hidden: boolean
-	ref?: Ref<HTMLPreElement>
+	ref?: RefObject<HTMLPreElement | null>
 }

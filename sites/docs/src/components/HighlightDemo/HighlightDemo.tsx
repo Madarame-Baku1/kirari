@@ -1,9 +1,9 @@
-/** biome-ignore-all lint/a11y/noNoninteractiveTabindex: Tab panels must be keyboard-focusable for horizontal code scrolling. */
 'use client'
 
 import styles from './HighlightDemo.module.css'
 import { useEffect, useRef, useState } from 'react'
 import { animateIn } from '../../client/motion'
+import { focusableWhenScrollable } from '../../client/scrollable'
 import { HighlightedCode } from '../HighlightedCode'
 import { Link } from '../Link'
 import { Tabs } from '../Tabs'
@@ -36,18 +36,21 @@ export const HighlightDemo = (props: Types.Props) => {
 								</Tabs.Tab>
 							))}
 						</Tabs.List>
-						<fieldset className={styles.demoPalettes} aria-label="Demo theme">
+						<fieldset className={styles.demoPalettes}>
+							<legend className="sr-only">Demo theme</legend>
 							{palettes.map(entry => (
-								<button
-									type="button"
-									key={entry.id}
-									aria-pressed={entry.id === palette}
-									aria-label={`${entry.label} theme`}
-									title={entry.label}
-									onClick={() => setPalette(entry.id)}
-								>
-									<i data-palette={entry.id} />
-								</button>
+								<label key={entry.id} className={styles.swatch} title={entry.label}>
+									<input
+										className="sr-only"
+										type="radio"
+										name="demo-palette"
+										value={entry.id}
+										checked={entry.id === palette}
+										onChange={() => setPalette(entry.id)}
+									/>
+									<span className="sr-only">{entry.label} theme</span>
+									<i data-palette={entry.id} aria-hidden="true" />
+								</label>
 							))}
 						</fieldset>
 					</div>
@@ -57,11 +60,15 @@ export const HighlightDemo = (props: Types.Props) => {
 							as="pre"
 							value={entry.id}
 							ref={element => {
-								if (element) panels.current.set(entry.id, element)
-								else panels.current.delete(entry.id)
+								if (!element) return
+								panels.current.set(entry.id, element)
+								const release = focusableWhenScrollable(element)
+								return () => {
+									release?.()
+									panels.current.delete(entry.id)
+								}
 							}}
 							className={`kirari ${styles.demoCode}`}
-							tabIndex={0}
 						>
 							<HighlightedCode html={entry.html} />
 						</Tabs.Panel>

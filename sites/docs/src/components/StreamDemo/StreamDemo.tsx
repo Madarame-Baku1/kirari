@@ -1,5 +1,4 @@
 /** biome-ignore-all lint/a11y/useSemanticElements: Keep preformatted code as a named, keyboard-scrollable region. */
-/** biome-ignore-all lint/a11y/noNoninteractiveTabindex: Code scrollers must be keyboard-focusable. */
 'use client'
 
 import styles from './StreamDemo.module.css'
@@ -10,6 +9,7 @@ import { typescript } from '@vortexlabs/kirari/languages/typescript'
 import { createTokenStream } from '@vortexlabs/kirari/stream'
 import { streamSample } from './StreamDemo.constants'
 import { reducedMotion } from '../../client/motion'
+import { focusableWhenScrollable } from '../../client/scrollable'
 import { HighlightedCode } from '../HighlightedCode'
 import { Button } from '../Button'
 import { Icon } from '../Icon'
@@ -101,7 +101,7 @@ export const StreamDemo = () => {
 				role="region"
 				className={`kirari ${styles.streamCode}`}
 				aria-label="Streaming example"
-				tabIndex={0}
+				ref={focusableWhenScrollable}
 			>
 				<HighlightedCode
 					id="stream-output"

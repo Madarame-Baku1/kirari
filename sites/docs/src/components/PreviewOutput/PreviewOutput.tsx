@@ -1,19 +1,29 @@
 /** biome-ignore-all lint/a11y/useSemanticElements: Keep preformatted code as a named, keyboard-scrollable region. */
-/** biome-ignore-all lint/a11y/noNoninteractiveTabindex: Code scrollers must be keyboard-focusable. */
+'use client'
+
+import { useEffect, useRef } from 'react'
+import { focusableWhenScrollable } from '../../client/scrollable'
 import { HighlightedCode } from '../HighlightedCode'
 import type * as Types from './PreviewOutput.types'
 
 export const PreviewOutput = (props: Types.Props) => {
 	const { id, label, html, hidden, ref, className = '' } = props
+	const ownRef = useRef<HTMLPreElement>(null)
+	const pre = ref ?? ownRef
+	useEffect(
+		() => focusableWhenScrollable(pre.current),
+		[
+			pre,
+		],
+	)
 
 	return (
 		<pre
 			role="region"
-			ref={ref}
+			ref={pre}
 			className={`kirari ${className}`}
 			id={id}
 			aria-label={label}
-			tabIndex={0}
 			hidden={hidden}
 		>
 			<HighlightedCode html={html} />

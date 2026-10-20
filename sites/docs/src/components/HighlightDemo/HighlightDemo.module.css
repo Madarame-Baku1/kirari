@@ -68,15 +68,15 @@
 	border: 0;
 	flex: none;
 }
-.demoPalettes button {
+.swatch {
+	position: relative;
 	display: grid;
+	cursor: pointer;
 	place-items: center;
 	width: var(--size-28);
 	height: var(--size-28);
 	padding: 0;
-	border: 0;
 	border-radius: var(--radius-round);
-	background: transparent;
 }
 .demoPalettes i {
 	width: var(--size-14);
@@ -88,10 +88,14 @@
 		transform var(--duration-fast),
 		box-shadow var(--duration-fast);
 }
-.demoPalettes button:hover i {
+.swatch:hover i {
 	transform: scale(1.15);
 }
-.demoPalettes button[aria-pressed="true"] i {
+.swatch:has(input:focus-visible) {
+	outline: var(--size-2) solid var(--focus-ring);
+	outline-offset: 0;
+}
+.swatch:has(input:checked) i {
 	box-shadow:
 		0 0 0 var(--size-2) var(--kirari-background),
 		0 0 0 0.21875rem var(--gold);
