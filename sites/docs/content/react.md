@@ -24,6 +24,8 @@ export const Example = () => (
 
 Output: `pre.kirari` with the usual `.kirari-*` classes. Extra props go to the `<pre>`.
 
+Text children join the way React renders text, so `{value}` interpolation works; element children throw.
+
 - `lines`: wrap lines in `.kirari-line` with `data-line`.
 - `highlightLines`: lines or `[first, last]` ranges get `.kirari-line-highlighted`.
 - `lineClassName`, `decorations`, `classes`, `tokenClassName`: as in [decorations](/docs/decorations/).
