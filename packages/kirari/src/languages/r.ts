@@ -1,32 +1,21 @@
-import { scan } from '../tokenize.js'
+import { scanWithOverrides } from '../tokenize.js'
 import type { Language, Token } from '../types.js'
 import { whitespace, number } from '../grammars/clike.js'
 
 const rawStrings = (source: string, language: Language): Token[] => {
-  const tokens: Token[] = []
-  let previous: Token | undefined
-  let scanner = scan(source, language)
-  for (let item = scanner.next(); !item.done; item = scanner.next()) {
-    let token = item.value
-    if (token.type === 'string' && /^[rR]"-*[(\[{]$/.test(token.value)) {
-      const closing = ({ '(': ')', '[': ']', '{': '}' } as const)[token.value.at(-1) as '(' | '[' | '{']
-      const dashes = token.value.length - 3
-      let end = token.end
-      while (end < source.length) {
-        if (source[end++] !== closing) continue
-        const start = end
-        while (source[end] === '-') end++
-        if (end - start === dashes && source[end] === '"') { end++; break }
-      }
-      token = { ...token, value: source.slice(token.start, end), end }
-      scanner = scan(source, language, end, previous)
+  return scanWithOverrides(source, language, token => {
+    if (token.type !== 'string' || !/^[rR]"-*[(\[{]$/.test(token.value)) return undefined
+    const closing = ({ '(': ')', '[': ']', '{': '}' } as const)[token.value.at(-1) as '(' | '[' | '{']
+    const dashes = token.value.length - 3
+    let end = token.end
+    while (end < source.length) {
+      if (source[end++] !== closing) continue
+      const start = end
+      while (source[end] === '-') end++
+      if (end - start === dashes && source[end] === '"') { end++; break }
     }
-    const last = tokens[tokens.length - 1]
-    if (token.type === 'text' && last?.type === 'text') tokens[tokens.length - 1] = { ...last, value: last.value + token.value, end: token.end }
-    else tokens.push(token)
-    if (token.type !== 'text' && token.type !== 'comment') previous = token
-  }
-  return tokens
+    return { ...token, value: source.slice(token.start, end), end }
+  })
 }
 
 export const r: Language = {

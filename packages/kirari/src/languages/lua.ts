@@ -1,31 +1,20 @@
-import { scan } from '../tokenize.js'
+import { scanWithOverrides } from '../tokenize.js'
 import type { Language, Token } from '../types.js'
 import { whitespace, number, operator, punctuation } from '../grammars/clike.js'
 
 const longBrackets = (source: string, language: Language): Token[] => {
-  const tokens: Token[] = []
-  let previous: Token | undefined
-  let scanner = scan(source, language)
-  for (let item = scanner.next(); !item.done; item = scanner.next()) {
-    let token = item.value
-    if ((token.type === 'string' || token.type === 'comment') && /^(?:--)?\[=*\[$/.test(token.value)) {
-      const level = token.value.length - (token.type === 'comment' ? 4 : 2)
-      let end = token.end
-      while (end < source.length) {
-        if (source[end++] !== ']') continue
-        const equals = end
-        while (source[end] === '=') end++
-        if (end - equals === level && source[end] === ']') { end++; break }
-      }
-      token = { ...token, value: source.slice(token.start, end), end }
-      scanner = scan(source, language, end, previous)
+  return scanWithOverrides(source, language, token => {
+    if (token.type !== 'string' && token.type !== 'comment' || !/^(?:--)?\[=*\[$/.test(token.value)) return undefined
+    const level = token.value.length - (token.type === 'comment' ? 4 : 2)
+    let end = token.end
+    while (end < source.length) {
+      if (source[end++] !== ']') continue
+      const equals = end
+      while (source[end] === '=') end++
+      if (end - equals === level && source[end] === ']') { end++; break }
     }
-    const last = tokens[tokens.length - 1]
-    if (token.type === 'text' && last?.type === 'text') tokens[tokens.length - 1] = { ...last, value: last.value + token.value, end: token.end }
-    else tokens.push(token)
-    if (token.type !== 'text' && token.type !== 'comment') previous = token
-  }
-  return tokens
+    return { ...token, value: source.slice(token.start, end), end }
+  })
 }
 
 export const lua: Language = {

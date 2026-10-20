@@ -1,4 +1,4 @@
-import { scan } from '../tokenize.js'
+import { scanWithOverrides } from '../tokenize.js'
 import type { Language, Token, Rule } from '../types.js'
 
 export const identifier = /[_\p{ID_Start}]\p{ID_Continue}*/u
@@ -28,29 +28,15 @@ export const preprocessor: Rule = {
 }
 
 export const nestedComments = (source: string, language: Language): Token[] => {
-  const tokens: Token[] = []
-  let previous: Token | undefined
-  let scanner = scan(source, language)
-  for (let item = scanner.next(); !item.done; item = scanner.next()) {
-    let token = item.value
-    if (token.type === 'comment' && token.value.startsWith('/*')) {
-      let depth = 1
-      let end = token.start + 2
-      while (end < source.length && depth > 0) {
-        if (source.startsWith('/*', end)) { depth++; end += 2 }
-        else if (source.startsWith('*/', end)) { depth--; end += 2 }
-        else end++
-      }
-      if (end !== token.end) {
-        token = { ...token, value: source.slice(token.start, end), end }
-        scanner = scan(source, language, end, previous)
-      }
+  return scanWithOverrides(source, language, token => {
+    if (token.type !== 'comment' || !token.value.startsWith('/*')) return undefined
+    let depth = 1
+    let end = token.start + 2
+    while (end < source.length && depth > 0) {
+      if (source.startsWith('/*', end)) { depth++; end += 2 }
+      else if (source.startsWith('*/', end)) { depth--; end += 2 }
+      else end++
     }
-    const last = tokens[tokens.length - 1]
-    if (token.type === 'text' && last?.type === 'text') {
-      tokens[tokens.length - 1] = { ...last, value: last.value + token.value, end: token.end }
-    } else tokens.push(token)
-    if (token.type !== 'text' && token.type !== 'comment') previous = token
-  }
-  return tokens
+    return { ...token, value: source.slice(token.start, end), end }
+  })
 }

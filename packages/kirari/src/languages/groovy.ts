@@ -1,29 +1,18 @@
-import { scan } from '../tokenize.js'
+import { scanWithOverrides } from '../tokenize.js'
 import type { Language, Token } from '../types.js'
 import { whitespace, lineComment, blockComment, quotedString, tripleString, number, operator, punctuation } from '../grammars/clike.js'
 
 const slashyStrings = (source: string, language: Language): Token[] => {
-  const tokens: Token[] = []
-  let previous: Token | undefined
-  let scanner = scan(source, language)
-  for (let item = scanner.next(); !item.done; item = scanner.next()) {
-    let token = item.value
+  return scanWithOverrides(source, language, (token, previous) => {
     // shortcut: slashy strings use expression-start context; command-style arguments need a Groovy parser.
-    if (/^\/=?$/.test(token.value) && (!previous || /^(?:[([{,:;=!?&|+*%~<>^-]|=>|==~|=~|return|throw|case|assert)$/.test(previous.value))) {
-      let end = token.start + 1
-      while (end < source.length) {
-        if (source[end] === '\\' && source[end + 1] === '/') end += 2
-        else if (source[end++] === '/') break
-      }
-      token = { type: 'string', value: source.slice(token.start, end), start: token.start, end }
-      scanner = scan(source, language, end, previous)
+    if (!/^\/=?$/.test(token.value) || previous && !/^(?:[([{,:;=!?&|+*%~<>^-]|=>|==~|=~|return|throw|case|assert)$/.test(previous.value)) return undefined
+    let end = token.start + 1
+    while (end < source.length) {
+      if (source[end] === '\\' && source[end + 1] === '/') end += 2
+      else if (source[end++] === '/') break
     }
-    const last = tokens[tokens.length - 1]
-    if (token.type === 'text' && last?.type === 'text') tokens[tokens.length - 1] = { ...last, value: last.value + token.value, end: token.end }
-    else tokens.push(token)
-    if (token.type !== 'text' && token.type !== 'comment') previous = token
-  }
-  return tokens
+    return { type: 'string', value: source.slice(token.start, end), start: token.start, end }
+  })
 }
 
 export const groovy: Language = {
