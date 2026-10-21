@@ -6,8 +6,16 @@ const entries = {
   'all languages': '../test/fixtures/all-languages.ts',
 }
 
+// Gzip byte limits; raise one only with a deliberate size change and updated docs.
+const budgets: Record<keyof typeof entries, number> = {
+  core: 3_900,
+  javascript: 4_400,
+  'all languages': 23_200,
+}
+
+const over: string[] = []
 console.log('Browser ESM bundles; bytes; gzip level 9; CSS excluded.')
-for (const [name, path] of Object.entries(entries)) {
+for (const [name, path] of Object.entries(entries) as [keyof typeof entries, string][]) {
   const result = await Bun.build({
     entrypoints: [new URL(path, import.meta.url).pathname],
     target: 'browser',
@@ -31,5 +39,11 @@ for (const [name, path] of Object.entries(entries)) {
   if (check.exitCode !== 0) {
     throw new Error(`Invalid bundle: ${name}`)
   }
-  console.log(`${name}: ${bytes.byteLength} minified, ${gzipSync(bytes, { level: 9 }).byteLength} gzip`)
+  const gzip = gzipSync(bytes, { level: 9 }).byteLength
+  console.log(`${name}: ${bytes.byteLength} minified, ${gzip} gzip (budget ${budgets[name]})`)
+  if (gzip > budgets[name]) over.push(`${name} is ${gzip - budgets[name]} bytes over its ${budgets[name]} byte budget`)
+}
+if (over.length) {
+  console.error(over.join('\n'))
+  process.exit(1)
 }

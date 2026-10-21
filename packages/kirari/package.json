@@ -72,7 +72,7 @@
     "build": "tsc -p tsconfig.build.json",
     "size": "bun scripts/size.ts",
     "check:browser": "bun run build && bun checks/browser.ts",
-    "check": "bun run typecheck && bun test ./test && bun run build && bun test ./checks",
+    "check": "bun run typecheck && bun test ./test && bun run build && bun test ./checks && bun run size",
     "prepublishOnly": "bun run build"
   },
   "packageManager": "bun@1.3.11",
