@@ -2,7 +2,7 @@ import { isSignificant } from '../types.js'
 import type { Token } from '../types.js'
 
 type Result = { function: boolean; pending: boolean }
-type Group = { end: number; close: number; complete: boolean }
+type Group = { end: number; complete: boolean }
 /** Source-wide lookahead data; share only between scanners of the same immutable source. */
 export interface FunctionLookupCache {
   lastLine?: number
@@ -16,6 +16,19 @@ export interface LookupOptions {
   readonly property: boolean
   /** The name is a bare `async` that may be an arrow-function modifier. */
   readonly asyncModifier: boolean
+}
+
+const closers: Record<string, string> = { '(': ')', '[': ']', '{': '}', '${': '}', '<': '>' }
+
+/** Index of the last line break in `source`, or -1. */
+const lastLineBreak = (source: string): number => {
+  let index = source.length - 1
+  while (index >= 0) {
+    const char = source.charCodeAt(index)
+    if (char === 10 || char === 13 || char === 0x2028 || char === 0x2029) break
+    index--
+  }
+  return index
 }
 
 /**
@@ -43,17 +56,9 @@ export const createFunctionLookup = (source: string, typed: boolean, scan: (star
         const value = reader.next()
         token = value.done || value.value.start >= limit ? undefined : value.value
         if (token?.type === 'operator' && /^\/=?$/.test(token.value)) {
-          if (cache.lastLine === undefined) {
-            let lastLine = source.length - 1
-            while (lastLine >= 0) {
-              const char = source.charCodeAt(lastLine)
-              if (char === 10 || char === 13 || char === 0x2028 || char === 0x2029) break
-              lastLine--
-            }
-            cache.lastLine = lastLine
-          }
+          cache.lastLine ??= lastLineBreak(source)
           // A slash on the last line may still become a regex once more source arrives.
-          if (token.start > cache.lastLine) pending = true
+          pending ||= token.start > cache.lastLine
         }
       } while (token && !isSignificant(token.type))
     }
@@ -66,28 +71,27 @@ export const createFunctionLookup = (source: string, typed: boolean, scan: (star
       if (cached) { jump(cached.end); return cached }
       const angles = opening.value === '<'
       const stack: { token: Token; close: string }[] = []
-      const closers: Record<string, string> = { '(': ')', '[': ']', '{': '}', '${': '}', '<': '>' }
       while (token) {
         const value = token.value
         if (token.type === 'punctuation' && closers[value] || angles && value === '<') {
           stack.push({ token, close: closers[value]! })
         } else if (token.type === 'punctuation' && /^[)\]}]$/.test(value) || angles && token.type === 'operator' && /^>/.test(value)) {
-          const count = value[0] === '>' ? /^>+/.exec(value)![0].length : 1
-          for (let index = 0; index < count; index++) {
+          // `>>` and `>>>` close one angle bracket per `>`.
+          for (let index = 0; !index || value[index] === '>'; index++) {
             const frame = stack.pop()
             if (!frame || frame.close !== value[index]) {
-              const failed = { end: token.start, close: token.start, complete: false }
+              const failed = { end: token.start, complete: false }
               groups.set(opening.start, failed)
               return failed
             }
-            const closed = { end: token.start + index + 1, close: token.start + index, complete: true }
+            const closed = { end: token.start + index + 1, complete: true }
             groups.set(frame.token.start, closed)
             if (!stack.length) { jump(closed.end); return closed }
           }
         }
         next()
       }
-      const incomplete = { end: limit, close: limit, complete: false }
+      const incomplete = { end: limit, complete: false }
       for (const frame of stack) groups.set(frame.token.start, incomplete)
       return incomplete
     }
@@ -168,7 +172,7 @@ export const createFunctionLookup = (source: string, typed: boolean, scan: (star
         if (typed && is(':')) { next(); return result(until('=>')) }
         if (!continuation()) return result(false)
         pending ||= !token && limit === source.length
-        limit = closed.close
+        limit = closed.end - 1
         jump(opening.end)
         continue
       }
