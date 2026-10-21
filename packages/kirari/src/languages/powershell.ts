@@ -1,3 +1,4 @@
+import { definitionsFor } from '../grammars/definitions.js'
 import type { Language } from '../types.js'
 import { whitespace } from '../grammars/clike.js'
 
@@ -6,6 +7,7 @@ const boundary = /(?![\p{L}\p{Nd}_?-])/u
 
 export const powershell: Language = {
   name: 'powershell',
+  definitions: definitionsFor('powershell'),
   rules: [
     whitespace,
     { type: 'comment', pattern: /#[^\r\n]*|<#[\s\S]*?(?:#>|$)/ },

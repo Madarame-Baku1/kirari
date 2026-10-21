@@ -1,3 +1,4 @@
+import { definitionsFor } from '../grammars/definitions.js'
 import type { Language, Token } from '../types.js'
 import { scan } from '../tokenize.js'
 import { identifier, whitespace, lineComment, blockComment, preprocessor, quotedString, number, operator, punctuation } from '../grammars/clike.js'
@@ -34,6 +35,7 @@ const rawStrings = (source: string, language: Language): Token[] => {
 
 export const csharp: Language = {
   name: 'csharp',
+  definitions: definitionsFor('csharp'),
   tokenize: rawStrings,
   identifier,
   keywords: 'abstract add alias and as ascending async await base break by case catch checked class const continue default delegate descending do else enum event explicit extern file finally fixed for foreach from get global goto group if implicit in init interface internal into is join let lock managed nameof namespace new not or orderby out override params partial private protected public readonly record ref remove required return scoped sealed select set sizeof stackalloc static struct switch this throw try typeof unchecked unmanaged unsafe using value var virtual volatile when where while with yield'.split(' '),

@@ -1,7 +1,9 @@
+import { definitionsFor } from '../grammars/definitions.js'
 import type { Language } from '../types.js'
 
 export const sql: Language = {
   name: 'sql',
+  definitions: definitionsFor('sql'),
   rules: [
     { type: 'text', pattern: /\s+/ },
     { type: 'comment', pattern: /--[^\r\n]*|\/\*[^]*?(?:\*\/|$)/ },

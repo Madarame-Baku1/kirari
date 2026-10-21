@@ -1,8 +1,10 @@
+import { definitionsFor } from '../grammars/definitions.js'
 import type { Language } from '../types.js'
 import { nestedComments, identifier, whitespace, lineComment, blockComment, number, operator, punctuation } from '../grammars/clike.js'
 
 export const rust: Language = {
   name: 'rust',
+  definitions: definitionsFor('rust'),
   tokenize: nestedComments,
   identifier,
   keywords: 'as async await break const continue crate dyn else enum extern fn for if impl in let loop match mod move mut pub ref return self Self static struct super trait type union unsafe use where while abstract become box do final macro override priv typeof unsized virtual yield try gen'.split(' '),

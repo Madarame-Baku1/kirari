@@ -1,3 +1,4 @@
+import { definitionsFor } from '../grammars/definitions.js'
 import { scanWithOverrides } from '../tokenize.js'
 import type { Language, Token } from '../types.js'
 import { whitespace, number } from '../grammars/clike.js'
@@ -20,6 +21,7 @@ const rawStrings = (source: string, language: Language): Token[] => {
 
 export const r: Language = {
   name: 'r',
+  definitions: definitionsFor('r'),
   tokenize: rawStrings,
   identifier: /(?:[\p{L}]|\.(?!\d))[\p{L}\d._]*/u,
   keywords: 'if else repeat while function for in next break'.split(' '),

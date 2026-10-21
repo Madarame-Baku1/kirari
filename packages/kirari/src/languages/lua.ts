@@ -1,3 +1,4 @@
+import { definitionsFor } from '../grammars/definitions.js'
 import { scanWithOverrides } from '../tokenize.js'
 import type { Language, Token } from '../types.js'
 import { whitespace, number, operator, punctuation } from '../grammars/clike.js'
@@ -19,6 +20,7 @@ const longBrackets = (source: string, language: Language): Token[] => {
 
 export const lua: Language = {
   name: 'lua',
+  definitions: definitionsFor('lua'),
   tokenize: longBrackets,
   identifier: /[a-zA-Z_]\w*/,
   keywords: 'and break do else elseif end for function goto if in local not or repeat return then until while'.split(' '),

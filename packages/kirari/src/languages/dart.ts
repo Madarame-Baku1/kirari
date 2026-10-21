@@ -1,8 +1,10 @@
+import { definitionsFor } from '../grammars/definitions.js'
 import type { Language } from '../types.js'
 import { nestedComments, whitespace, lineComment, blockComment, quotedString, tripleString, number, operator, punctuation } from '../grammars/clike.js'
 
 export const dart: Language = {
   name: 'dart',
+  definitions: definitionsFor('dart'),
   tokenize: nestedComments,
   identifier: /[$_\p{ID_Start}][$\p{ID_Continue}]*/u,
   keywords: 'abstract as assert async await base break case catch class const continue covariant default deferred do dynamic else enum export extends extension external factory final finally for get hide if implements import in interface is late library mixin native new of on operator part required rethrow return sealed set show static super switch sync this throw try typedef var void when while with yield'.split(' '),

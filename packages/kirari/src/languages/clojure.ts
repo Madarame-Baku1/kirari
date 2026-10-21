@@ -1,3 +1,4 @@
+import { definitionsFor } from '../grammars/definitions.js'
 import type { Language } from '../types.js'
 
 const symbol = /[^\s,()[\]{}";@^`~\\:#'][^\s,()[\]{}";@^`~\\]*/
@@ -6,6 +7,7 @@ const keywords = 'def defn defn- defmacro defonce defmulti defmethod defprotocol
 
 export const clojure: Language = {
   name: 'clojure',
+  definitions: definitionsFor('clojure'),
   rules: [
     { type: 'text', pattern: /[\s,]+/ },
     { type: 'comment', pattern: /;[^\r\n]*|#![^\r\n]*/ },

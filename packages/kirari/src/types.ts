@@ -25,6 +25,7 @@ export interface Language {
   readonly name: string
   readonly rules: readonly Rule[]
   readonly tokenize?: (source: string, language: Language) => Token[]
+  readonly definitions?: (tokens: Token[], open?: readonly string[]) => Token[]
   readonly identifier?: RegExp
   readonly keywords?: readonly string[]
   readonly types?: readonly string[]

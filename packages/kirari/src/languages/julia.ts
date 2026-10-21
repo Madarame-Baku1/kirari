@@ -1,3 +1,4 @@
+import { definitionsFor } from '../grammars/definitions.js'
 import { scanWithOverrides } from '../tokenize.js'
 import type { Language, Token } from '../types.js'
 import { whitespace, number, operator, punctuation } from '../grammars/clike.js'
@@ -18,6 +19,7 @@ const comments = (source: string, language: Language): Token[] => {
 
 export const julia: Language = {
   name: 'julia',
+  definitions: definitionsFor('julia'),
   tokenize: comments,
   identifier: /[_\p{ID_Start}][\p{ID_Continue}]*(?:!(?!=))?/u,
   keywords: 'abstract baremodule begin break catch const continue do else elseif end export finally for function global if import in isa let local macro module mutable outer primitive public quote return struct try type using where while'.split(' '),

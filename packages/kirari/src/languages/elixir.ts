@@ -1,3 +1,4 @@
+import { definitionsFor } from '../grammars/definitions.js'
 import type { Language } from '../types.js'
 import { whitespace } from '../grammars/clike.js'
 
@@ -8,6 +9,7 @@ const sigil = new RegExp(`(?:${heredoc.source}|${quoted.source}|${delimited.sour
 
 export const elixir: Language = {
   name: 'elixir',
+  definitions: definitionsFor('elixir'),
   identifier: /[_\p{ID_Start}]\p{ID_Continue}*[!?]?/u,
   keywords: 'after alias and case catch cond def defdelegate defexception defguard defguardp defimpl defmacro defmacrop defmodule defp defprotocol defstruct do else end fn for if import in not or quote raise receive require rescue reraise super throw try unless unquote unquote_splicing use when with'.split(' '),
   booleans: ['true', 'false'],

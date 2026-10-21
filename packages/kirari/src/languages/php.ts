@@ -1,3 +1,4 @@
+import { definitionsFor } from '../grammars/definitions.js'
 import type { Language } from '../types.js'
 import { whitespace, blockComment, number, operator, punctuation } from '../grammars/clike.js'
 
@@ -5,6 +6,7 @@ const keywords = 'abstract and array as break callable case catch class clone co
 
 export const php: Language = {
   name: 'php',
+  definitions: definitionsFor('php'),
   identifier: /[_\p{ID_Start}]\p{ID_Continue}*/u,
   keywords,
   types: 'bool float int iterable mixed never object string void'.split(' '),

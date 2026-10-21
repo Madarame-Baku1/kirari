@@ -234,6 +234,11 @@ export const classifyDefinitions = (tokens: Token[], language: string, open: rea
   return tokens
 }
 
+/** A `Language.definitions` callback that classifies as the built-in `language`, whatever the definition is named. */
+export const definitionsFor = (language: string) => {
+  return (tokens: Token[], open?: readonly string[]): Token[] => classifyDefinitions(tokens, language, open)
+}
+
 /** Whether text contains a newline that is not a backslash line continuation. */
 export const endsLine = (text: string): boolean => /[\r\n]/.test(text.replace(/\\(?:\r\n|\r|\n)/g, ''))
 

@@ -2,7 +2,7 @@
 
 A small, dependency-free syntax highlighter. Kirari turns source code into
 escaped HTML or a token array on the server, at build time, or in the browser,
-without a DOM. The default bundle is about 2.2 KB gzipped; 48 language
+without a DOM. The default bundle is about 4.3 KB gzipped; 48 language
 definitions and 21 CSS-variable themes are available as separate imports.
 It is a lexical highlighter, not a parser.
 
@@ -236,7 +236,10 @@ literals. Disable `templates` or `regexLiterals` on a derived definition if you
 want rules to take over those constructs.
 
 Definitions accept `name`, `rules`, `identifier`, `keywords`, `types`, `booleans`,
-`nulls`, `templates`, `regexLiterals`, and an optional `tokenize` callback.
+`nulls`, `templates`, `regexLiterals`, and optional `tokenize` and `definitions`
+callbacks. `definitions(tokens)` runs after tokenizing and can retype names as
+functions; built-in definitions that classify function definitions set it, and
+copies made with a spread keep it even when renamed.
 Optional identifier patterns enable
 lexical variable/property/function classification. With no identifier pattern,
 unmatched characters remain `text`. There is no global language registry.

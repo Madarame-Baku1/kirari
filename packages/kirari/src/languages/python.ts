@@ -1,3 +1,4 @@
+import { definitionsFor } from '../grammars/definitions.js'
 import { scan } from '../tokenize.js'
 import { isSignificant } from '../types.js'
 import type { Language, Token } from '../types.js'
@@ -144,6 +145,7 @@ const tokenizePython = (source: string, language: Language): Token[] => scanPyth
 
 export const python: Language = {
   name: 'python',
+  definitions: definitionsFor('python'),
   tokenize: tokenizePython,
   identifier: /[_\p{ID_Start}]\p{ID_Continue}*/u,
   keywords: 'and as assert async await break case class continue def del elif else except finally for from global if import in is lambda match nonlocal not or pass raise return try while with yield'.split(' '),

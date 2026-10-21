@@ -1,3 +1,4 @@
+import { definitionsFor } from '../grammars/definitions.js'
 import { scan } from '../tokenize.js'
 import type { Language, Token } from '../types.js'
 
@@ -160,6 +161,7 @@ const heredocEnd = (source: string, position: number, heredoc: Heredoc): { start
 
 export const shell: Language = {
   name: 'shell',
+  definitions: definitionsFor('shell'),
   tokenize: tokenizeShell,
   identifier: /[a-zA-Z_][a-zA-Z_\d-]*/,
   keywords: 'case do done elif else esac fi for function if in select then time until while'.split(' '),

@@ -1,3 +1,4 @@
+import { definitionsFor } from '../grammars/definitions.js'
 import type { Language } from '../types.js'
 import { whitespace, number, operator, punctuation } from '../grammars/clike.js'
 
@@ -5,6 +6,7 @@ const percentBody = /(?:\{(?:\\(?:[\s\S]|$)|[^}\\])*(?:\}|$)|\((?:\\(?:[\s\S]|$)
 
 export const ruby: Language = {
   name: 'ruby',
+  definitions: definitionsFor('ruby'),
   regexLiterals: true,
   identifier: /[_\p{ID_Start}]\p{ID_Continue}*[!?]?/u,
   keywords: 'BEGIN END alias and begin break case class def defined? do else elsif end ensure for if in module next not or redo rescue retry return self super then undef unless until when while yield __ENCODING__ __FILE__ __LINE__'.split(' '),

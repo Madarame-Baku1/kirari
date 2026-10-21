@@ -18,7 +18,6 @@ import { isSignificant } from './types.js'
 import type { Language, Token } from './types.js'
 import { createFunctionLookup } from './grammars/functions.js'
 import type { FunctionLookupCache } from './grammars/functions.js'
-import { classifyDefinitions } from './grammars/definitions.js'
 
 export type Frame = { kind: 'template'; opening: boolean } | { kind: 'expression'; depth: number }
 /** Lexical state for JavaScript-like languages, carried between scanner steps. */
@@ -44,11 +43,15 @@ const sticky = (pattern: RegExp): RegExp => {
   return new RegExp(pattern.source, pattern.flags.replace(/[gy]/g, '') + 'y')
 }
 
+const classify = (tokens: Token[], language: Language): Token[] => {
+  return language.definitions ? language.definitions(tokens) : tokens
+}
+
 export const tokenize = (source: string, language: Language): Token[] => {
-  if (language.tokenize) return classifyDefinitions(language.tokenize(source, language), language.name)
+  if (language.tokenize) return classify(language.tokenize(source, language), language)
   const tokens: Token[] = []
   for (const token of scan(source, language)) appendToken(tokens, token)
-  return classifyDefinitions(tokens, language.name)
+  return classify(tokens, language)
 }
 
 /**
