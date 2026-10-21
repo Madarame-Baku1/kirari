@@ -116,6 +116,7 @@
 }
 .category h3::before {
 	content: "";
+	transform: translateY(-1px);
 	width: var(--size-8);
 	height: var(--size-8);
 	border-radius: var(--size-2);
