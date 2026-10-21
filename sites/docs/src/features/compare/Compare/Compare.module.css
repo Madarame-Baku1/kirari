@@ -1,0 +1,260 @@
+.root {
+	--label-width: 10rem;
+	max-width: var(--page-width);
+	margin: 0 auto;
+	padding: var(--size-64) var(--size-24) var(--size-80);
+}
+
+.header h1 {
+	margin: 0;
+	font-size: clamp(var(--size-40), 6vw, var(--size-56));
+	font-weight: var(--weight-heading);
+	line-height: 1.1;
+}
+
+.headingName {
+	position: relative;
+	display: inline-block;
+	padding-right: 0.32em;
+}
+
+.headingName svg {
+	position: absolute;
+	top: 0;
+	right: 0;
+	width: 0.36em;
+	height: 0.36em;
+	color: var(--gold);
+	fill: currentColor;
+	stroke: none;
+}
+
+.header p {
+	max-width: 40rem;
+	margin: var(--size-12) 0 var(--size-48);
+	color: var(--muted);
+	font-size: var(--size-17);
+}
+
+.section {
+	margin-top: var(--size-64);
+}
+
+.title {
+	margin: 0 0 var(--size-20);
+	font-size: var(--size-24);
+	font-weight: var(--weight-heading);
+	line-height: 1.3;
+}
+
+.table {
+	table-layout: fixed;
+	font-size: var(--size-15);
+}
+
+.labelColumn {
+	width: var(--label-width);
+}
+
+.table :is(th, td) {
+	padding: var(--size-12) var(--size-16);
+	border-bottom: var(--hairline) solid var(--line);
+	vertical-align: top;
+}
+
+.table thead :is(th, td) {
+	padding-top: var(--size-16);
+	padding-bottom: var(--size-12);
+	border-bottom-color: var(--line-strong);
+	vertical-align: bottom;
+}
+
+.table tbody tr:last-child :is(th, td) {
+	border-bottom: 0;
+}
+
+.table thead th {
+	scroll-snap-align: start;
+	color: var(--ink);
+	font-weight: var(--weight-semibold);
+}
+
+.table tr > :first-child {
+	position: sticky;
+	left: 0;
+	z-index: 2;
+	padding-left: 0;
+	background: var(--bg);
+}
+
+.table tbody th {
+	color: var(--faint);
+	font-weight: var(--weight-medium);
+	transition: color var(--duration-fast) var(--ease-out);
+}
+
+.table tbody tr:hover th {
+	color: var(--ink);
+}
+
+.table [data-kirari] {
+	background: color-mix(in srgb, var(--gold) 9%, var(--bg));
+	color: var(--ink);
+}
+
+.table thead [data-kirari] {
+	box-shadow: inset 0 3px var(--gold);
+}
+
+.table thead [data-kirari] a {
+	font-weight: var(--weight-heading);
+}
+
+.version {
+	display: block;
+	color: var(--faint);
+	font: var(--weight-medium) var(--size-12) / 1.6 var(--mono);
+}
+
+.lede {
+	max-width: 46rem;
+	margin: 0 0 var(--size-20);
+	color: var(--muted);
+}
+
+.timing {
+	font-family: var(--mono);
+	font-variant-numeric: tabular-nums;
+}
+
+.mark {
+	display: inline-flex;
+	color: var(--faint);
+}
+
+.mark[data-value="true"] {
+	color: var(--kirari-string);
+}
+
+.snippets {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: var(--size-16);
+}
+
+.alternatives {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: var(--size-16);
+}
+
+.card {
+	padding: var(--size-24);
+	border: var(--hairline) solid var(--line);
+	border-radius: var(--size-8);
+}
+
+.card h3 {
+	margin: 0;
+	font-size: var(--size-18);
+	font-weight: var(--weight-semibold);
+}
+
+.card p {
+	margin: var(--size-8) 0 0;
+	color: var(--muted);
+}
+
+.card .cardLabel {
+	margin: 0 0 var(--size-8);
+	color: var(--faint);
+	font: var(--weight-medium) var(--size-12) / 1.6 var(--mono);
+}
+
+.card[data-kirari] .cardLabel {
+	color: var(--gold-text);
+}
+
+.bundleSize {
+	display: block;
+	font: var(--weight-semibold) var(--size-24) / 1.4 var(--mono);
+	font-variant-numeric: tabular-nums;
+}
+
+.bundleSize small {
+	color: var(--muted);
+	font-size: var(--size-12);
+	font-weight: var(--weight-medium);
+}
+
+.barTrack {
+	display: block;
+	height: var(--size-4);
+	margin-top: var(--size-12);
+	background: var(--line);
+}
+
+.bar {
+	display: block;
+	width: 100%;
+	height: 100%;
+	background: var(--faint);
+	transform: scaleX(var(--bar-scale));
+	transform-origin: left;
+}
+
+[data-kirari] .bar {
+	background: var(--gold);
+}
+
+@keyframes fill {
+	from {
+		transform: scaleX(0);
+	}
+}
+
+@keyframes glaze {
+	13.75%,
+	to {
+		transform: translateX(36px);
+	}
+}
+
+@media (prefers-reduced-motion: no-preference) {
+	.starGlaze {
+		animation: glaze 4s var(--ease-in-out) 0.65s infinite;
+	}
+
+	.bar {
+		animation: fill 0.5s var(--ease-out) both;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.table tbody th {
+		transition: none;
+	}
+}
+
+.actions {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--size-12);
+	margin-top: var(--size-32);
+}
+
+@media (max-width: 53.75rem) {
+	.root {
+		--label-width: 8.5rem;
+		padding: var(--size-48) var(--size-16) var(--size-64);
+	}
+
+	.table {
+		font-size: var(--size-14);
+	}
+
+	.snippets,
+	.alternatives {
+		grid-template-columns: minmax(0, 1fr);
+	}
+}

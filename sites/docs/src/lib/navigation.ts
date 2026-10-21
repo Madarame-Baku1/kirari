@@ -93,6 +93,7 @@ export const routes = {
 	docs: '/docs/',
 	playground: '/playground/',
 	changelog: '/changelog/',
+	compare: '/compare/',
 } as const
 
 export const docsPath = (id: Types.SectionId) =>
@@ -110,6 +111,12 @@ export const pageSearchEntries = [
 		description: 'Breaking changes, improvements, and bug fixes in every release.',
 		category: 'Page',
 		href: routes.changelog,
+	},
+	{
+		title: 'Compare',
+		description: 'Kirari vs Shiki, Prism, and highlight.js.',
+		category: 'Page',
+		href: routes.compare,
 	},
 	...sections.map(section => ({
 		title: section.title,

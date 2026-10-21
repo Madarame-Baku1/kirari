@@ -11,9 +11,16 @@ export const Stat = (props: Types.Props) => {
 	const root = useRef<HTMLDivElement>(null)
 	const number = useRef<HTMLSpanElement>(null)
 	useEffect(() => {
-		// Update React's own text node so reconciliation still matches the DOM.
-		const text = number.current?.firstChild
-		if (reducedMotion() || !root.current || !(text instanceof Text)) return
+		const element = number.current
+		const text = element?.firstChild
+		if (
+			reducedMotion() ||
+			!root.current ||
+			!element ||
+			!(text instanceof Text) ||
+			Number(value) === 0
+		)
+			return
 		const decimals = value.split('.')[1]?.length ?? 0
 		const counter = {
 			value: 0,
@@ -21,20 +28,45 @@ export const Stat = (props: Types.Props) => {
 		const render = () => {
 			text.nodeValue = counter.value.toFixed(decimals)
 		}
-		let tween: gsap.core.Tween | undefined
-		/* Server HTML shows the final value; reset before the stat scrolls into view. */
+		let tween: gsap.core.Timeline | undefined
 		render()
 		const observer = new IntersectionObserver(
 			([entry]) => {
 				if (!entry?.isIntersecting) return
 				observer.disconnect()
-				tween = gsap.to(counter, {
-					value: Number(value),
-					duration: 2,
-					delay: 0.15,
-					ease: 'power2.out',
-					onUpdate: render,
-				})
+				tween = gsap
+					.timeline({
+						delay: 0.15,
+					})
+					.to(
+						counter,
+						{
+							value: Number(value),
+							duration: 2,
+							ease: 'power2.out',
+							onUpdate: render,
+						},
+						0,
+					)
+					.to(
+						element,
+						{
+							filter: 'blur(1.75px)',
+							duration: 0.18,
+							ease: 'sine.inOut',
+						},
+						0,
+					)
+					.to(
+						element,
+						{
+							filter: 'blur(0px)',
+							duration: 1.82,
+							ease: 'power2.out',
+							clearProps: 'filter',
+						},
+						0.18,
+					)
 			},
 			{
 				threshold: 0.75,
@@ -45,6 +77,9 @@ export const Stat = (props: Types.Props) => {
 		return () => {
 			observer.disconnect()
 			tween?.kill()
+			gsap.set(element, {
+				clearProps: 'filter',
+			})
 			text.nodeValue = value
 		}
 	}, [

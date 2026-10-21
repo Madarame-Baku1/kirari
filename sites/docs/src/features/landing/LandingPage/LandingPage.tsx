@@ -3,6 +3,7 @@ import { css } from '@vortexlabs/kirari/languages/css'
 import { typescript } from '@vortexlabs/kirari/languages/typescript'
 import { languageEntries } from '@/lib/languages'
 import { docsPath, routes } from '@/lib/navigation'
+import { site } from '@/lib/site'
 import { theme, themes } from '@/lib/themes'
 import { Button } from '@/components/ui/Button'
 import { CodeBlock } from '@/components/code/CodeBlock'
@@ -95,7 +96,11 @@ export const LandingPage = () => {
 					<HighlightDemo demos={demos} palettes={palettes} />
 				</div>
 				<section className="stats" aria-label="At a glance" data-reveal="stagger">
-					<Stat value="2.9" unit="kB" label="core with JavaScript, gzipped" />
+					<Stat
+						value={(site.javascriptHighlightGzipBytes / 1000).toFixed(1)}
+						unit="KB"
+						label="JavaScript highlighting, gzipped"
+					/>
 					<Stat
 						value={String(languageCount)}
 						unit=""

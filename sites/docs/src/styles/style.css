@@ -254,7 +254,8 @@ kbd {
 }
 .footer-inner nav ul {
 	display: flex;
-	gap: var(--size-20);
+	flex-wrap: wrap;
+	gap: var(--size-8) var(--size-20);
 	margin: 0;
 	padding: 0;
 	list-style: none;

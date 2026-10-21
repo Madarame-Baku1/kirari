@@ -26,6 +26,7 @@ export const GET = () =>
 			'',
 			`- [Complete documentation](${site.url}/llms-full.txt): All guides in one Markdown document.`,
 			`- [Playground](${site.url}/playground/): Try code, languages, and themes.`,
+			`- [Comparison](${site.url}/compare/): Kirari vs Shiki, Prism, and highlight.js.`,
 			`- [Source code](${site.github})`,
 			`- [npm package](${site.npm})`,
 			'',

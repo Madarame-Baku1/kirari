@@ -17,6 +17,10 @@ export const pageLinks: readonly {
 		label: 'Playground',
 	},
 	{
+		target: 'compare',
+		label: 'Compare',
+	},
+	{
 		target: 'changelog',
 		label: 'Changelog',
 	},

@@ -11,5 +11,7 @@ export const site = {
 	github: 'https://github.com/vortexkit/kirari',
 	x: 'https://x.com/intent/follow?screen_name=ugi_dev',
 	version: kirariPackage.version,
+	// Tree-shaken highlight() setup; measured by packages/benchmarks/compare-size.ts.
+	javascriptHighlightGzipBytes: 4190,
 	install: 'npm install @vortexlabs/kirari',
 } as const

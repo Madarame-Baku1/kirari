@@ -20,6 +20,10 @@ export const links: readonly {
 		label: 'Changelog',
 	},
 	{
+		href: routes.compare,
+		label: 'Compare',
+	},
+	{
 		href: '/llms.txt',
 		label: 'llms.txt',
 		prefetch: false,

@@ -58,6 +58,7 @@ export const indexablePaths = [
 	...sections.map(section => docsPath(section.id)),
 	'/playground/',
 	'/changelog/',
+	'/compare/',
 ]
 
 export const softwareSchema = {
