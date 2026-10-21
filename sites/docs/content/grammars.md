@@ -23,6 +23,6 @@ const projectJavaScript: Language = {
 }
 ```
 
-Definitions can specify keywords, types, identifier patterns, and rules. An optional `tokenize(source, language)` callback can replace the scanner for structural syntax. Return complete tokens with contiguous source offsets.
+Definitions can specify keywords, types, identifier patterns, and rules. An optional `tokenize(source, language)` callback can replace the scanner for structural syntax. Return complete tokens with contiguous source offsets. An optional `definitions(tokens)` callback runs after tokenizing and can retype names as functions; built-in definitions that classify function definitions set it, and spreading a built-in keeps it even when renamed.
 
 Templates, regex literals, and structural scanners can handle syntax before ordinary rules. Rules do not override every construct in JSX, Vue, Svelte, HTML, CSS, or YAML. Definitions and callbacks are trusted application code.
